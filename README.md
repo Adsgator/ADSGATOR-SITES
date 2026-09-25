@@ -14,3 +14,10 @@ diretamente.
 ## Deploy
 
 Deploy automático pela Vercel a cada push na branch `main`.
+
+## Imagens dos e-mails
+
+A pasta `email/` guarda as imagens usadas nos e-mails enviados pelo painel
+(painel.adsgator.com.br), publicadas em `https://www.adsgator.com.br/email/`.
+Os e-mails já enviados apontam para esses endereços: não renomear, mover ou
+apagar esses arquivos, mesmo quando a estrutura do site mudar.
