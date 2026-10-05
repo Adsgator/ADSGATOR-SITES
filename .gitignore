@@ -15,6 +15,9 @@ build/
 .env.*
 !.env.example
 
+# Anotações só deste computador (caminhos locais); ver DOCS/PLANO-SITE.md
+DOCS/LOCAL.md
+
 # Sistema / editor
 .DS_Store
 Thumbs.db
