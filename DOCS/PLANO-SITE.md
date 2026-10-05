@@ -41,6 +41,16 @@
   `DOCS/LOCAL.md`. Os backups
   incluem bancos de dados com usuários e, provavelmente, dados de
   formulários e clientes: tratar como confidenciais.
+- O que eram os sites antigos (explicado pelo Lucas em 2026-10-05):
+  - Principal: o site institucional (adsgator.com.br).
+  - Ajuda: a central de ajuda, com os artigos.
+  - Cliente: loja WooCommerce usada para contratar. Os planos eram
+    cadastrados lá, e o cliente fazia o cadastro e o pagamento pelo checkout
+    ligado ao Asaas.
+  - Login: painel interno antigo de acompanhamento dos clientes da agência.
+    Não era público e não entra no site.
+  - Formulários: páginas com os formulários de briefing de novos projetos
+    (nova LP, novas campanhas de Google Ads), incorporados do respondi.app.
 
 ## 3. Endereços que não podem quebrar
 
@@ -52,6 +62,7 @@
 | `adsgator.com.br/ajuda` | Rodapé de todos os e-mails | Central de Ajuda (Fase 2) |
 | `ajuda.adsgator.com.br/ajuda/como-adicionar-saldo-no-google-ads/` | 2 templates de saldo do painel e os e-mails já enviados | Artigo na central nova + redirecionamento do endereço antigo (Fase 2) |
 | Endereços antigos do WordPress | Google e links externos | Levantar na Fase 0; redirecionar (301) para as páginas novas |
+| Endereços dos sites cliente e formulários | Links de contratação e de briefing já enviados a clientes | Levantar na Fase 0; redirecionar para o que os substituir (decisões 2 e 3) |
 
 - Os links dos e-mails usam o domínio sem `www`. Conferido em 2026-10-05: o
   redirecionamento mantém o caminho (`adsgator.com.br/termos` → 308 →
@@ -70,8 +81,16 @@ entra no site novo.
 1. Descompactar cada backup numa pasta temporária fora de qualquer
    repositório (ex.: a pasta de rascunho da sessão do Claude Code).
 2. Achar o banco de cada site (arquivo `.sql` dentro do backup) e listar,
-   sem copiar dados pessoais: páginas e posts publicados (título, endereço,
-   data), artigos da central de ajuda, menus e as imagens usadas por eles.
+   sem copiar dados pessoais, só o que interessa a cada um:
+   - Principal e Ajuda: páginas e posts publicados (título, endereço,
+     data), artigos, menus e as imagens usadas por eles.
+   - Cliente: só os planos (nome, descrição, preço da época) e os textos das
+     páginas, inclusive o aceite dos Termos no checkout, se houver. NUNCA
+     pedidos, cadastros de clientes ou documentos.
+   - Formulários: só os links ou códigos de incorporação dos formulários do
+     respondi.app e os textos das páginas (as respostas devem estar no
+     respondi, não no WordPress: conferir sem abrir respostas).
+   - Login: não abrir. Não entra no site público.
 3. Ler os textos dos Termos, da Privacidade, da página inicial e dos artigos
    da ajuda.
 4. Registrar aqui uma tabela: conteúdo antigo → proposta (entra como está,
@@ -84,8 +103,8 @@ entra no site novo.
 **Critério de pronto:** inventário aprovado pelo Lucas; nenhuma cópia dos
 backups fora do lugar original.
 
-**Perguntar ao Lucas nesta fase:** o que eram os sites cliente, login e
-formulários, e se algo deles entra no site novo.
+**Levar ao Lucas no fim desta fase:** o inventário com a proposta do que
+entra, e os planos e formulários encontrados (base para as decisões 2 e 3).
 
 ### Fase 1: base do site, Termos e Privacidade (prioridade)
 
@@ -121,6 +140,7 @@ do rodapé dos e-mails abrem a página certa, inclusive pelo endereço sem
 
 - Conteúdo com o Lucas: serviços, como funciona, planos e preços (se for
   mostrar), contato, provas sociais.
+- Contratação e briefings, conforme as decisões 2 e 3.
 - Medição (Google Analytics, Google Ads) e aviso de cookies, se o Lucas
   quiser medir o site.
 
@@ -139,6 +159,11 @@ que o site usar.
   encaminhados pela ImprovMX para o Gmail.
 - Cobranças por links de pagamento do Asaas; atendimento por WhatsApp e
   e-mail.
+- Contratação: o cadastro e o pagamento de novos clientes iam para o Asaas
+  (pelo checkout do WooCommerce, já desativado). Conferir quais dados o
+  fluxo novo vai coletar.
+- Briefings de novos projetos: formulários do respondi.app (o que o cliente
+  envia fica no respondi).
 - Relatórios do Google Analytics e do Google Ads dos clientes são enviados em
   PDF.
 - Para o advogado avaliar: onde ficam os dados de cada serviço (transferência
@@ -147,10 +172,18 @@ que o site usar.
 ## 6. Decisões em aberto (perguntar na fase correspondente)
 
 1. Tema padrão do site: escuro (como o painel), claro ou o do sistema.
-2. Sites antigos cliente, login e formulários: o que eram e se algo entra.
-3. Medição no site e aviso de cookies.
-4. Conteúdo da página inicial.
-5. (Fase 2) Subdomínio `ajuda.`: só redirecionar ou manter a central nele.
+2. Contratação sem o WooCommerce: como um cliente novo contrata pelo site
+   (ex.: link de pagamento ou assinatura do Asaas por plano, WhatsApp ou um
+   formulário) e onde ele aceita os Termos. O e-mail de boas-vindas do
+   painel diz que o cliente aceitou os Termos na contratação, então o fluxo
+   novo precisa desse aceite. Decide na Fase 3, mas afeta o texto dos
+   Termos (Fase 1).
+3. Briefings: páginas no site com os formulários do respondi.app
+   incorporados ou só links para o respondi. Se incorporar, a política de
+   segurança do site (CSP) precisa liberar o respondi.
+4. Medição no site e aviso de cookies.
+5. Conteúdo da página inicial.
+6. (Fase 2) Subdomínio `ajuda.`: só redirecionar ou manter a central nele.
 
 ## 7. Andamento
 
@@ -158,4 +191,7 @@ que o site usar.
   plano, `CLAUDE.md`, `DOCS/IDENTIDADE-VISUAL.md`, `.vercelignore` e
   `DOCS/LOCAL.md` fora do Git). Conferido no ar depois do deploy: os
   documentos respondem 404 (não são publicados), a página provisória e
-  `/email/*` respondem 200 como antes. Próximo: Fase 0.
+  `/email/*` respondem 200 como antes.
+- 2026-10-05: o Lucas explicou os sites antigos (seção 2). Fase 0 ajustada
+  (o que tirar de cada backup; o login não é aberto) e decisões 2 e 3
+  novas (contratação e briefings). Próximo: Fase 0.
