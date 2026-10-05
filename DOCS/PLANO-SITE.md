@@ -298,7 +298,7 @@ rascunho no mesmo dia (conferido: nenhum `.sql`, `.zip`, `.json` ou `.txt`
 restante; ficaram só os scripts de leitura, sem dados). A Fase 1 extrai de
 novo do backup o texto completo dos Termos e da Reembolso.
 
-### Fase 1: base do site, Termos e Privacidade (DETALHADA, AGUARDANDO APROVAÇÃO DO LUCAS)
+### Fase 1: base do site, Termos e Privacidade (APROVADA PELO LUCAS EM 2026-10-05, EM CONSTRUÇÃO)
 
 Prioridade porque os links do rodapé de todos os e-mails (`/termos`,
 `/privacidade` e `/ajuda`) dão 404 hoje.
@@ -548,7 +548,8 @@ que o site usar.
    sistema. Recomendado: o do sistema, com botão para trocar: cada visitante
    vê o tema do próprio aparelho, e os dois temas existem de qualquer jeito.
    Escuro deixa o site com a cara do painel; claro é o mais comum em sites
-   de serviço e textos longos (Termos).
+   de serviço e textos longos (Termos). DECIDIDO (Lucas, 2026-10-05): claro,
+   com botão para trocar.
 2. (Fase 4) Checkout novo em `checkout.adsgator.com.br` (o Lucas já
    decidiu o checkout, no lugar do WooCommerce, e o endereço): como
    integrar com o Asaas, de onde vêm os planos, como registrar o aceite dos
@@ -655,14 +656,19 @@ que o site usar.
        quem não tem o plano.
     b) Na Vercel, como as landing pages de hoje: nada novo para aprender
        (ver a decisão 13 e o `DOCS/LOCAL.md` antes de escolher).
-15. (Fase 1) Página inicial nesta fase:
+15. (Fase 1) Página inicial nesta fase. DECIDIDO (Lucas, 2026-10-05):
+    opção a.
     a) Recomendado: simples e indexável, com uma frase do que a Adsgator faz
        e os contatos (texto aprovado pelo Lucas). Quem chega por indicação e
        procura "Adsgator" no Google acha o site e o contato. A página
        completa vem na Fase 3.
     b) Manter a página provisória com `noindex` até a Fase 3: nada a
        escrever agora, mas quem procurar a Adsgator não acha o site.
-16. (Fase 1) Como publicar os Termos:
+16. (Fase 1) Como publicar os Termos. DECIDIDO (Lucas, 2026-10-05): opção
+    b, tudo de uma vez. A Fase 1 só vai para a `main` com as regras do
+    modelo novo definidas (decisões 11 e 12). Proposta: os preços ficam nas
+    páginas dos planos e no checkout, e os Termos dizem "conforme o plano
+    contratado", para não mudarem a cada reajuste.
     a) Recomendado: publicar já os Termos das regras de hoje (clientes
        atuais), com as contradições corrigidas (sem fidelidade), o
        Reembolso como seção, sem o Dashboard Ads e com o atendimento; as
@@ -746,3 +752,8 @@ que o site usar.
   depois dos redirecionamentos de `forms.` (Lucas). Na conta da Vercel há
   menos projetos de landing page do que pastas locais (Fase 5). Aguardando
   a aprovação da Fase 1.
+- 2026-10-05: Fase 1 aprovada pelo Lucas. Decididos: tema claro (decisão
+  1), página inicial simples e indexável (decisão 15) e Termos completos de
+  uma vez, regras de hoje e modelo novo (decisão 16). A construção segue no
+  branch `fase-1`; os registros da construção ficam neste plano dentro do
+  branch até ele ser juntado na `main`.
