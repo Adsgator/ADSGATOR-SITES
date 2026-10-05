@@ -105,6 +105,14 @@ for (const [origem, esperado] of antigos) {
 const browser = await chromium.launch({ channel: "chrome" });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 const page = await ctx.newPage();
+// A Privacidade diz que o site não carrega nada de terceiros: toda requisição
+// tem de ser para o próprio site (com ou sem www).
+const origens = new Set([BASE, SEM_WWW].filter(Boolean).map((u) => new URL(u).origin));
+const externos = new Set();
+page.on("request", (req) => {
+  const u = new URL(req.url());
+  if (!["data:", "blob:"].includes(u.protocol) && !origens.has(u.origin)) externos.add(u.origin);
+});
 const problemas = [];
 page.on("console", (m) => ["error", "warning"].includes(m.type()) && problemas.push(`[${m.type()}] (${new URL(page.url()).pathname}) ${m.text().slice(0, 250)}`));
 page.on("pageerror", (e) => problemas.push(`[pageerror] (${new URL(page.url()).pathname}) ${e.message}`));
@@ -163,6 +171,30 @@ try {
   await page.goto(BASE + "/politicas-de-reembolso/", { waitUntil: "networkidle" });
   check("reembolso antigo abre a seção nos Termos", page.url().endsWith("/termos#reembolso") && (await page.locator("#reembolso").count()) === 1, page.url());
 
+  // Termos e Privacidade: o sumário leva às seções, e só vão ao ar aprovados
+  // (sem aviso de rascunho, sem trecho destacado a confirmar e com a data).
+  for (const caminho of ["/termos", "/privacidade"]) {
+    await page.goto(BASE + caminho, { waitUntil: "networkidle" });
+    const quebrados = await page.evaluate(() =>
+      [...document.querySelectorAll('a[href^="#"]')]
+        .map((a) => decodeURIComponent(a.getAttribute("href").slice(1)))
+        .filter((id) => !document.getElementById(id)),
+    );
+    check(`${caminho}: links internos levam a seções que existem`, quebrados.length === 0, quebrados.join(", "));
+    const texto = await page.locator("article").innerText();
+    const marcas = await page.locator("article mark").count();
+    check(
+      `${caminho}: texto aprovado, sem rascunho e com a data`,
+      !/rascunho/i.test(texto) && marcas === 0 && /Última atualização: \d/.test(texto),
+      `${marcas} trecho(s) a confirmar${/rascunho/i.test(texto) ? ", aviso de rascunho" : ""}`,
+    );
+  }
+  await page.goto(BASE + "/termos", { waitUntil: "networkidle" });
+  await page.locator("article").getByRole("link", { name: "Reembolso", exact: true }).click();
+  await page.waitForURL("**/termos#reembolso");
+  const topo = await page.evaluate(() => document.getElementById("reembolso").getBoundingClientRect().top);
+  check("sumário dos Termos: clicar em Reembolso leva à seção", topo >= 0 && topo < 200, `${Math.round(topo)}px do topo`);
+
   // Página 404 e o botão de voltar.
   const r404 = await page.goto(BASE + "/nao-existe-teste", { waitUntil: "networkidle" });
   check("404 com mensagem", r404?.status() === 404 && (await page.getByText("Página não encontrada").first().isVisible()));
@@ -172,13 +204,19 @@ try {
 
   // Celular: nada sai para o lado.
   await page.setViewportSize({ width: 375, height: 800 });
-  for (const caminho of ["/", "/termos", "/ajuda"]) {
+  for (const caminho of ["/", "/termos", "/privacidade", "/ajuda"]) {
     await page.goto(BASE + caminho, { waitUntil: "networkidle" });
     const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     check(`celular sem rolagem lateral em ${caminho}`, sobra <= 0, `${sobra}px`);
   }
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await page.screenshot({ path: new URL("inicio-celular.png", saida).pathname.slice(1), fullPage: true });
+
+  // O que a Privacidade promete: nenhum cookie e, no navegador, só o tema.
+  const cookies = await ctx.cookies();
+  check("sem cookies", cookies.length === 0, cookies.map((c) => c.name).join(", "));
+  const guardado = await page.evaluate(() => Object.keys(localStorage));
+  check("no navegador, só a preferência de tema", guardado.every((k) => k === "theme"), guardado.join(", "));
 } catch (e) {
   check("execução sem erro", false, e.message.split("\n")[0]);
 } finally {
@@ -190,6 +228,7 @@ const inesperados = problemas.filter(
   (p) => !(p.includes("(/nao-existe-teste)") && p.includes("status of 404")),
 );
 check("console sem erros nem avisos", inesperados.length === 0, inesperados.join(" || "));
+check("nada carregado de fora do site", externos.size === 0, [...externos].join(", "));
 console.log(resultados.join("\n"));
 const falhas = resultados.filter((r) => r.startsWith("FALHOU")).length;
 console.log(`\n${resultados.length - falhas} passaram, ${falhas} falharam (${BASE})`);

@@ -29,9 +29,16 @@ npm run build      # o mesmo build que a Vercel roda
 imagens dos e-mails (mesmo conteúdo, com e sem `www`), os redirecionamentos
 dos endereços antigos do WordPress, os cabeçalhos de segurança, `robots.txt`,
 `sitemap.xml`, a imagem de compartilhamento e, com cliques, cabeçalho,
-rodapé, links dos e-mails, troca de tema, página 404 e tela de celular.
-Também falha se aparecer erro no console. As imagens das telas ficam em
-`tests/.saida/` (fora do Git).
+rodapé, links dos e-mails, troca de tema, sumário dos Termos, página 404 e
+tela de celular. Também falha se aparecer erro no console e confere o que a
+Política de Privacidade promete: nenhum cookie, só a preferência de tema
+guardada no navegador e nada carregado de fora do site. Se o site passar a
+medir visitas, a Privacidade e esse teste mudam juntos. As imagens das telas
+ficam em `tests/.saida/` (fora do Git).
+
+Termos e Privacidade só vão para a `main` aprovados: o teste falha enquanto a
+página tiver o aviso de rascunho, algum trecho destacado a confirmar (`<mark>`
+nos arquivos de `src/content/`) ou estiver sem a data da última atualização.
 
 ```bash
 node tests/site.mjs                       # contra o npm run dev (BASE padrão)

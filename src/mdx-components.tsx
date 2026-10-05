@@ -1,11 +1,13 @@
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 
-// Endereço de seção a partir do título ("Reembolso" vira "reembolso"), para
-// links como /termos#reembolso.
+// Endereço de seção a partir do título ("10. Reembolso" vira "reembolso"), para
+// links como /termos#reembolso. O número da seção fica de fora para o endereço
+// não mudar quando a numeração mudar.
 function ancora(texto: React.ReactNode) {
   if (typeof texto !== "string") return undefined;
   return texto
+    .replace(/^\d+\.\s*/, "")
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
