@@ -50,6 +50,11 @@
     relatório mensal.
   - Regra de comunicação nos Termos (canais, horário e prazo de resposta),
     no lugar da 8.1 antiga ("não há uma frequência definida").
+- Para o plano do painel (Lucas, 2026-10-05): levar para lá as mensagens
+  que o Lucas usa no atendimento (respostas às dúvidas principais) e no
+  onboarding. O que servir para qualquer cliente também pode virar pergunta
+  frequente e artigo da ajuda aqui (Fases 2 e 3), e as de onboarding podem
+  guiar a sequência depois do pagamento (Fase 4): menos mensagem manual.
 
 ## 2. Fatos conferidos em 2026-10-05
 
@@ -88,6 +93,34 @@
   Vercel responde 404 `DEPLOYMENT_NOT_FOUND`. Ou seja: os links de briefing
   já enviados a clientes e o artigo de saldo dos e-mails estão quebrados
   hoje (decisão 10).
+- Hospedagem (conferido em 2026-10-05 nas páginas oficiais):
+  - Vercel: o plano Hobby é só para uso pessoal e não comercial; uso
+    comercial exige Pro ou Enterprise. Entre os exemplos de uso comercial
+    estão "anunciar a venda de um produto ou serviço" e "receber pagamento
+    para criar, atualizar ou hospedar o site" (Fair Use Guidelines,
+    atualizada em 2026-09-14). A Vercel pode pausar a conta ou o deploy que
+    violar as diretrizes (artigo de ajuda "Why has my account or deployment
+    been paused?", atualizado em 2026-10-02).
+  - Vercel Pro: US$ 20 por mês de taxa da plataforma, com 1 vaga de quem
+    publica e US$ 20 de crédito de uso; inclui 1 TB de tráfego e 1 milhão
+    de requisições de CDN por mês; vaga extra de quem publica a US$ 20,
+    vagas só de leitura grátis; preços em dólar, sem impostos (página do
+    plano Pro, atualizada em 2026-09-15). As páginas não citam cobrança por
+    projeto.
+  - Cloudflare Pages, plano grátis: requisições a arquivos estáticos grátis
+    e ilimitadas, 500 builds por mês, até 20.000 arquivos por site e 100
+    domínios próprios (documentação, atualizada em 2026-09-05). Não achei
+    restrição a uso comercial nas páginas oficiais; a afirmação explícita
+    de que é permitido veio de sites de terceiros e da comunidade deles.
+  - Netlify: plano grátis com 300 créditos por mês (20 créditos por GB de
+    tráfego, 15 por deploy); a página de preços não cita restrição
+    comercial.
+  - GitHub Pages não permite site de negócio (termos do GitHub).
+- As landing pages novas dos clientes são Astro com `output: 'static'` (só
+  arquivos, sem código de servidor): funcionam em qualquer hospedagem de
+  arquivos estáticos. Duas usam o Analytics da Vercel (opcional).
+- No painel, `painel.adsgator.com.br` foi ligado na Vercel sem criar
+  registro DNS: o DNS curinga já cobre (plano do painel, 2026-09).
 
 ## 3. Endereços que não podem quebrar
 
@@ -383,8 +416,8 @@ que o site usar.
     c) Ligar `forms.` antes da Fase 1, se houver cliente com briefing
        pendente: atrasa um pouco o `/termos`.
     Em qualquer opção, ligar o subdomínio mexe na configuração do domínio na
-    Vercel (seção 3: só com autorização). Com o DNS curinga, talvez não
-    precise mudar DNS: conferir na documentação da Vercel na hora.
+    Vercel (seção 3: só com autorização). Não deve precisar mudar DNS: no
+    painel, o subdomínio foi ligado sem criar registro (seção 2).
 11. (Fases 3 e 4) Planos à venda para clientes novos. DECIDIDO em parte
     (Lucas, 2026-10-05):
     - Landing page deixa de ser plano mensal: valor único (o cliente paga, a
@@ -399,12 +432,42 @@ que o site usar.
 12. (Fase 1, Termos) Consequências do novo modelo de landing page: os
     Termos antigos (2.3 e 2.4) tratam a landing page como licença de uso por
     assinatura, que fica com a Adsgator, com taxa para levar os arquivos.
-    Definir: o que o cliente recebe ao pagar (arquivos, código, acesso),
-    onde a landing page fica hospedada e quem paga hospedagem e domínio (com
-    e sem o plano de manutenção; regras de uso comercial da hospedagem
-    pesquisadas na hora), o que acontece com quem já tem landing page no
-    modelo de assinatura (continua nas regras antigas ou migra) e a regra
-    de comunicação (canais, horário e prazo de resposta).
+    DECIDIDO (Lucas, 2026-10-05):
+    - Quem já tem landing page por assinatura continua no modelo antigo,
+      sem mudança; o modelo novo vale só para clientes novos. Os Termos
+      cobrem os dois (recomendado: um texto só, com uma seção para cada
+      modelo e a data a partir da qual o novo vale; o advogado valida).
+    - Com o plano de manutenção, a hospedagem fica incluída, na conta da
+      agência. Sem o plano, o cliente paga a hospedagem (como: abaixo).
+    - O "Dashboard Ads" não existe mais: sai dos Termos e das descrições dos
+      planos de Google Ads ("Dashboard de acompanhamento").
+    - Atendimento por e-mail e WhatsApp, como hoje (horário do site antigo:
+      segunda a sexta, 9h às 12h e 13h30 às 17h; confirmar).
+
+    Hospedagem sem o plano de manutenção (as landing pages são arquivos
+    estáticos, então qualquer hospedagem serve; seção 2):
+    a) Recomendado: plano só de hospedagem, pago à Adsgator pelo checkout
+       (mensal ou anual), na mesma conta da agência. Nenhuma configuração
+       por cliente e nenhuma conversa técnica; a receita cobre o custo.
+       Depende da decisão 13 (receber para hospedar é uso comercial).
+    b) Hospedagem na conta do próprio cliente, num plano grátis que permita
+       uso comercial (ex.: Cloudflare Pages; confirmar os termos na hora).
+       O cliente não paga hospedagem, mas cada entrega exige criar a conta
+       com ele, e qualquer problema depois volta como suporte.
+    c) Entrega dos arquivos para o cliente hospedar onde quiser. Nenhuma
+       responsabilidade depois, mas a maioria dos negócios locais não
+       consegue fazer isso sozinha.
+
+    Proposta para qualquer opção: o cliente recebe os arquivos quando
+    pedir, sem custo (a landing page é dele), e o domínio fica no nome dele
+    (CPF ou CNPJ). Falta: escolher a opção, confirmar a proposta e decidir o
+    e-mail com o domínio do cliente (o plano antigo incluía contas de
+    e-mail): como está hoje para os clientes atuais e se entra no modelo
+    novo.
+13. (Antes da Fase 1) Plano da Vercel: conferir se a conta atende às regras
+    de uso comercial da Vercel (seção 2), já que nela ficam o site da
+    agência, o painel e os sites de clientes. Situação da conta, opções e
+    recomendação em `DOCS/LOCAL.md`.
 
 ## 7. Andamento
 
@@ -446,3 +509,11 @@ que o site usar.
   mais valorizado, com verba mínima (decisão 11). Decisão 12 nova
   (consequências do novo modelo de landing page nos Termos). Próximo:
   detalhar a Fase 1.
+- 2026-10-05: respostas do Lucas na decisão 12 (clientes atuais seguem no
+  modelo antigo; hospedagem incluída no plano de manutenção e paga pelo
+  cliente sem ele; sem Dashboard Ads; atendimento por e-mail e WhatsApp) e
+  um pedido para o painel (mensagens de atendimento e onboarding, seção 1).
+  Pesquisadas nas páginas oficiais as regras e os preços de hospedagem
+  (seção 2) e conferido nos projetos que as landing pages dos clientes são
+  estáticas (Astro). Decisão 13 nova (plano da Vercel). Próximo: decisões 12
+  e 13, depois detalhar a Fase 1.
