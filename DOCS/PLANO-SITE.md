@@ -27,6 +27,29 @@
   domínio já aponta para cá: o site novo não precisa de mudança de DNS.
 - O WordPress antigo foi desativado; o conteúdo dele existe só nos backups
   (Fase 0).
+- Direção da Adsgator (Lucas, 2026-10-05): sem prospecção ativa. O site
+  atende os clientes atuais e quem chegar sozinho (busca ou indicação), e a
+  contratação não depende de conversa: o cliente entende o serviço, aceita
+  as regras e paga pelo site, e a entrada dele (briefing, configuração das
+  contas) também é por autoatendimento. Por isso o checkout novo (Fase 4)
+  continua. O site deve pedir o mínimo de manutenção: páginas simples, nada
+  que precise de atualização frequente.
+- O que essa direção pede do site (proposta; cada item é confirmado com o
+  Lucas na fase correspondente):
+  - Cada plano explica em linguagem simples o que inclui, o que não inclui,
+    para quem é e para quem não é (ex.: verba mínima recomendada), como
+    funciona depois de contratar, prazos, canais e horário de atendimento.
+  - Expectativa alinhada por escrito antes de pagar: sem garantia de
+    resultado, a verba do Google Ads é paga pelo cliente direto ao Google e o
+    resultado do negócio é do cliente (os Termos antigos já dizem isso em
+    4.1, 11.5, 12.3 e 12.4). No checkout, aceite explícito disso junto com os
+    Termos, com texto validado pelo Lucas e pelo advogado.
+  - Depois do pagamento, tudo encadeado sem conversa: e-mail de boas-vindas
+    (painel), briefing (`forms.`), artigos de configuração da ajuda (criar
+    conta no Google Ads, dar acesso, Google Meu Negócio, adicionar saldo) e
+    relatório mensal.
+  - Regra de comunicação nos Termos (canais, horário e prazo de resposta),
+    no lugar da 8.1 antiga ("não há uma frequência definida").
 
 ## 2. Fatos conferidos em 2026-10-05
 
@@ -76,7 +99,7 @@
 | `adsgator.com.br/ajuda` | Rodapé de todos os e-mails | Central de Ajuda (Fase 2) |
 | `ajuda.adsgator.com.br/ajuda/como-adicionar-saldo-no-google-ads/` | 2 templates de saldo do painel e os e-mails já enviados | Artigo na central nova + redirecionamento do endereço antigo (Fase 2) |
 | Endereços antigos do WordPress | Google e links externos | Lista na Fase 0 (resultado); redirecionar (301) para as páginas novas |
-| `forms.adsgator.com.br` | Links de briefing já enviados a clientes | Continua sendo o endereço dos briefings (Lucas, 2026-10-05); os 7 briefings levantados na Fase 0 mantêm o endereço (Fase 4) |
+| `forms.adsgator.com.br` | Links de briefing já enviados a clientes | Continua sendo o endereço dos briefings (Lucas, 2026-10-05); os 7 briefings levantados na Fase 0 mantêm o endereço: redirecionamentos para o respondi logo depois da Fase 1 (decisão 10), páginas na Fase 4 |
 
 - Os links dos e-mails usam o domínio sem `www`. Conferido em 2026-10-05: o
   redirecionamento mantém o caminho (`adsgator.com.br/termos` → 308 →
@@ -94,7 +117,7 @@
 
 ## 4. Fases
 
-### Fase 0: inventário do WordPress (FEITA, AGUARDANDO APROVAÇÃO DO LUCAS)
+### Fase 0: inventário do WordPress (APROVADA PELO LUCAS EM 2026-10-05)
 
 **Objetivo:** saber exatamente o que havia, para o Lucas escolher o que
 entra no site novo.
@@ -216,9 +239,11 @@ Elementor, com 2 envios de um formulário do Elementor (a página
 "Notificações" tem um), não abertos; ficam só no backup. O respondi em si
 não foi conferido.
 
-**Pendente:** aprovação do Lucas e respostas às decisões 7 a 10; depois,
-apagar os textos públicos extraídos que ficaram na pasta de rascunho. A
-Fase 1 extrai de novo do backup o texto completo dos Termos e da Reembolso.
+**Fechamento:** inventário aprovado pelo Lucas em 2026-10-05 (decisões 7,
+10 e 11 respondidas na seção 6). Textos extraídos apagados da pasta de
+rascunho no mesmo dia (conferido: nenhum `.sql`, `.zip`, `.json` ou `.txt`
+restante; ficaram só os scripts de leitura, sem dados). A Fase 1 extrai de
+novo do backup o texto completo dos Termos e da Reembolso.
 
 ### Fase 1: base do site, Termos e Privacidade (prioridade)
 
@@ -234,7 +259,9 @@ Prioridade porque os links do rodapé de todos os e-mails dão 404 hoje.
 - `/termos` e `/privacidade` com os textos da Fase 0 revisados. Conteúdo
   legal: o Lucas valida, de preferência com um advogado; o Claude não
   inventa cláusula. A Privacidade precisa refletir o que a Adsgator usa hoje
-  (seção 5).
+  (seção 5). Os Termos seguem as decisões 7, 11 e 12: sem fidelidade,
+  landing page de valor único com manutenção opcional, Google Ads mensal e,
+  se for o caso, as regras dos clientes atuais.
 - `/email/*` continua no mesmo endereço.
 
 **Critério de pronto (em produção):** `/termos`, `/privacidade` e os links
@@ -250,10 +277,13 @@ do rodapé dos e-mails abrem a página certa, inclusive pelo endereço sem
   novo (os e-mails já enviados continuam no antigo, por isso o
   redirecionamento).
 
-### Fase 3: página inicial
+### Fase 3: página inicial e páginas dos planos
 
-- Conteúdo com o Lucas: serviços, como funciona, planos e preços (se for
-  mostrar), contato, provas sociais.
+- Simples, seguindo a direção da seção 1: o que a Adsgator faz, os planos à
+  venda (decisão 11) com o que inclui e o que não inclui, como funciona
+  depois de contratar, perguntas frequentes (base: páginas antigas Landing
+  Page Pro e Google Ads) e botão "Contratar" que leva ao checkout (Fase 4).
+  Portfólio e depoimentos só se forem reais e autorizados (decisão 8).
 - Medição (Google Analytics, Google Ads) e aviso de cookies, se o Lucas
   quiser medir o site.
 
@@ -266,8 +296,10 @@ contratações (Lucas, 2026-10-05). Pode vir antes da Fase 3, se o Lucas
 preferir.
 
 - Detalhar esta fase com o Lucas a partir do inventário da Fase 0 (planos e
-  textos do checkout antigo) e das decisões 2 e 3. As formas de integrar
-  com o Asaas são pesquisadas na documentação dele na hora, não de memória.
+  textos do checkout antigo) e das decisões 2, 3 e 11. O checkout precisa
+  de pagamento único (landing page) e recorrente (Google Ads e manutenção).
+  As formas de integrar com o Asaas são pesquisadas na documentação dele na
+  hora, não de memória.
 - Se usar a API do Asaas, essa parte precisa de código no servidor: a chave
   fica só no servidor (variável secreta na Vercel), nunca no navegador nem
   no Git, e toda checagem da tela é repetida no servidor.
@@ -329,10 +361,11 @@ que o site usar.
 6. (Fase 2) Subdomínio `ajuda.`: só redirecionar ou manter a central nele.
 7. (Fase 1) Fidelidade e reembolso: a 5.1 dos Termos diz "sem fidelidade",
    mas outras cláusulas dos Termos e a página de Reembolso falam em
-   fidelidade de 6 meses e multa de 30%. Qual regra vale hoje? Recomendado:
-   o Lucas define a regra (de preferência com o advogado) e o Reembolso vira
-   seção dos Termos, num texto só e sem contradição; o endereço antigo
-   redireciona para `/termos`. Alternativa: página própria `/reembolso`.
+   fidelidade de 6 meses e multa de 30%. DECIDIDO (Lucas, 2026-10-05): sem
+   fidelidade; o advogado valida o texto. Ainda a confirmar: o Reembolso
+   vira seção dos Termos, num texto só e sem contradição, e o endereço
+   antigo redireciona para `/termos` (recomendado), ou página própria
+   `/reembolso`.
 8. (Fase 3) Portfólios e depoimentos: manter as 6 páginas de portfólio e
    os depoimentos com nome e foto? Recomendado: só o que for de cliente real
    e com autorização; `/portfolios/` redireciona para a página que existir.
@@ -341,6 +374,7 @@ que o site usar.
    como página simples, se ainda for usada (ex.: bio do Instagram).
 10. Subdomínios quebrados hoje (seção 2): os briefings já enviados
     (`forms.`) e o artigo de saldo dos e-mails (`ajuda.`) não abrem.
+    DECIDIDO (Lucas, 2026-10-05): opção b.
     a) Manter a ordem: `ajuda.` na Fase 2 e `forms.` na Fase 4.
     b) Recomendado: logo depois da Fase 1, ligar `forms.` só com
        redirecionamentos (cada briefing vai direto para o formulário dele no
@@ -351,6 +385,26 @@ que o site usar.
     Em qualquer opção, ligar o subdomínio mexe na configuração do domínio na
     Vercel (seção 3: só com autorização). Com o DNS curinga, talvez não
     precise mudar DNS: conferir na documentação da Vercel na hora.
+11. (Fases 3 e 4) Planos à venda para clientes novos. DECIDIDO em parte
+    (Lucas, 2026-10-05):
+    - Landing page deixa de ser plano mensal: valor único (o cliente paga, a
+      Adsgator faz e a landing page é do cliente), com um plano opcional de
+      suporte e manutenção.
+    - Planos de Google Ads continuam, mais valorizados: preços ajustados
+      para cima e sem clientes de verba muito baixa (verba mínima).
+    - Falta definir: preços, verba mínima, o que entra no plano de
+      manutenção e se o Site Pro e os combos (Landing Page + Ads Start)
+      saem. Recomendado: poucos planos, porque menos dúvida é menos
+      conversa.
+12. (Fase 1, Termos) Consequências do novo modelo de landing page: os
+    Termos antigos (2.3 e 2.4) tratam a landing page como licença de uso por
+    assinatura, que fica com a Adsgator, com taxa para levar os arquivos.
+    Definir: o que o cliente recebe ao pagar (arquivos, código, acesso),
+    onde a landing page fica hospedada e quem paga hospedagem e domínio (com
+    e sem o plano de manutenção; regras de uso comercial da hospedagem
+    pesquisadas na hora), o que acontece com quem já tem landing page no
+    modelo de assinatura (continua nas regras antigas ou migra) e a regra
+    de comunicação (canais, horário e prazo de resposta).
 
 ## 7. Andamento
 
@@ -382,3 +436,13 @@ que o site usar.
   conferido com `nslookup` e `curl` (seção 2). Bancos extraídos apagados no
   mesmo dia. Pendente: aprovação do inventário, decisões 7 a 10 e apagar os
   textos extraídos que ficaram na pasta de rascunho.
+- 2026-10-05: o Lucas definiu a direção da Adsgator (seção 1): sem
+  prospecção, atende os clientes atuais e quem chegar sozinho, contratação e
+  entrada do cliente por autoatendimento, checkout novo mantido. Fase 3
+  simplificada (página inicial e páginas dos planos) e decisão 11 nova.
+- 2026-10-05: Fase 0 aprovada pelo Lucas. Decididos: sem fidelidade
+  (decisão 7); redirecionamentos de `forms.` logo depois da Fase 1 (decisão
+  10); landing page de valor único com manutenção opcional e Google Ads
+  mais valorizado, com verba mínima (decisão 11). Decisão 12 nova
+  (consequências do novo modelo de landing page nos Termos). Próximo:
+  detalhar a Fase 1.
