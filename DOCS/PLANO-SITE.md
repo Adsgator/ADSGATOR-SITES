@@ -786,6 +786,13 @@ que o site usar.
     navegador nem roda no site publicado, que é estático. A saída que o npm
     sugere (voltar o `eslint-config-next` para a 14 e o shadcn para a 1.0)
     quebraria o projeto. Rever quando sair a correção.
+  - Preview do branch publicado (status Ready), protegido pelo login da
+    Vercel (sem login, 302 para a tela de login); `vercel inspect` mostra o
+    build como Next.js, então o `"framework": "nextjs"` do `vercel.json`
+    funcionou. A produção continuou com a página provisória. Testar o
+    preview com o `vercel curl` cria uma chave de desvio da proteção no
+    projeto, se não houver (documentação do `vercel curl`, 2026-10-02): só
+    com autorização do Lucas.
   - Pendente: textos dos Termos e da Privacidade (decisões 11, 12 e 16), o
     Lucas aprovar o texto do início e da ajuda e os dados do rodapé,
     conferir o preview e só então juntar na `main`.
