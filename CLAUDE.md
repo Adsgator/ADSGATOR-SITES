@@ -36,6 +36,8 @@ trabalho estão no CLAUDE.md global do Lucas (valem aqui também).
   mudam). Hoje dão 404.
 - O artigo de ajuda "Como adicionar saldo no Google Ads", linkado pelos
   e-mails de saldo no endereço antigo do WordPress (detalhes no plano).
+- `forms.adsgator.com.br`: links de briefing já enviados a clientes;
+  continua sendo o endereço dos briefings (plano, Fase 4).
 - Endereços antigos do WordPress que tinham visitas: levantados na Fase 0 e
   redirecionados para as páginas novas.
 

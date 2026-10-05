@@ -20,8 +20,8 @@
   (Fase 4). O que é interno (o que o site login antigo fazia) vai para o
   painel, num plano próprio de lá, que só começa depois que o site público
   estiver pronto. Critério aplicado: o que o cliente ou o público usa fica
-  aqui; o que só a agência usa vai para o painel, que exige login. Por ele,
-  os briefings ficam aqui (quem preenche é o cliente).
+  aqui; o que só a agência usa vai para o painel, que exige login. Os
+  briefings ficam aqui: quem responde é o cliente (confirmado pelo Lucas).
 - Este repositório já publica www.adsgator.com.br na Vercel (página
   provisória, com `noindex`) e hospeda as imagens dos e-mails (`/email/`). O
   domínio já aponta para cá: o site novo não precisa de mudança de DNS.
@@ -69,13 +69,17 @@
 | `adsgator.com.br/ajuda` | Rodapé de todos os e-mails | Central de Ajuda (Fase 2) |
 | `ajuda.adsgator.com.br/ajuda/como-adicionar-saldo-no-google-ads/` | 2 templates de saldo do painel e os e-mails já enviados | Artigo na central nova + redirecionamento do endereço antigo (Fase 2) |
 | Endereços antigos do WordPress | Google e links externos | Levantar na Fase 0; redirecionar (301) para as páginas novas |
-| Endereços dos sites cliente e formulários | Links de contratação e de briefing já enviados a clientes | Levantar na Fase 0; redirecionar para o checkout e os briefings novos (Fase 4) |
+| `forms.adsgator.com.br` | Links de briefing já enviados a clientes | Continua sendo o endereço dos briefings (Lucas, 2026-10-05); páginas antigas levantadas na Fase 0 mantêm o endereço ou redirecionam (Fase 4) |
+| `cliente.adsgator.com.br` | Links de contratação já enviados a clientes | Levantar na Fase 0; levar ao checkout novo (Fase 4, decisão 2) |
 
 - Os links dos e-mails usam o domínio sem `www`. Conferido em 2026-10-05: o
   redirecionamento mantém o caminho (`adsgator.com.br/termos` → 308 →
   `www.adsgator.com.br/termos`).
-- Ligar um subdomínio (ex.: `ajuda.`) na Vercel mexe na configuração do
-  domínio: só com autorização do Lucas, mostrando antes o que será feito.
+- Ligar um subdomínio (ex.: `forms.`, `ajuda.`) na Vercel mexe na
+  configuração do domínio: só com autorização do Lucas, mostrando antes o
+  que será feito.
+- Os endereços `forms.` e `cliente.` vêm dos nomes dos backups: conferir na
+  Fase 0.
 
 ## 4. Fases
 
@@ -165,7 +169,10 @@ Asaas, como antes. Pode vir antes da Fase 3, se o Lucas preferir.
   no Git, e toda checagem da tela é repetida no servidor.
 - Testes de pagamento no ambiente de testes do Asaas, se houver (conferir);
   pagamento real só com autorização do Lucas, a cada um.
-- Links antigos de contratação e de briefing levam aos novos (seção 3).
+- Briefings em `forms.adsgator.com.br`, como antes (decisão 3), só para
+  quem recebe o link: recomendado sem indexação no Google.
+- Links antigos de contratação e de briefing continuam funcionando
+  (seção 3).
 - Termos e Privacidade atualizados com o que o checkout coleta e com o
   registro do aceite.
 
@@ -210,9 +217,10 @@ que o site usar.
    entra sozinho no painel. Recomendado: o aceite no próprio checkout, já
    que o e-mail de boas-vindas do painel diz que o cliente aceitou os
    Termos na contratação; o texto dos Termos (Fase 1) já deve prever isso.
-3. (Fase 4) Briefings: páginas no site com os formulários do respondi.app
-   incorporados ou só links para o respondi. Se incorporar, a política de
-   segurança do site (CSP) precisa liberar o respondi.
+3. (Fase 4) Briefings em `forms.adsgator.com.br` (endereço decidido):
+   formulários do respondi.app incorporados nas páginas, como no site
+   antigo (recomendado; a política de segurança do site, CSP, precisa
+   liberar o respondi), ou só botões que levam ao respondi.
 4. Medição no site e aviso de cookies.
 5. Conteúdo da página inicial.
 6. (Fase 2) Subdomínio `ajuda.`: só redirecionar ou manter a central nele.
@@ -231,3 +239,6 @@ que o site usar.
   novo e os briefings viraram a Fase 4; o que era interno vai para o
   painel, num plano pendente de lá (só começa depois do site público).
   Próximo: Fase 0.
+- 2026-10-05: o Lucas confirmou que quem responde o briefing é o cliente e
+  decidiu manter os briefings em `forms.adsgator.com.br`, como no site
+  antigo (seções 3 e 6).
