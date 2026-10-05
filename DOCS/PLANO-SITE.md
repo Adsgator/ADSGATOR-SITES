@@ -757,3 +757,35 @@ que o site usar.
   uma vez, regras de hoje e modelo novo (decisão 16). A construção segue no
   branch `fase-1`; os registros da construção ficam neste plano dentro do
   branch até ele ser juntado na `main`.
+- 2026-10-05 (branch `fase-1`): base da Fase 1 construída (passos 1 a 9;
+  Termos e Privacidade ainda com aviso de rascunho).
+  - Modelo oficial do Next 16.3.8 (`create-next-app`) para `tsconfig`,
+    `eslint`, `postcss` e `AGENTS.md`; ele fixa React 19.2.8 e TypeScript 5,
+    o que resolveu a dúvida do TypeScript 7. `@next/mdx` na mesma versão do
+    Next.
+  - Copiados do painel (`ADSGATOR-PAINEL`): `src/app/globals.css`,
+    `src/app/icon.svg`, `src/lib/utils.ts`, `src/components/theme-provider.tsx`,
+    `brand.tsx`, `ui/button.tsx`, `ui/empty.tsx`, `not-found-message.tsx`
+    (texto adaptado), `components.json`, `public/brand/` (logos e símbolo) e
+    os cabeçalhos de segurança do `next.config.ts` (sem o `noindex`).
+  - Achados: o Button do Base UI marca links como `role="button"` (nos
+    links do site ficou só a aparência de botão; o painel usa o mesmo
+    padrão) e as classes em conflito precisam passar pelo `cn` (sem ele, o
+    botão do WhatsApp não ficava amarelo e o "Enviar e-mail" ficava sem
+    borda; visto nas capturas de tela).
+  - Verificado: lint, tipos e build sem erro, todas as páginas estáticas;
+    `tests/site.mjs` com 48 de 48 no `npm run dev` e no build de produção
+    rodando no computador (`next start`), inclusive console sem erros com a
+    CSP de produção; imagens dos e-mails com o mesmo hash de produção antes
+    da troca (`banner-topo.png` 487efee51f2d, `logo-rodape.png`
+    26ede58094fa).
+  - `npm audit`: 9 avisos altos, todos da mesma falha no `braces` (até a
+    3.0.3; GHSA-vfj7-8cjw-p6xm, de 2026-09-18, sem versão corrigida). Ele
+    chega por ferramentas de desenvolvimento (ESLint do Next e CLI do
+    shadcn) que leem padrões do próprio projeto; nada disso vai para o
+    navegador nem roda no site publicado, que é estático. A saída que o npm
+    sugere (voltar o `eslint-config-next` para a 14 e o shadcn para a 1.0)
+    quebraria o projeto. Rever quando sair a correção.
+  - Pendente: textos dos Termos e da Privacidade (decisões 11, 12 e 16), o
+    Lucas aprovar o texto do início e da ajuda e os dados do rodapé,
+    conferir o preview e só então juntar na `main`.
