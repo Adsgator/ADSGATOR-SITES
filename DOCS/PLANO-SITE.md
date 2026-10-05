@@ -58,6 +58,13 @@
     Não era público: vai para o painel (seção 1), não para o site.
   - Formulários: páginas com os formulários de briefing de novos projetos
     (nova LP, novas campanhas de Google Ads), incorporados do respondi.app.
+- Subdomínios hoje (conferido em 2026-10-05 com `nslookup` e `curl`):
+  qualquer `*.adsgator.com.br` resolve para a Vercel (DNS curinga: um nome
+  inventado também resolve), mas nenhum projeto atende `forms.`, `ajuda.`,
+  `cliente.` nem `login.`. Em `https` a conexão segura falha; em `http` a
+  Vercel responde 404 `DEPLOYMENT_NOT_FOUND`. Ou seja: os links de briefing
+  já enviados a clientes e o artigo de saldo dos e-mails estão quebrados
+  hoje (decisão 10).
 
 ## 3. Endereços que não podem quebrar
 
@@ -68,8 +75,8 @@
 | `adsgator.com.br/privacidade` | Rodapé de todos os e-mails | Página Privacidade (Fase 1) |
 | `adsgator.com.br/ajuda` | Rodapé de todos os e-mails | Central de Ajuda (Fase 2) |
 | `ajuda.adsgator.com.br/ajuda/como-adicionar-saldo-no-google-ads/` | 2 templates de saldo do painel e os e-mails já enviados | Artigo na central nova + redirecionamento do endereço antigo (Fase 2) |
-| Endereços antigos do WordPress | Google e links externos | Levantar na Fase 0; redirecionar (301) para as páginas novas |
-| `forms.adsgator.com.br` | Links de briefing já enviados a clientes | Continua sendo o endereço dos briefings (Lucas, 2026-10-05); páginas antigas levantadas na Fase 0 mantêm o endereço ou redirecionam (Fase 4) |
+| Endereços antigos do WordPress | Google e links externos | Lista na Fase 0 (resultado); redirecionar (301) para as páginas novas |
+| `forms.adsgator.com.br` | Links de briefing já enviados a clientes | Continua sendo o endereço dos briefings (Lucas, 2026-10-05); os 7 briefings levantados na Fase 0 mantêm o endereço (Fase 4) |
 
 - Os links dos e-mails usam o domínio sem `www`. Conferido em 2026-10-05: o
   redirecionamento mantém o caminho (`adsgator.com.br/termos` → 308 →
@@ -81,12 +88,13 @@
   (2026-10-05). O checkout novo fica em `checkout.adsgator.com.br`, só para
   novas contratações; redirecionar o endereço antigo para ele é opcional
   (decisão 2).
-- Os endereços `forms.` e `cliente.` vêm dos nomes dos backups: conferir na
-  Fase 0.
+- Endereços dos sites antigos conferidos na Fase 0 (gravados em cada
+  banco): `adsgator.com.br`, `ajuda.`, `cliente.` e
+  `forms.adsgator.com.br`. O do login não foi aberto.
 
 ## 4. Fases
 
-### Fase 0: inventário do WordPress (PRÓXIMA)
+### Fase 0: inventário do WordPress (FEITA, AGUARDANDO APROVAÇÃO DO LUCAS)
 
 **Objetivo:** saber exatamente o que havia, para o Lucas escolher o que
 entra no site novo.
@@ -120,6 +128,97 @@ backups fora do lugar original.
 
 **Levar ao Lucas no fim desta fase:** o inventário com a proposta do que
 entra, e os planos e formulários encontrados (base para as decisões 2 e 3).
+
+#### Resultado (2026-10-05)
+
+**Como foi feito.** Só os bancos foram extraídos (nada de temas, plugins ou
+arquivos), para a pasta de rascunho da sessão, e lidos com um leitor de SQL
+em Node, sem instalar banco. Foram lidos só os tipos de conteúdo públicos
+(páginas, posts, artigos, planos, menus, checkout) e configurações com nome
+conhecido (endereço do site, página inicial). Pedidos, usuários, cadastros,
+logs de e-mail, snippets de código e envios de formulário não foram lidos;
+o login não foi aberto. Os bancos extraídos foram apagados no mesmo dia.
+Nomes de clientes, códigos dos formulários e preços estão em
+`DOCS/LOCAL.md`, não aqui.
+
+**Conteúdo antigo → proposta**
+
+| Site | Conteúdo antigo | Proposta |
+|---|---|---|
+| Principal | Termos de serviço (`/termos-de-servico/`, texto de 20/10/2025) | Entra revisado em `/termos` (Fase 1). Achados: a 5.1 diz "sem fidelidade", mas a 6.3, 9.2, 11.2 e 11.4 falam em fidelidade e multa de 30%; cita `cliente.adsgator.com.br` como local de contratação (12.1, 15 e "Últimas considerações"); repete a Privacidade na seção 16; cita "Dashboard Ads" e e-mails profissionais (confirmar se ainda existem) |
+| Principal | Políticas de privacidade (`/politicas-de-privacidade/`) | Reescrita em `/privacidade` (Fase 1): o texto antigo é genérico (newsletter, cookies) e não cita nenhum serviço usado hoje (seção 5) |
+| Principal | Políticas de reembolso (`/politicas-de-reembolso/`) | Repete os Termos 11.3 a 11.5 e contradiz a 5.1 (fidelidade de 6 meses, multa de 30%, cita uma cláusula 5.3 que não existe mais). Proposta: vira seção dos Termos (decisão 7) |
+| Principal | Landing Page Pro (`/landing-page-pro/`, era a página inicial) | Base da Fase 3 (oferta de landing page, recursos, FAQ). O preço diverge entre as páginas (LOCAL.md) |
+| Principal | Google Ads (`/google-ads/`, privada desde 2026-08-17) | Base da Fase 3 (planos Ads Start, Boost e Power; FAQ de verba) |
+| Principal | Portfólios (`/portfolios/`) e 6 páginas de portfólio, uma por cliente | Fase 3 (decisão 8). `/portfolios/` era usado em prospecção: o plugin Redirection registrou 445 acessos |
+| Principal | Depoimentos com nome e foto (páginas Landing Page Pro e Google Ads) | Só entram se forem de clientes reais e autorizados (decisão 8) |
+| Principal | Árvore de links (`/links/`, privada) | Decisão 9 |
+| Principal | Home (`/home/`, privada), Erro 404, 1 post de teste, 2 formulários de demonstração (Fluent Forms) | Saem |
+| Ajuda | 4 artigos: criar conta no Google Ads, dar acesso ao Google Ads, adicionar saldo, dar acesso ao Google Meu Negócio | Entram revisados (Fase 2): conferir as capturas de tela (podem mostrar dados de alguma conta) e se as telas do Google mudaram |
+| Ajuda | 5 artigos sem texto (só uma imagem "em manutenção"): 3 de "Minha conta" e 2 de e-mail (Gmail e Outlook) | Saem |
+| Ajuda | Página inicial, 3 categorias, post "Hello world!" | Saem; `/ajuda` lista os artigos |
+| Cliente | 8 planos (abaixo) | Base da decisão 2 (Fase 4) |
+| Cliente | Checkout do CartFlows ("Finalizar contratação") e página de confirmação | Base da Fase 4 (abaixo) |
+| Cliente | Minha conta, Painel de controle, página "teste" | Saem (área do cliente antiga; interno fica com o painel) |
+| Formulários | 7 páginas de briefing com formulário do respondi.app | Fase 4 (decisão 3); mantêm o endereço |
+| Formulários | "Notificações" (formulário padrão do Elementor, sem ação de envio), formulário do Contact Form 7 sem página, "Forms Home" e 404 ("Nenhum formulário disponível") | Saem |
+
+As imagens usadas pelas páginas estão nos backups (conferido: 83 de 83 no
+principal, 34 de 34 na ajuda).
+
+**Endereços antigos para redirecionar (proposta, 301)**
+
+- `adsgator.com.br`: `/termos-de-servico/` → `/termos`;
+  `/politicas-de-privacidade/` → `/privacidade`; `/politicas-de-reembolso/`
+  → `/termos` (decisão 7); `/landing-page-pro/`, `/google-ads/`,
+  `/portfolios/`, `/portfolio/` (linkado no rodapé antigo), as 6 páginas de
+  portfólio e `/links/` → `/` até a Fase 3 definir as páginas (decisões 8 e
+  9); `/home/`, `/erro-404/`, `/2023/04/06/cobertura-em-todo-o-brasil/`,
+  `/author/lucas/` e `/category/uncategorized/` → `/`. Os endereços antigos
+  terminam com `/`: o redirecionamento precisa aceitar com e sem a barra.
+- `ajuda.adsgator.com.br` (decisões 6 e 10): `/ajuda/<artigo>/` dos 4 artigos
+  que entram → `/ajuda/<artigo>`; os 5 que saem, `/`, `/home/` e
+  `/ajuda-categorias/*` → `/ajuda`.
+- `cliente.adsgator.com.br` (decisão 2): `/`, `/minha-conta/`,
+  `/step/finalizar-contratacao/` (com `?add-to-cart=<plano>`, usado nos
+  botões "Contratar") e `/produto/*` → `checkout.` ou `/`.
+- `forms.adsgator.com.br` (Fase 4): os 7 briefings mantêm o endereço; `/` e
+  o 404 antigos não tinham conteúdo.
+- Sem dados de visitas: os backups não guardam visitas (o cache do LiteSpeed
+  lista endereços pedidos, quase todos por robôs procurando falhas). Se o
+  Lucas quiser priorizar por tráfego, o Google Search Console mostra as
+  páginas com cliques (opcional).
+
+**Planos (base da decisão 2).** 8 produtos no WooCommerce: Ads Start, Ads
+Boost e Ads Power (gestão de Google Ads com limite de verba gerenciada);
+Landing Page Pro; Site Pro (até 5 páginas); Landing Page Pro + Ads Start;
+Landing Page Max + Ads Start (2026-04); "Somente cadastro" (R$ 0, cadastro
+sem pagamento). Só a Landing Page Pro e o "Somente cadastro" estavam
+publicados; os outros eram privados (link direto). Nenhum tem período de
+assinatura gravado no WooCommerce: confirmar como a mensalidade era cobrada
+(provavelmente recorrência no Asaas). Preços e divergência da Landing Page
+Pro em `DOCS/LOCAL.md`.
+
+**Checkout antigo (base da Fase 4).** Campos: nome, sobrenome, CNPJ
+(opcional), nome da empresa, WhatsApp, endereço (CEP, número, rua, bairro,
+complemento, cidade, estado, país), e-mail e observações. Pagamento pelo
+plugin do Asaas para WooCommerce. Aceite dos Termos sem caixa de marcar:
+só a frase "Ao clicar em 'Contratar', você concorda com os termos de
+serviço e confirma a contratação do plano escolhido", com links para
+Termos, Privacidade e Reembolso no rodapé.
+
+**Briefings (base da decisão 3).** 7 páginas, cada uma com um formulário do
+respondi.app incorporado pelo `embed.js` do respondi: Briefing Pro, Estilo e
+Sensações, Google Ads, Landing Page Pro e 3 de clientes específicos
+(2026-04). Endereços e códigos em `DOCS/LOCAL.md`. Os briefings não gravam
+resposta no WordPress: a única tabela de envios com linhas no banco é a do
+Elementor, com 2 envios de um formulário do Elementor (a página
+"Notificações" tem um), não abertos; ficam só no backup. O respondi em si
+não foi conferido.
+
+**Pendente:** aprovação do Lucas e respostas às decisões 7 a 10; depois,
+apagar os textos públicos extraídos que ficaram na pasta de rascunho. A
+Fase 1 extrai de novo do backup o texto completo dos Termos e da Reembolso.
 
 ### Fase 1: base do site, Termos e Privacidade (prioridade)
 
@@ -228,6 +327,30 @@ que o site usar.
 4. Medição no site e aviso de cookies.
 5. Conteúdo da página inicial.
 6. (Fase 2) Subdomínio `ajuda.`: só redirecionar ou manter a central nele.
+7. (Fase 1) Fidelidade e reembolso: a 5.1 dos Termos diz "sem fidelidade",
+   mas outras cláusulas dos Termos e a página de Reembolso falam em
+   fidelidade de 6 meses e multa de 30%. Qual regra vale hoje? Recomendado:
+   o Lucas define a regra (de preferência com o advogado) e o Reembolso vira
+   seção dos Termos, num texto só e sem contradição; o endereço antigo
+   redireciona para `/termos`. Alternativa: página própria `/reembolso`.
+8. (Fase 3) Portfólios e depoimentos: manter as 6 páginas de portfólio e
+   os depoimentos com nome e foto? Recomendado: só o que for de cliente real
+   e com autorização; `/portfolios/` redireciona para a página que existir.
+9. (Fase 3) Árvore de links (`/links/`, privada desde 2026-08-17): sai
+   (redireciona para `/`, recomendado, já que estava fora do ar) ou volta
+   como página simples, se ainda for usada (ex.: bio do Instagram).
+10. Subdomínios quebrados hoje (seção 2): os briefings já enviados
+    (`forms.`) e o artigo de saldo dos e-mails (`ajuda.`) não abrem.
+    a) Manter a ordem: `ajuda.` na Fase 2 e `forms.` na Fase 4.
+    b) Recomendado: logo depois da Fase 1, ligar `forms.` só com
+       redirecionamentos (cada briefing vai direto para o formulário dele no
+       respondi, sem página nova); a Fase 4 depois troca pelas páginas.
+       `ajuda.` entra com a Fase 2. Pouco trabalho e os links voltam antes.
+    c) Ligar `forms.` antes da Fase 1, se houver cliente com briefing
+       pendente: atrasa um pouco o `/termos`.
+    Em qualquer opção, ligar o subdomínio mexe na configuração do domínio na
+    Vercel (seção 3: só com autorização). Com o DNS curinga, talvez não
+    precise mudar DNS: conferir na documentação da Vercel na hora.
 
 ## 7. Andamento
 
@@ -249,3 +372,13 @@ que o site usar.
 - 2026-10-05: o checkout novo fica em `checkout.adsgator.com.br`, só para
   novas contratações; o Lucas liberou trocar o `cliente.` antigo (seção 3,
   Fase 4 e decisão 2).
+- 2026-10-05: Fase 0 feita (resultado na Fase 0, detalhes de clientes em
+  `DOCS/LOCAL.md`). Extraídos só os bancos do principal, da ajuda, do
+  cliente e dos formulários; o login não foi aberto. Verificado: o leitor
+  de SQL deu o mesmo resultado lendo o arquivo em pedaços de 1 MB e de 7
+  caracteres (978 linhas, mesmo hash, no banco de formulários), e o número
+  de linhas bateu com o de comandos `INSERT` do arquivo; as imagens usadas
+  pelas páginas existem nos backups (83/83 e 34/34); estado dos subdomínios
+  conferido com `nslookup` e `curl` (seção 2). Bancos extraídos apagados no
+  mesmo dia. Pendente: aprovação do inventário, decisões 7 a 10 e apagar os
+  textos extraídos que ficaram na pasta de rascunho.
