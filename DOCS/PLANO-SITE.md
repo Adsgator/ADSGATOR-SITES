@@ -141,6 +141,36 @@
   arquivos estáticos. Duas usam o Analytics da Vercel (opcional).
 - No painel, `painel.adsgator.com.br` foi ligado na Vercel sem criar
   registro DNS: o DNS curinga já cobre (plano do painel, 2026-09).
+- Leis usadas nos Termos e na Privacidade (conferido em 2026-10-05 nos textos
+  oficiais: compilados do Planalto, baixados pelo computador do Lucas porque o
+  site recusou a ferramenta de busca, e páginas da ANPD modificadas em
+  2026-09-16):
+  - CDC (Lei 8.078/1990), art. 49: desistência em 7 dias da assinatura ou do
+    recebimento do serviço, quando a contratação é fora do estabelecimento; os
+    valores pagos durante o prazo, a qualquer título, são devolvidos de
+    imediato, atualizados.
+  - Decreto 7.962/2013 (comércio eletrônico). Art. 2: o site que oferece ou
+    fecha contrato mostra, em destaque, nome empresarial e CNPJ, endereço
+    físico e eletrônico, características do serviço, condições integrais da
+    oferta (pagamento e prazo de execução) e restrições. Art. 4: sumário do
+    contrato antes da contratação, com destaque para as cláusulas que limitam
+    direitos; confirmar na hora o aceite; disponibilizar o contrato para o
+    cliente guardar logo depois da contratação; atendimento eletrônico para
+    dúvidas, reclamações, suspensão e cancelamento, com resposta em até 5
+    dias. Art. 5: informar como desistir; desistência pela mesma ferramenta da
+    contratação, com confirmação imediata; cancela os contratos acessórios;
+    estorno no cartão comunicado na hora.
+  - LGPD (Lei 13.709/2018): art. 9 (o que informar ao titular), art. 18
+    (direitos), art. 19 (confirmação e acesso: simplificado na hora ou
+    declaração completa em até 15 dias) e art. 41 (encarregado).
+  - Resolução CD/ANPD nº 2/2022, anexo, art. 11: agente de tratamento de
+    pequeno porte não precisa indicar encarregado, mas precisa de um canal de
+    comunicação com o titular; pelo art. 3, não vale para tratamento de alto
+    risco nem para receita acima do limite de empresa de pequeno porte.
+  - Resolução CD/ANPD nº 19/2024, art. 17, § 2º: na transferência
+    internacional por cláusulas-padrão, o controlador publica no site, em
+    linguagem simples, a forma, a duração e a finalidade, o país de destino e
+    os demais itens do artigo.
 
 ## 3. Endereços que não podem quebrar
 
@@ -408,6 +438,65 @@ do rodapé (e-mail, WhatsApp, horário e CNPJ do site antigo) e os pontos da
 Privacidade (seção 5); aprovar os textos dos Termos e da Privacidade (e
 levar ao advogado); conferir o preview antes de juntar na `main`.
 
+**Rascunhos dos Termos e da Privacidade (2026-10-05, branch `fase-1`)**
+
+O Lucas escolheu o caminho recomendado ("pode seguir"): rascunhos completos,
+com as propostas destacadas para ele confirmar.
+
+- Base: os textos antigos extraídos de novo do backup do site principal (só
+  as páginas Termos de serviço, de 20/10/2025, Políticas de reembolso e
+  Políticas de privacidade; o banco e os textos foram apagados da pasta de
+  rascunho no mesmo dia), as decisões 7, 11, 12 e 16 e as leis da seção 2.
+- Termos (`src/content/termos.mdx`), o que mudou em relação ao antigo:
+  - sem fidelidade nem multa de 30% (saíram a 6.3, a 9.2, a 11.2 e a
+    fidelidade da página de Reembolso), e o Reembolso virou a seção 10
+    (`/termos#reembolso`);
+  - saíram o Dashboard Ads, o `cliente.adsgator.com.br` e as contas de
+    e-mail do modelo antigo (nenhum cliente atual tem; decisão 12);
+  - seções novas para a landing page de preço único (4) e o plano de
+    hospedagem, suporte e manutenção (5); a assinatura antiga ficou na seção
+    6, só para quem contratou até a data da publicação;
+  - a regra de atendimento (canais, horário e prazo de resposta) substituiu a
+    8.1 ("não há uma frequência definida");
+  - resumo no topo (o decreto do comércio eletrônico pede sumário antes da
+    contratação: serve também para o checkout) e preços fora dos Termos
+    ("informados antes da contratação", decisão 16);
+  - a Privacidade que se repetia na 16 virou link para `/privacidade`.
+- Privacidade (`src/content/privacidade.mdx`): reescrita a partir da seção 5
+  e do que o site faz (sem cookies, sem medição, nada carregado de fora e só
+  o tema guardado no navegador, conferido nos testes).
+- Pontos para o Lucas confirmar (os trechos destacados nas páginas):
+  1. Domínio incluso na landing page: o registro do primeiro ano.
+  2. Prazo da landing page nova: até 7 dias úteis depois de receber todo o
+     material, como no modelo antigo.
+  3. Entrega: quando a landing page é publicada no domínio do cliente, com
+     aviso (é dela que conta o mês até a primeira mensalidade da
+     manutenção).
+  4. Pagamento da landing page: na contratação, à vista ou parcelado.
+  5. Fim do plano de manutenção (cancelamento ou atraso): arquivos ou conta
+     da Cloudflare no nome do cliente, e a renovação do domínio passa para
+     ele; com atraso, ele pede os arquivos antes de 28 dias.
+  6. Relatório do Google Ads todo mês.
+  7. Atendimento: exceto feriados nacionais; resposta em até 2 dias úteis (o
+     decreto pede até 5 dias); ligações e reuniões combinadas antes.
+  8. Desistência em 7 dias: proposta de seguir a lei (devolução imediata de
+     tudo o que foi pago à Adsgator); o texto antigo dava 15 dias úteis e
+     descontava gastos já feitos, como o domínio.
+  9. Privacidade: a lista de serviços e de dados (seções 3 e 4) está
+     completa?
+
+  As datas destacadas ("data da publicação") são preenchidas na publicação.
+- Para o advogado: se o CDC vale para os clientes (empresas) e, com isso, a
+  desistência e o foro; a base legal de cada uso de dados, o país de cada
+  serviço e os prazos de guarda (Privacidade, seções 3, 6 e 7); o papel da
+  Adsgator nas landing pages e contas dos clientes (Privacidade, seção 5);
+  como tratar a saída do Dashboard Ads e das contas de e-mail para os
+  clientes atuais; licenças de terceiros (imagens, fontes) numa landing page
+  que passa a ser do cliente.
+- Depois de publicados: avisar os clientes atuais por e-mail sobre os Termos
+  novos (a cláusula 10 antiga promete aviso por e-mail em mudança
+  significativa). Envio de verdade só com autorização do Lucas.
+
 ### Fase 2: Central de Ajuda
 
 - Artigos da ajuda antiga revisados, começando pelo de saldo. `/ajuda` com a
@@ -424,6 +513,12 @@ levar ao advogado); conferir o preview antes de juntar na `main`.
   depois de contratar, perguntas frequentes (base: páginas antigas Landing
   Page Pro e Google Ads) e botão "Contratar" que leva ao checkout (Fase 4).
   Portfólio e depoimentos só se forem reais e autorizados (decisão 8).
+- Direção do Lucas (2026-10-05): a página inicial final mantém o que o site
+  antigo tinha, atualizado e mais moderno; a da Fase 1 é provisória.
+- Comércio eletrônico (Decreto 7.962/2013, art. 2; seção 2): as páginas que
+  oferecem os planos mostram, em destaque, nome empresarial, CNPJ, endereço
+  físico e eletrônico, o que o serviço inclui, as condições (pagamento e
+  prazo) e as restrições. O Lucas decide qual endereço publicar.
 - Medição (Google Analytics, Google Ads) e aviso de cookies, se o Lucas
   quiser medir o site.
 
@@ -452,6 +547,11 @@ preferir.
 - Links antigos de briefing continuam funcionando (seção 3).
 - Termos e Privacidade atualizados com o que o checkout coleta e com o
   registro do aceite.
+- Comércio eletrônico (Decreto 7.962/2013, arts. 4 e 5; seção 2): sumário do
+  contrato antes de pagar (o resumo dos Termos), confirmação imediata da
+  contratação, os Termos aceitos enviados para o cliente guardar,
+  desistência pela mesma ferramenta da contratação (com confirmação imediata
+  e estorno no cartão) e resposta ao atendimento em até 5 dias.
 
 **Critério de pronto (em produção):** fechado quando a fase for detalhada;
 no mínimo, uma contratação de teste completa (plano, cadastro, aceite dos
@@ -519,7 +619,8 @@ caso.
 ## 5. Pontos para a Política de Privacidade
 
 Levantados no painel em 2026-10-05. Conferir com o Lucas e completar com o
-que o site usar.
+que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
+2026-10-05).
 
 - Os e-mails para clientes são enviados pela Brevo, que registra entrega,
   abertura e clique (imagem de rastreio e links) e inclui um link de
@@ -562,7 +663,8 @@ que o site usar.
    antigo (recomendado; a política de segurança do site, CSP, precisa
    liberar o respondi), ou só botões que levam ao respondi.
 4. Medição no site e aviso de cookies.
-5. Conteúdo da página inicial.
+5. Conteúdo da página inicial. Direção do Lucas (2026-10-05): manter o que o
+   site antigo tinha, atualizado e mais moderno (Fase 3).
 6. (Fase 2) Subdomínio `ajuda.`: só redirecionar ou manter a central nele.
 7. (Fase 1) Fidelidade e reembolso: a 5.1 dos Termos diz "sem fidelidade",
    mas outras cláusulas dos Termos e a página de Reembolso falam em
@@ -796,3 +898,25 @@ que o site usar.
   - Pendente: textos dos Termos e da Privacidade (decisões 11, 12 e 16), o
     Lucas aprovar o texto do início e da ajuda e os dados do rodapé,
     conferir o preview e só então juntar na `main`.
+- 2026-10-05 (branch `fase-1`): rascunhos dos Termos e da Privacidade
+  (detalhes na Fase 1). O Lucas respondeu "pode seguir" e explicou que a
+  página inicial de agora não é a final: a ideia é manter o que o site antigo
+  tinha, atualizado e mais moderno (Fase 3 e decisão 5).
+  - Leis conferidas nos textos oficiais (seção 2). Mudança proposta no texto
+    antigo por causa delas: a desistência em 7 dias devolve tudo, de
+    imediato.
+  - Os títulos das seções viram endereço sem o número ("10. Reembolso" vira
+    `#reembolso`), para o link antigo continuar valendo se a numeração mudar.
+  - Testes novos: sem cookies, só o tema guardado no navegador e nada
+    carregado de fora do site (o que a Privacidade promete); sumário dos
+    Termos (links e clique em Reembolso); Privacidade no celular; e "texto
+    aprovado", que falha enquanto houver aviso de rascunho ou trecho a
+    confirmar.
+  - Verificado: lint, tipos e build sem erro; `tests/site.mjs` com 55 de 57
+    no `npm run dev` e, depois da última revisão do texto, no build de
+    produção rodando no computador. As 2 falhas são as de "texto aprovado",
+    esperadas até a aprovação. Capturas de tela conferidas (claro, escuro e
+    celular): o destaque amarelo fica legível nos dois temas.
+  - Pendente: o Lucas confirmar os 9 pontos da Fase 1 e os dados do rodapé;
+    levar ao advogado; preencher a data, tirar os destaques e o aviso de
+    rascunho; testes 57 de 57; juntar na `main` com o OK dele.
