@@ -7,6 +7,15 @@ build/
 .output/
 .astro/
 
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Testes: imagens e arquivos gerados (README, "Testes")
+tests/.saida/
+
 # Vercel
 .vercel/
 

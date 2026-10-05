@@ -1,9 +1,12 @@
+@AGENTS.md
+
 # ADSGATOR-SITES: instruções para o Claude Code
 
 Site público da Adsgator em `www.adsgator.com.br` (o domínio sem `www`
-redireciona para cá). Hoje é só uma página provisória; o plano do site novo
-está em [`DOCS/PLANO-SITE.md`](DOCS/PLANO-SITE.md). As regras gerais de
-trabalho estão no CLAUDE.md global do Lucas (valem aqui também).
+redireciona para cá), em Next.js com a mesma base do painel (Fase 1 do
+plano). O plano do site está em [`DOCS/PLANO-SITE.md`](DOCS/PLANO-SITE.md).
+As regras gerais de trabalho estão no CLAUDE.md global do Lucas (valem aqui
+também).
 
 ## Ler antes de qualquer coisa
 
@@ -28,12 +31,12 @@ trabalho estão no CLAUDE.md global do Lucas (valem aqui também).
 ## Endereços que não podem quebrar
 
 - `/email/banner-topo.png` e `/email/logo-rodape.png`: estão em todos os
-  e-mails já enviados pelo painel. Nunca renomear, mover nem apagar. Se o
-  site virar Next.js, ficam em `public/email/` (mesmo endereço) e isso é
-  conferido no ar.
+  e-mails já enviados pelo painel. Nunca renomear, mover nem apagar. Ficam
+  em `public/email/` (mesmo endereço); os testes conferem que respondem
+  igual a antes.
 - `/termos`, `/privacidade` e `/ajuda` em `adsgator.com.br`: estão no rodapé
   de todos os e-mails (configuráveis no painel, mas os já enviados não
-  mudam). Hoje dão 404.
+  mudam).
 - O artigo de ajuda "Como adicionar saldo no Google Ads", linkado pelos
   e-mails de saldo no endereço antigo do WordPress (detalhes no plano).
 - `forms.adsgator.com.br`: links de briefing já enviados a clientes;
