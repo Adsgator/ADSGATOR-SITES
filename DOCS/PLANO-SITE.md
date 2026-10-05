@@ -118,6 +118,20 @@
     2026-04-23); o plano grátis permite até 100 Workers por conta (página de
     limites). Pages grátis: 500 builds por mês, até 20.000 arquivos por site
     e 100 domínios próprios (documentação, atualizada em 2026-09-05).
+  - Cloudflare, plano grátis para as landing pages: até 100 Workers por
+    conta, 20.000 arquivos por versão e 25 MiB por arquivo (limites do
+    Workers, atualizada em 2026-09-05). O limite de 100.000 requisições por
+    dia vale para o código do Worker: a página de cobrança diz que arquivos
+    estáticos são grátis e ilimitados e indica que ficam fora desse limite,
+    sem dizer com todas as letras. Publicação automática pelo Git: 3.000
+    minutos de build por mês, 1 por vez, até 20 minutos cada (atualizada em
+    2026-05-29). Domínio próprio num Worker exige o domínio ativo na
+    Cloudflare (servidores DNS apontando para ela) na mesma conta do Worker;
+    o certificado sai sozinho; até 100 domínios por zona (página de domínios
+    próprios, atualizada em 2026-09-29). Essa página não fala de restrição
+    por plano; no Pages, o plano grátis tem domínio próprio escrito na
+    documentação. Domínios por conta: sem limite fixo, até 50 pendentes de
+    cada vez (comunidade da Cloudflare; não achei página oficial).
   - Netlify: plano grátis com 300 créditos por mês (20 créditos por GB de
     tráfego, 15 por deploy); a página de preços não cita restrição
     comercial.
@@ -357,6 +371,61 @@ no mínimo, uma contratação de teste completa (plano, cadastro, aceite dos
 Termos e pagamento) chega ao Asaas e os links antigos de briefing
 continuam funcionando, com testes de cliques reais no Chrome.
 
+### Fase 5: landing pages dos clientes na Cloudflare
+
+Projeto à parte do site (as landing pages ficam em outros repositórios),
+registrado aqui porque faz parte de arrumar a casa. Decisão 14 (Lucas,
+2026-10-05): landing pages novas na Cloudflare, as atuais depois, e a
+Vercel só com o que é da agência (site e painel).
+
+**Objetivo:** as landing pages dos clientes no plano grátis da Cloudflare,
+dentro das regras dela, e nenhuma na conta da Vercel.
+
+**Fatos conferidos:** seção 2 (plano grátis: até 100 sites por conta,
+arquivos estáticos grátis e ilimitados, domínio próprio exige o domínio
+ativo na Cloudflare na mesma conta do site). As landing pages são Astro
+estático. Caminho dos projetos em `DOCS/LOCAL.md`.
+
+**Parte A: antes da primeira landing page nova**
+1. O Lucas cria a conta da agência na Cloudflare, com verificação em duas
+   etapas (a senha fica só com ele).
+2. Definir como publicar (build automático pelo GitHub ou publicação pelo
+   computador; pesquisar na hora) e testar com uma landing page "[TESTE]"
+   num domínio ou subdomínio de teste, com domínio próprio e certificado.
+3. Definir o passo a passo do domínio do cliente (registrado no nome dele,
+   com os servidores DNS na Cloudflare) e da conta no nome do cliente para
+   quem não tem o plano (decisão 12). Regras do registro.br pesquisadas na
+   hora.
+4. Escrever o processo junto do modelo das landing pages (`adsgator-base`)
+   e apagar o teste no fim.
+
+**Parte B: depois das Fases 1 a 4**, uma landing page por vez: publicar na
+Cloudflare, conferir no endereço de teste, trocar os servidores DNS do
+domínio (com autorização do Lucas, mostrando antes o que muda), conferir no
+ar com cliques reais (página, botões de WhatsApp, medição) e só então
+apagar o projeto da Vercel. As 2 que usam o Analytics da Vercel deixam de
+usá-lo.
+
+**Critério de pronto (em produção):** parte A: a landing page de teste abre
+pela Cloudflare com domínio próprio e certificado, publicada seguindo o
+processo escrito. Parte B: todas as landing pages dos clientes abrem pela
+Cloudflare, testadas com cliques reais, e nenhuma fica na Vercel.
+
+**Decisões para o Lucas:**
+- Workers (recomendado, é o que a Cloudflare indica para projetos novos)
+  ou Pages (o plano grátis do Pages tem domínio próprio escrito na
+  documentação: fica de reserva se o teste da parte A mostrar alguma
+  restrição no Workers grátis).
+- Quando fazer a parte A: recomendado logo depois dos redirecionamentos de
+  `forms.` (decisão 10), para estar pronta quando chegar o primeiro
+  cliente novo; ou só quando ele chegar.
+
+**Fora:** o site da agência e o painel (continuam na Vercel, decisão 13).
+
+**Tarefas do Lucas:** criar a conta da agência na Cloudflare; autorizar
+cada troca de DNS; dar acesso ao registro.br dos domínios, quando for o
+caso.
+
 ## 5. Pontos para a Política de Privacidade
 
 Levantados no painel em 2026-10-05. Conferir com o Lucas e completar com o
@@ -459,24 +528,28 @@ que o site usar.
       planos de Google Ads ("Dashboard de acompanhamento").
     - Atendimento por e-mail e WhatsApp, de segunda a sexta, das 9h às 12h e
       das 13h30 às 17h (como hoje).
+    - Renovação do domínio: incluída no plano de manutenção; sem o plano, o
+      cliente paga por conta própria.
+    - Arquivos da landing page: entregues sem custo quando o cliente pedir
+      (por isso a landing page é cobrada completa, e não mais por plano).
+    - E-mail dos clientes atuais: hoje nenhum tem (ninguém usava) e fica
+      assim por enquanto; o plano grátis da Umbler é uma ideia para depois
+      (pesquisar quando for o caso). Nos Termos do modelo antigo, as contas
+      de e-mail citadas não existem mais: o advogado diz como tratar.
 
-    Falta definir (Fase 1, na redação dos Termos):
-    - Renovação do domínio depois do primeiro ano. Proposta: paga pelo
-      cliente direto à empresa de registro, já que o domínio está no nome
-      dele.
-    - Entrega dos arquivos. Proposta: quando o cliente pedir, sem custo.
-    - Conta na Cloudflare no nome do cliente: criada com o e-mail dele; a
-      senha e a verificação em duas etapas ficam com ele, e o Lucas não
-      guarda senha (como ele entra para publicar: pesquisar na hora).
-    - E-mail com o domínio dos clientes atuais (o plano antigo incluía
-      contas de e-mail): como ficou depois do fim da Hostgator.
+    Falta definir (Fase 5, parte A): como criar a conta na Cloudflare no
+    nome do cliente (proposta: com o e-mail dele; a senha e a verificação em
+    duas etapas ficam com ele, e o Lucas não guarda senha) e como o Lucas
+    entra nela para publicar.
 13. (Antes da Fase 1) Plano da Vercel: conferir se a conta atende às regras
     de uso comercial da Vercel (seção 2), já que nela ficam o site da
     agência, o painel e os sites de clientes. DECIDIDO (Lucas, 2026-10-05):
     manter a conta como está por enquanto; se der problema, ele vê a troca
     de plano. Detalhes em `DOCS/LOCAL.md`.
 14. (Antes da próxima landing page nova) Onde hospedar as landing pages
-    novas do plano de manutenção:
+    novas do plano de manutenção. DECIDIDO (Lucas, 2026-10-05): opção a.
+    Depois das Fases 1 a 4, as landing pages atuais também vão para a
+    Cloudflare, e a Vercel fica só com o que é da agência (Fase 5).
     a) Recomendado: na Cloudflare (Workers com arquivos estáticos, como a
        Cloudflare recomenda para projetos novos), numa conta da agência.
        Grátis, e o contrato não restringe o plano grátis a uso pessoal
@@ -546,3 +619,8 @@ que o site usar.
   a conta da Vercel como está (decisão 13). Conferido nos termos oficiais
   da Cloudflare que o plano grátis não é restrito a uso pessoal (seção 2).
   Decisão 14 nova (onde hospedar as landing pages novas).
+- 2026-10-05: decisão 14: Cloudflare para as landing pages novas; as atuais
+  vão depois das Fases 1 a 4, e a Vercel fica só com o que é da agência
+  (Fase 5 nova). Decisão 12 completada (renovação do domínio, entrega dos
+  arquivos, e-mail dos clientes atuais). Conferidos os limites do plano
+  grátis da Cloudflare (seção 2): comporta as landing pages atuais e novas.
