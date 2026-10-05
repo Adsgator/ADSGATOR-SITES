@@ -53,8 +53,8 @@
 | `ajuda.adsgator.com.br/ajuda/como-adicionar-saldo-no-google-ads/` | 2 templates de saldo do painel e os e-mails já enviados | Artigo na central nova + redirecionamento do endereço antigo (Fase 2) |
 | Endereços antigos do WordPress | Google e links externos | Levantar na Fase 0; redirecionar (301) para as páginas novas |
 
-- Os links dos e-mails usam o domínio sem `www`: conferir que o
-  redirecionamento para `www` mantém o caminho (`/termos` →
+- Os links dos e-mails usam o domínio sem `www`. Conferido em 2026-10-05: o
+  redirecionamento mantém o caminho (`adsgator.com.br/termos` → 308 →
   `www.adsgator.com.br/termos`).
 - Ligar um subdomínio (ex.: `ajuda.`) na Vercel mexe na configuração do
   domínio: só com autorização do Lucas, mostrando antes o que será feito.
@@ -156,4 +156,6 @@ que o site usar.
 
 - 2026-10-05: kit de partida criado a partir da sessão do painel (este
   plano, `CLAUDE.md`, `DOCS/IDENTIDADE-VISUAL.md`, `.vercelignore` e
-  `DOCS/LOCAL.md` fora do Git). Próximo: Fase 0.
+  `DOCS/LOCAL.md` fora do Git). Conferido no ar depois do deploy: os
+  documentos respondem 404 (não são publicados), a página provisória e
+  `/email/*` respondem 200 como antes. Próximo: Fase 0.
