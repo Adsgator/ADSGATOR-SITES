@@ -107,11 +107,17 @@
     vagas só de leitura grátis; preços em dólar, sem impostos (página do
     plano Pro, atualizada em 2026-09-15). As páginas não citam cobrança por
     projeto.
-  - Cloudflare Pages, plano grátis: requisições a arquivos estáticos grátis
-    e ilimitadas, 500 builds por mês, até 20.000 arquivos por site e 100
-    domínios próprios (documentação, atualizada em 2026-09-05). Não achei
-    restrição a uso comercial nas páginas oficiais; a afirmação explícita
-    de que é permitido veio de sites de terceiros e da comunidade deles.
+  - Cloudflare: o contrato dos planos (Self-Serve Subscription Agreement,
+    em vigor desde 2025-09-12) não restringe o plano grátis a uso pessoal;
+    a única restrição ligada a comércio é não processar nem coletar dados
+    de cartão de crédito em site do plano grátis. Desde 2025-04-08 a
+    Cloudflare recomenda começar projetos novos no Workers, que também
+    serve arquivos estáticos; o Pages continua funcionando, mas sem
+    investimento novo (blog da Cloudflare). No Workers, requisições a
+    arquivos estáticos são grátis e ilimitadas (documentação, atualizada em
+    2026-04-23); o plano grátis permite até 100 Workers por conta (página de
+    limites). Pages grátis: 500 builds por mês, até 20.000 arquivos por site
+    e 100 domínios próprios (documentação, atualizada em 2026-09-05).
   - Netlify: plano grátis com 300 créditos por mês (20 créditos por GB de
     tráfego, 15 por deploy); a página de preços não cita restrição
     comercial.
@@ -329,8 +335,10 @@ contratações (Lucas, 2026-10-05). Pode vir antes da Fase 3, se o Lucas
 preferir.
 
 - Detalhar esta fase com o Lucas a partir do inventário da Fase 0 (planos e
-  textos do checkout antigo) e das decisões 2, 3 e 11. O checkout precisa
-  de pagamento único (landing page) e recorrente (Google Ads e manutenção).
+  textos do checkout antigo) e das decisões 2, 3, 11 e 12. O checkout
+  precisa de pagamento único (landing page) e recorrente (Google Ads e
+  manutenção); o plano de manutenção é oferecido na entrega, com a primeira
+  cobrança um mês depois (decisão 12).
   As formas de integrar com o Asaas são pesquisadas na documentação dele na
   hora, não de memória.
 - Se usar a API do Asaas, essa parte precisa de código no servidor: a chave
@@ -395,10 +403,9 @@ que o site usar.
 7. (Fase 1) Fidelidade e reembolso: a 5.1 dos Termos diz "sem fidelidade",
    mas outras cláusulas dos Termos e a página de Reembolso falam em
    fidelidade de 6 meses e multa de 30%. DECIDIDO (Lucas, 2026-10-05): sem
-   fidelidade; o advogado valida o texto. Ainda a confirmar: o Reembolso
-   vira seção dos Termos, num texto só e sem contradição, e o endereço
-   antigo redireciona para `/termos` (recomendado), ou página própria
-   `/reembolso`.
+   fidelidade; o advogado valida o texto. O Reembolso vira seção dos
+   Termos (Lucas, 2026-10-05), num texto só e sem contradição; o endereço
+   antigo redireciona para `/termos`.
 8. (Fase 3) Portfólios e depoimentos: manter as 6 páginas de portfólio e
    os depoimentos com nome e foto? Recomendado: só o que for de cliente real
    e com autorização; `/portfolios/` redireciona para a página que existir.
@@ -426,8 +433,8 @@ que o site usar.
     - Planos de Google Ads continuam, mais valorizados: preços ajustados
       para cima e sem clientes de verba muito baixa (verba mínima).
     - Falta definir: preços, verba mínima, o que entra no plano de
-      manutenção e se o Site Pro e os combos (Landing Page + Ads Start)
-      saem. Recomendado: poucos planos, porque menos dúvida é menos
+      manutenção, o plano de e-mail (decisão 12) e se o Site Pro e os
+      combos (Landing Page + Ads Start) saem. Recomendado: poucos planos, porque menos dúvida é menos
       conversa.
 12. (Fase 1, Termos) Consequências do novo modelo de landing page: os
     Termos antigos (2.3 e 2.4) tratam a landing page como licença de uso por
@@ -437,37 +444,50 @@ que o site usar.
       sem mudança; o modelo novo vale só para clientes novos. Os Termos
       cobrem os dois (recomendado: um texto só, com uma seção para cada
       modelo e a data a partir da qual o novo vale; o advogado valida).
-    - Com o plano de manutenção, a hospedagem fica incluída, na conta da
-      agência. Sem o plano, o cliente paga a hospedagem (como: abaixo).
+    - Landing page nova: preço único; a Adsgator desenvolve e a página é do
+      cliente, com o domínio no nome dele já incluso na contratação.
+    - À parte e opcional: plano de hospedagem, suporte e manutenção,
+      oferecido na entrega, com a primeira mensalidade um mês depois dela.
+      A hospedagem desses clientes fica na conta da agência (onde: decisão
+      14).
+    - Sem o plano: o cliente hospeda por conta própria, ou o Lucas cria a
+      conta na Cloudflare no nome do cliente e passa o acesso a ele; a
+      manutenção fica com o cliente ou é paga à parte quando ele precisar.
+    - E-mail profissional (com o domínio do cliente): plano à parte,
+      opcional, pago pelo cliente.
     - O "Dashboard Ads" não existe mais: sai dos Termos e das descrições dos
       planos de Google Ads ("Dashboard de acompanhamento").
-    - Atendimento por e-mail e WhatsApp, como hoje (horário do site antigo:
-      segunda a sexta, 9h às 12h e 13h30 às 17h; confirmar).
+    - Atendimento por e-mail e WhatsApp, de segunda a sexta, das 9h às 12h e
+      das 13h30 às 17h (como hoje).
 
-    Hospedagem sem o plano de manutenção (as landing pages são arquivos
-    estáticos, então qualquer hospedagem serve; seção 2):
-    a) Recomendado: plano só de hospedagem, pago à Adsgator pelo checkout
-       (mensal ou anual), na mesma conta da agência. Nenhuma configuração
-       por cliente e nenhuma conversa técnica; a receita cobre o custo.
-       Depende da decisão 13 (receber para hospedar é uso comercial).
-    b) Hospedagem na conta do próprio cliente, num plano grátis que permita
-       uso comercial (ex.: Cloudflare Pages; confirmar os termos na hora).
-       O cliente não paga hospedagem, mas cada entrega exige criar a conta
-       com ele, e qualquer problema depois volta como suporte.
-    c) Entrega dos arquivos para o cliente hospedar onde quiser. Nenhuma
-       responsabilidade depois, mas a maioria dos negócios locais não
-       consegue fazer isso sozinha.
-
-    Proposta para qualquer opção: o cliente recebe os arquivos quando
-    pedir, sem custo (a landing page é dele), e o domínio fica no nome dele
-    (CPF ou CNPJ). Falta: escolher a opção, confirmar a proposta e decidir o
-    e-mail com o domínio do cliente (o plano antigo incluía contas de
-    e-mail): como está hoje para os clientes atuais e se entra no modelo
-    novo.
+    Falta definir (Fase 1, na redação dos Termos):
+    - Renovação do domínio depois do primeiro ano. Proposta: paga pelo
+      cliente direto à empresa de registro, já que o domínio está no nome
+      dele.
+    - Entrega dos arquivos. Proposta: quando o cliente pedir, sem custo.
+    - Conta na Cloudflare no nome do cliente: criada com o e-mail dele; a
+      senha e a verificação em duas etapas ficam com ele, e o Lucas não
+      guarda senha (como ele entra para publicar: pesquisar na hora).
+    - E-mail com o domínio dos clientes atuais (o plano antigo incluía
+      contas de e-mail): como ficou depois do fim da Hostgator.
 13. (Antes da Fase 1) Plano da Vercel: conferir se a conta atende às regras
     de uso comercial da Vercel (seção 2), já que nela ficam o site da
-    agência, o painel e os sites de clientes. Situação da conta, opções e
-    recomendação em `DOCS/LOCAL.md`.
+    agência, o painel e os sites de clientes. DECIDIDO (Lucas, 2026-10-05):
+    manter a conta como está por enquanto; se der problema, ele vê a troca
+    de plano. Detalhes em `DOCS/LOCAL.md`.
+14. (Antes da próxima landing page nova) Onde hospedar as landing pages
+    novas do plano de manutenção:
+    a) Recomendado: na Cloudflare (Workers com arquivos estáticos, como a
+       Cloudflare recomenda para projetos novos), numa conta da agência.
+       Grátis, e o contrato não restringe o plano grátis a uso pessoal
+       (seção 2). Uma plataforma só para os dois casos: quem tem o plano
+       fica na conta da agência, quem não tem fica numa conta no nome dele,
+       e mudar de uma para a outra (cliente que cancela o plano ou que
+       contrata depois) é publicar os mesmos arquivos na outra conta.
+       Contra: uma plataforma a mais, que já vai ser preciso conhecer para
+       quem não tem o plano.
+    b) Na Vercel, como as landing pages de hoje: nada novo para aprender
+       (ver a decisão 13 e o `DOCS/LOCAL.md` antes de escolher).
 
 ## 7. Andamento
 
@@ -517,3 +537,12 @@ que o site usar.
   (seção 2) e conferido nos projetos que as landing pages dos clientes são
   estáticas (Astro). Decisão 13 nova (plano da Vercel). Próximo: decisões 12
   e 13, depois detalhar a Fase 1.
+- 2026-10-05: o Lucas decidiu o modelo da landing page nova (preço único,
+  domínio no nome do cliente incluso, plano de hospedagem, suporte e
+  manutenção à parte com a primeira mensalidade um mês depois da entrega;
+  sem o plano, hospedagem própria ou conta na Cloudflare no nome do
+  cliente), o e-mail profissional como plano à parte, o horário de
+  atendimento, o Reembolso como seção dos Termos (decisões 7 e 12) e manter
+  a conta da Vercel como está (decisão 13). Conferido nos termos oficiais
+  da Cloudflare que o plano grátis não é restrito a uso pessoal (seção 2).
+  Decisão 14 nova (onde hospedar as landing pages novas).
