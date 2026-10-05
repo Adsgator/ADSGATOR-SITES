@@ -44,6 +44,8 @@ trabalho estão no CLAUDE.md global do Lucas (valem aqui também).
 - Painel (`../ADSGATOR-PAINEL`, repositório privado): de onde vem a base
   visual e o jeito de trabalhar. Código copiado de lá é copiado, não
   importado (dois projetos simples não justificam pacote compartilhado);
-  anotar no plano de onde veio.
+  anotar no plano de onde veio. O que só a agência usa (interno) é feito
+  lá, não aqui; o checkout de contratação, que o cliente usa, é daqui
+  (plano, seção 1).
 - Backups do WordPress antigo: só leitura, numa pasta temporária fora deste
   repositório (ver Fase 0 no plano).
