@@ -298,28 +298,115 @@ rascunho no mesmo dia (conferido: nenhum `.sql`, `.zip`, `.json` ou `.txt`
 restante; ficaram só os scripts de leitura, sem dados). A Fase 1 extrai de
 novo do backup o texto completo dos Termos e da Reembolso.
 
-### Fase 1: base do site, Termos e Privacidade (prioridade)
+### Fase 1: base do site, Termos e Privacidade (DETALHADA, AGUARDANDO APROVAÇÃO DO LUCAS)
 
-Prioridade porque os links do rodapé de todos os e-mails dão 404 hoje.
+Prioridade porque os links do rodapé de todos os e-mails (`/termos`,
+`/privacidade` e `/ajuda`) dão 404 hoje.
 
-- Trocar a página provisória por um projeto Next.js com a mesma stack e o
-  mesmo visual do painel (versões conferidas no npm na hora), num branch,
-  conferido no preview da Vercel antes de ir para a `main`.
-- Cabeçalho e rodapé do site, tema claro e escuro, páginas estáticas.
-- Indexável no Google (é o contrário do painel): sitemap, robots, títulos e
-  descrições, imagem de compartilhamento. Cabeçalhos de segurança como os do
-  painel, sem o `noindex`.
-- `/termos` e `/privacidade` com os textos da Fase 0 revisados. Conteúdo
-  legal: o Lucas valida, de preferência com um advogado; o Claude não
-  inventa cláusula. A Privacidade precisa refletir o que a Adsgator usa hoje
-  (seção 5). Os Termos seguem as decisões 7, 11 e 12: sem fidelidade,
-  landing page de valor único com manutenção opcional, Google Ads mensal e,
-  se for o caso, as regras dos clientes atuais.
-- `/email/*` continua no mesmo endereço.
+**Objetivo:** trocar a página provisória por um site Next.js com o visual
+do painel, com Termos e Privacidade de verdade e uma Ajuda provisória, sem
+mudar nada em `/email/*`, e com os endereços antigos do WordPress deste
+domínio redirecionados. Conteúdo legal: o Lucas valida, de preferência com
+um advogado; o Claude não inventa cláusula.
 
-**Critério de pronto (em produção):** `/termos`, `/privacidade` e os links
-do rodapé dos e-mails abrem a página certa, inclusive pelo endereço sem
-`www`; `/email/*` responde igual a antes; testes com cliques reais no Chrome.
+**Fatos conferidos (2026-10-05)**
+- Projeto `adsgator-sites` na Vercel (`vercel project inspect`): tipo
+  "Other" (estático), com saída na pasta `public` se ela existir, senão na
+  raiz. Um projeto Next.js tem `public/`: sem trocar o tipo, a Vercel
+  serviria só essa pasta (no painel, o tipo errado deu 404 em tudo; plano do
+  painel). O `vercel.json` aceita `"framework": "nextjs"`, que substitui o
+  tipo do projeto (documentação do vercel.json, atualizada em 2026-08-14):
+  a troca vai no próprio branch, sem mexer na produção antes da hora.
+- Hoje no repositório: `index.html` (com `noindex`), `vercel.json`
+  (`cleanUrls`, `trailingSlash: false`), `email/banner-topo.png` (16.066
+  bytes) e `email/logo-rodape.png` (8.039 bytes).
+- Painel: Next.js 16.3.6, React 19.2.8, Tailwind 4, shadcn `base-nova`,
+  `next-themes` (escuro por padrão, respeitando o sistema), Geist pelo
+  `next/font`, cabeçalhos de segurança no `next.config.ts`, CSP com nonce no
+  `src/proxy.ts` e testes em `tests/` com `playwright-core` e o Chrome
+  instalado (endereço na variável `BASE`).
+- Versões no npm: next 16.3.8, react 19.3.0, tailwindcss 4.3.3, next-themes
+  0.4.6, shadcn 4.21.2, lucide-react 1.52.0, playwright-core 1.63.0 e
+  typescript 7.0.2 (o painel usa a 5: conferir na hora se o Next já aceita a
+  7; na dúvida, a mesma do painel). Conferir de novo ao construir.
+- CSP (guia do Next 16.3.8, atualizado em 2026-03-20): com nonce, todas as
+  páginas passam a ser geradas a cada visita (sem cache na CDN e com mais
+  custo). Sem nonce, o guia põe a CSP no `next.config` com `'unsafe-inline'`
+  em `script-src`; a alternativa com hashes (SRI) mantém as páginas
+  estáticas, mas é experimental. Escolha técnica: sem nonce, como no guia,
+  porque o site não tem login, formulário nem conteúdo de usuário; rever na
+  Fase 4 (checkout).
+- A Vercel não indexa os previews (artigo de ajuda da Vercel).
+
+**Passos**
+1. Branch `fase-1` a partir da `main`.
+2. Projeto Next.js com a stack do painel e as versões do npm no dia.
+   Copiado do painel (não importado; a origem é anotada aqui ao copiar):
+   `globals.css` (tema), `components.json`, `brand.tsx`, logos, ícone,
+   `theme-provider` e os componentes do shadcn que forem usados.
+3. `vercel.json` do branch com `"framework": "nextjs"` (sem o `cleanUrls`,
+   que era do site estático) e `.gitignore` com a pasta do build do Next
+   (`.next/`).
+4. `email/` vira `public/email/`: mesmos arquivos, mesmos nomes.
+5. Layout: cabeçalho com o logo; rodapé com Termos, Privacidade, Ajuda,
+   e-mail, WhatsApp, horário de atendimento e CNPJ (como no site antigo,
+   dados confirmados pelo Lucas); tema claro e escuro (padrão: decisão 1);
+   página 404 com link para o início.
+6. Páginas:
+   - `/`: simples até a Fase 3 (decisão 15).
+   - `/termos`: o texto antigo, extraído de novo do backup para a pasta de
+     rascunho (apagado no fim) e revisado com as decisões 7 e 12 (como:
+     decisão 16), com a data da última atualização.
+   - `/privacidade`: reescrita a partir da seção 5, mais o que o próprio
+     site faz (hospedagem na Vercel; nesta fase, sem cookies nem medição; a
+     preferência de tema fica guardada no navegador).
+   - `/ajuda`: provisória até a Fase 2 (canais e horário de atendimento),
+     para o link dos e-mails não dar 404.
+   Os textos ficam em arquivos de conteúdo (Markdown), não no código.
+7. Redirecionamentos permanentes dos endereços antigos deste domínio (lista
+   da Fase 0): `/termos-de-servico` → `/termos`, `/politicas-de-privacidade`
+   → `/privacidade`, `/politicas-de-reembolso` → seção de reembolso dos
+   Termos e os demais → `/`, com e sem a barra no fim. As 6 páginas de
+   portfólio têm nome de cliente no endereço: ficam fora do código público
+   e caem na página 404 até a decisão 8 (Fase 3).
+8. Busca: títulos e descrições, `robots.txt` liberado, `sitemap.xml` e
+   imagem de compartilhamento. Cabeçalhos de segurança do painel, sem o
+   `noindex`, e a CSP sem nonce.
+9. Testes em `tests/` (como no painel: `playwright-core`, Chrome instalado e
+   `BASE`): cliques no cabeçalho e no rodapé, os 3 links dos e-mails com e
+   sem `www`, troca de tema, 404, redirecionamentos, cabeçalhos, `robots`,
+   `sitemap` e `/email/*` com o mesmo conteúdo de antes (comparando o hash).
+   Rodam primeiro no `npm run dev` local, depois em produção.
+10. Push do branch: preview da Vercel (protegido pelo login da Vercel). O
+    Lucas confere no navegador; o Claude confere também, se houver um jeito
+    seguro de testar o preview protegido (pesquisar na hora).
+11. Com o OK do Lucas: juntar na `main`, testes em produção, README
+    atualizado (como rodar, testar e publicar), `npm audit` e registro aqui.
+
+**Critério de pronto (em produção)**
+- `adsgator.com.br/termos`, `/privacidade` e `/ajuda`, sem `www` como nos
+  e-mails, abrem a página certa, testado com cliques reais no Chrome.
+- `/email/banner-topo.png` e `/email/logo-rodape.png` respondem 200, como
+  `image/png` e com o mesmo conteúdo de antes (mesmo hash), com e sem `www`.
+- Os endereços antigos do passo 7 redirecionam para as páginas novas.
+- Cabeçalhos de segurança no ar, `robots.txt` e `sitemap.xml` respondendo e
+  nenhuma página de produção com `noindex`.
+- Termos e Privacidade com o texto aprovado pelo Lucas e a data de
+  atualização na página.
+- Testes no repositório, README atualizado e `npm audit` sem vulnerabilidade
+  alta ou crítica (ou o motivo registrado aqui).
+
+**Decisões para o Lucas:** 1 (tema), 15 (página inicial nesta fase) e 16
+(como publicar os Termos), na seção 6.
+
+**Fora:** página inicial completa e medição (Fase 3), artigos da ajuda e
+`ajuda.` (Fase 2), `forms.` (decisão 10, logo depois desta fase), checkout
+(Fase 4) e Cloudflare (Fase 5).
+
+**Tarefas do Lucas:** responder as decisões 1, 15 e 16; confirmar os dados
+do rodapé (e-mail, WhatsApp, horário e CNPJ do site antigo) e os pontos da
+Privacidade (seção 5); aprovar os textos dos Termos e da Privacidade (e
+levar ao advogado); conferir o preview antes de juntar na `main`.
 
 ### Fase 2: Central de Ajuda
 
@@ -384,7 +471,10 @@ dentro das regras dela, e nenhuma na conta da Vercel.
 **Fatos conferidos:** seção 2 (plano grátis: até 100 sites por conta,
 arquivos estáticos grátis e ilimitados, domínio próprio exige o domínio
 ativo na Cloudflare na mesma conta do site). As landing pages são Astro
-estático. Caminho dos projetos em `DOCS/LOCAL.md`.
+estático. Na conta da Vercel há hoje outros 4 projetos além do site e do
+painel (`vercel project ls`, 2026-10-05), entre eles landing pages de
+clientes; o Lucas confirma quais são. Lista e caminho dos projetos em
+`DOCS/LOCAL.md`.
 
 **Parte A: antes da primeira landing page nova**
 1. O Lucas cria a conta da agência na Cloudflare, com verificação em duas
@@ -403,7 +493,7 @@ estático. Caminho dos projetos em `DOCS/LOCAL.md`.
 Cloudflare, conferir no endereço de teste, trocar os servidores DNS do
 domínio (com autorização do Lucas, mostrando antes o que muda), conferir no
 ar com cliques reais (página, botões de WhatsApp, medição) e só então
-apagar o projeto da Vercel. As 2 que usam o Analytics da Vercel deixam de
+apagar o projeto da Vercel. As que usam o Analytics da Vercel deixam de
 usá-lo.
 
 **Critério de pronto (em produção):** parte A: a landing page de teste abre
@@ -416,9 +506,9 @@ Cloudflare, testadas com cliques reais, e nenhuma fica na Vercel.
   ou Pages (o plano grátis do Pages tem domínio próprio escrito na
   documentação: fica de reserva se o teste da parte A mostrar alguma
   restrição no Workers grátis).
-- Quando fazer a parte A: recomendado logo depois dos redirecionamentos de
-  `forms.` (decisão 10), para estar pronta quando chegar o primeiro
-  cliente novo; ou só quando ele chegar.
+- Quando fazer a parte A: DECIDIDO (Lucas, 2026-10-05): logo depois dos
+  redirecionamentos de `forms.` (decisão 10), para estar pronta quando
+  chegar o primeiro cliente novo.
 
 **Fora:** o site da agência e o painel (continuam na Vercel, decisão 13).
 
@@ -454,7 +544,11 @@ que o site usar.
 
 ## 6. Decisões em aberto (perguntar na fase correspondente)
 
-1. Tema padrão do site: escuro (como o painel), claro ou o do sistema.
+1. (Fase 1) Tema padrão do site: escuro (como o painel), claro ou o do
+   sistema. Recomendado: o do sistema, com botão para trocar: cada visitante
+   vê o tema do próprio aparelho, e os dois temas existem de qualquer jeito.
+   Escuro deixa o site com a cara do painel; claro é o mais comum em sites
+   de serviço e textos longos (Termos).
 2. (Fase 4) Checkout novo em `checkout.adsgator.com.br` (o Lucas já
    decidiu o checkout, no lugar do WooCommerce, e o endereço): como
    integrar com o Asaas, de onde vêm os planos, como registrar o aceite dos
@@ -561,6 +655,27 @@ que o site usar.
        quem não tem o plano.
     b) Na Vercel, como as landing pages de hoje: nada novo para aprender
        (ver a decisão 13 e o `DOCS/LOCAL.md` antes de escolher).
+15. (Fase 1) Página inicial nesta fase:
+    a) Recomendado: simples e indexável, com uma frase do que a Adsgator faz
+       e os contatos (texto aprovado pelo Lucas). Quem chega por indicação e
+       procura "Adsgator" no Google acha o site e o contato. A página
+       completa vem na Fase 3.
+    b) Manter a página provisória com `noindex` até a Fase 3: nada a
+       escrever agora, mas quem procurar a Adsgator não acha o site.
+16. (Fase 1) Como publicar os Termos:
+    a) Recomendado: publicar já os Termos das regras de hoje (clientes
+       atuais), com as contradições corrigidas (sem fidelidade), o
+       Reembolso como seção, sem o Dashboard Ads e com o atendimento; as
+       cláusulas do modelo novo de landing page entram quando ele for
+       vendido pelo site (Fases 3 e 4). Publicar com a aprovação do Lucas e
+       revisar com o advogado quando ele puder. Os links dos e-mails voltam
+       logo e nada é publicado antes de o serviço existir; em troca, os
+       Termos mudam de novo nas Fases 3 e 4.
+    b) Escrever tudo de uma vez agora (regras de hoje e modelo novo): uma
+       revisão só com o advogado, mas a Fase 1 espera os preços e o plano de
+       manutenção (decisão 11).
+    c) Como a (a), mas só publicar depois do advogado: mais seguro, mas os
+       links dos e-mails seguem dando 404 até lá.
 
 ## 7. Andamento
 
@@ -624,3 +739,10 @@ que o site usar.
   (Fase 5 nova). Decisão 12 completada (renovação do domínio, entrega dos
   arquivos, e-mail dos clientes atuais). Conferidos os limites do plano
   grátis da Cloudflare (seção 2): comporta as landing pages atuais e novas.
+- 2026-10-05: Fase 1 detalhada (objetivo, fatos conferidos, passos,
+  critério de pronto e decisões 1, 15 e 16). Conferidos: o tipo do projeto
+  na Vercel ("Other"), a opção `framework` do `vercel.json`, a stack do
+  painel, as versões no npm e o guia de CSP do Next. Parte A da Fase 5 logo
+  depois dos redirecionamentos de `forms.` (Lucas). Na conta da Vercel há
+  menos projetos de landing page do que pastas locais (Fase 5). Aguardando
+  a aprovação da Fase 1.
