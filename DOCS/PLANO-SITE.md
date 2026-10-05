@@ -70,14 +70,17 @@
 | `ajuda.adsgator.com.br/ajuda/como-adicionar-saldo-no-google-ads/` | 2 templates de saldo do painel e os e-mails já enviados | Artigo na central nova + redirecionamento do endereço antigo (Fase 2) |
 | Endereços antigos do WordPress | Google e links externos | Levantar na Fase 0; redirecionar (301) para as páginas novas |
 | `forms.adsgator.com.br` | Links de briefing já enviados a clientes | Continua sendo o endereço dos briefings (Lucas, 2026-10-05); páginas antigas levantadas na Fase 0 mantêm o endereço ou redirecionam (Fase 4) |
-| `cliente.adsgator.com.br` | Links de contratação já enviados a clientes | Levantar na Fase 0; levar ao checkout novo (Fase 4, decisão 2) |
 
 - Os links dos e-mails usam o domínio sem `www`. Conferido em 2026-10-05: o
   redirecionamento mantém o caminho (`adsgator.com.br/termos` → 308 →
   `www.adsgator.com.br/termos`).
-- Ligar um subdomínio (ex.: `forms.`, `ajuda.`) na Vercel mexe na
-  configuração do domínio: só com autorização do Lucas, mostrando antes o
-  que será feito.
+- Ligar um subdomínio (ex.: `forms.`, `checkout.`, `ajuda.`) na Vercel mexe
+  na configuração do domínio: só com autorização do Lucas, mostrando antes
+  o que será feito.
+- `cliente.adsgator.com.br` (contratação antiga): o Lucas liberou trocar
+  (2026-10-05). O checkout novo fica em `checkout.adsgator.com.br`, só para
+  novas contratações; redirecionar o endereço antigo para ele é opcional
+  (decisão 2).
 - Os endereços `forms.` e `cliente.` vêm dos nomes dos backups: conferir na
   Fase 0.
 
@@ -159,7 +162,9 @@ do rodapé dos e-mails abrem a página certa, inclusive pelo endereço sem
 
 O checkout novo substitui o do WooCommerce: o cliente escolhe o plano, faz
 o cadastro, aceita os Termos e paga, e o cadastro e o pagamento vão para o
-Asaas, como antes. Pode vir antes da Fase 3, se o Lucas preferir.
+Asaas, como antes. Fica em `checkout.adsgator.com.br`, só para novas
+contratações (Lucas, 2026-10-05). Pode vir antes da Fase 3, se o Lucas
+preferir.
 
 - Detalhar esta fase com o Lucas a partir do inventário da Fase 0 (planos e
   textos do checkout antigo) e das decisões 2 e 3. As formas de integrar
@@ -171,15 +176,14 @@ Asaas, como antes. Pode vir antes da Fase 3, se o Lucas preferir.
   pagamento real só com autorização do Lucas, a cada um.
 - Briefings em `forms.adsgator.com.br`, como antes (decisão 3), só para
   quem recebe o link: recomendado sem indexação no Google.
-- Links antigos de contratação e de briefing continuam funcionando
-  (seção 3).
+- Links antigos de briefing continuam funcionando (seção 3).
 - Termos e Privacidade atualizados com o que o checkout coleta e com o
   registro do aceite.
 
 **Critério de pronto (em produção):** fechado quando a fase for detalhada;
 no mínimo, uma contratação de teste completa (plano, cadastro, aceite dos
-Termos e pagamento) chega ao Asaas e os links antigos levam ao checkout
-novo, com testes de cliques reais no Chrome.
+Termos e pagamento) chega ao Asaas e os links antigos de briefing
+continuam funcionando, com testes de cliques reais no Chrome.
 
 ## 5. Pontos para a Política de Privacidade
 
@@ -210,11 +214,11 @@ que o site usar.
 ## 6. Decisões em aberto (perguntar na fase correspondente)
 
 1. Tema padrão do site: escuro (como o painel), claro ou o do sistema.
-2. (Fase 4) Checkout novo (o Lucas já decidiu que haverá um, no lugar do
-   WooCommerce): como integrar com o Asaas, onde ele fica (caminho no site
-   ou o subdomínio antigo, que mexe na configuração do domínio), de onde
-   vêm os planos, como registrar o aceite dos Termos e se o cliente novo
-   entra sozinho no painel. Recomendado: o aceite no próprio checkout, já
+2. (Fase 4) Checkout novo em `checkout.adsgator.com.br` (o Lucas já
+   decidiu o checkout, no lugar do WooCommerce, e o endereço): como
+   integrar com o Asaas, de onde vêm os planos, como registrar o aceite dos
+   Termos, se o cliente novo entra sozinho no painel e se o `cliente.`
+   antigo redireciona para ele. Recomendado: o aceite no próprio checkout, já
    que o e-mail de boas-vindas do painel diz que o cliente aceitou os
    Termos na contratação; o texto dos Termos (Fase 1) já deve prever isso.
 3. (Fase 4) Briefings em `forms.adsgator.com.br` (endereço decidido):
@@ -242,3 +246,6 @@ que o site usar.
 - 2026-10-05: o Lucas confirmou que quem responde o briefing é o cliente e
   decidiu manter os briefings em `forms.adsgator.com.br`, como no site
   antigo (seções 3 e 6).
+- 2026-10-05: o checkout novo fica em `checkout.adsgator.com.br`, só para
+  novas contratações; o Lucas liberou trocar o `cliente.` antigo (seção 3,
+  Fase 4 e decisão 2).
