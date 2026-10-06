@@ -55,6 +55,12 @@
   onboarding. O que servir para qualquer cliente também pode virar pergunta
   frequente e artigo da ajuda aqui (Fases 2 e 3), e as de onboarding podem
   guiar a sequência depois do pagamento (Fase 4): menos mensagem manual.
+- Também para o plano do painel (2026-10-06): responder como
+  contato@adsgator.com.br pelo Gmail ("Enviar como", com a Brevo) para de
+  funcionar em janeiro de 2027 (seção 2). Escolher outro jeito antes disso.
+- Identidade visual (Lucas, 2026-10-06): tudo o que a Adsgator mostra ao
+  cliente segue o mesmo sistema visual (Fase 1B), inclusive o que for do
+  painel e chegar ao cliente, como os e-mails, no que o e-mail permitir.
 
 ## 2. Fatos conferidos em 2026-10-05
 
@@ -171,6 +177,26 @@
     internacional por cláusulas-padrão, o controlador publica no site, em
     linguagem simples, a forma, a duração e a finalidade, o país de destino e
     os demais itens do artigo.
+- Domínios no registro.br (páginas de ajuda oficiais, conferidas em
+  2026-10-06): registro de 1 a 10 anos (R$ 40 por 1 ano, R$ 112 por 3 anos);
+  "nenhum usuário do sistema de registro pode reservar um domínio"; sem
+  pendência, o pedido vira registro em até 5 minutos e a cobrança vem depois,
+  por Pix, cartão ou boleto.
+- E-mail (conferido em 2026-10-06):
+  - Gmail (página oficial "Learn about changes to third-party email account
+    support in Gmail"): o "Enviar como" com endereço de fora do Google acaba
+    em janeiro de 2027, e antes disso o Gmail pode bloquear configurações
+    novas. Continuam o encaminhamento para o Gmail e o "Enviar como" de
+    endereços do Gmail e do Google Workspace. É o esquema que a Adsgator usa
+    hoje para responder como contato@ (Brevo).
+  - ImprovMX (página de preços): plano grátis com 1 domínio, 25 aliases, 500
+    e-mails encaminhados por dia e sem envio (SMTP); o Light (US$ 50 por ano)
+    tem 5 domínios e envio. Guarda os e-mails só até a entrega, na França
+    (AWS Paris), e envia pela França e pelos Estados Unidos (política de
+    privacidade).
+  - Brevo (ajuda oficial): dados na União Europeia (França, Alemanha e
+    Bélgica), com possível transferência aos Estados Unidos e à Índia,
+    conforme o uso.
 
 ## 3. Endereços que não podem quebrar
 
@@ -337,7 +363,9 @@ Prioridade porque os links do rodapé de todos os e-mails (`/termos`,
 do painel, com Termos e Privacidade de verdade e uma Ajuda provisória, sem
 mudar nada em `/email/*`, e com os endereços antigos do WordPress deste
 domínio redirecionados. Conteúdo legal: o Lucas valida, de preferência com
-um advogado; o Claude não inventa cláusula.
+um advogado; o Claude não inventa cláusula. Atualizado (Lucas, 2026-10-06):
+ele cuida da parte jurídica; as cláusulas novas são propostas destacadas
+para ele aprovar.
 
 **Fatos conferidos (2026-10-05)**
 - Projeto `adsgator-sites` na Vercel (`vercel project inspect`): tipo
@@ -497,6 +525,137 @@ com as propostas destacadas para ele confirmar.
   novos (a cláusula 10 antiga promete aviso por e-mail em mudança
   significativa). Envio de verdade só com autorização do Lucas.
 
+**Respostas do Lucas e revisão final (2026-10-06, branch `fase-1`)**
+
+- Respostas aos pontos acima:
+  1. domínio incluso, com registro por 3 anos (o cliente não se preocupa
+     com isso tão cedo);
+  2. prazo de 14 dias (o texto usa dias úteis, como o antigo: confirmar);
+  3, 4, 5 e 7. aprovados;
+  6. o relatório do Google Ads existe, sem frequência (hoje vai quando o
+     cliente pede);
+  8. seguir a lei. O domínio é registrado depois dos 7 dias de desistência:
+     o registro.br não reserva domínio (seção 2). Se o cliente pedir para
+     registrar antes, o domínio é dele e o valor dele não entra na devolução;
+  9. faltavam o Google Drive (arquivos e planilhas) e o código dos sites e
+     sistemas (GitHub); entraram também a Cloudflare e o Registro.br;
+  10. rodapé confirmado.
+- Parte jurídica: o Lucas cuida dela ("eu já entendo sobre isso"). Os
+  pontos que eram para o advogado foram resolvidos no texto: base legal (art.
+  7º da LGPD), países (principalmente Estados Unidos e União Europeia; a
+  região do banco do painel não foi conferida), guarda por até 5 anos depois
+  do contrato e o papel da Adsgator nas contas dos clientes.
+- Clientes atuais (muda a decisão 12): as landing pages e os sites por
+  assinatura passam a ser do cliente, como no modelo novo, e a assinatura
+  continua como plano de manutenção, pelo mesmo valor (agrado do Lucas; os
+  Termos não citam preço; valores em `DOCS/LOCAL.md`). Saiu a seção do
+  modelo antigo (licença de uso, taxa para levar os arquivos e regra de novo
+  design).
+- Seção nova "O que a Adsgator garante" (pedido do Lucas, contrapeso ao "não
+  garante"): cuidado e boas práticas, prazos com aviso se atrasar, resposta
+  no prazo, correção sem custo dos erros da Adsgator, transparência das
+  contas, arquivos, sigilo, devolução em 7 dias e aviso de mudanças.
+- As referências entre seções viraram links (pedido do Lucas: a navegação
+  precisa ajudar quem lê), e as leis citadas têm link para o texto oficial.
+- Revisão de completude (pedido do Lucas: cobrir até o que ninguém imagina,
+  mas acontece). Entraram:
+  - Google Ads: anúncios reprovados e conta suspensa pelo Google; remoção do
+    acesso da Adsgator;
+  - landing page: até 2 rodadas de ajustes antes da aprovação; projeto
+    parado por mais de 60 dias esperando o cliente;
+  - pagamentos: reajuste anual com aviso de 30 dias; pagamento contestado ou
+    estornado;
+  - atendimento: combinados valem por escrito; recesso avisado antes;
+  - responsabilidades do cliente: direito sobre o material enviado, contatos
+    atualizados e segurança das contas;
+  - responsabilidade e imprevistos: serviços de terceiros, caso fortuito ou
+    força maior, limite de responsabilidade (quando a lei permitir) e fim de
+    um serviço com aviso de 30 dias;
+  - disposições gerais: dados dos clientes do cliente (LGPD), portfólio só
+    com autorização, regra inválida não derruba as outras e tolerância não é
+    renúncia.
+- Privacidade: "sem cookies" vale por enquanto. Quando o site medir visitas e
+  anúncios (Google Analytics e Google Ads, Fase 3), a política muda antes e o
+  site pede permissão para os cookies que não forem necessários.
+- Nos textos, o destaque amarelo passou a marcar só o que mudou desde a
+  leitura do Lucas. Pendente: o OK final dele para publicar.
+
+### Fase 1B: identidade visual e experiência (antes das Fases 2 e 3)
+
+Pedido do Lucas (2026-10-06): o site todo, e tudo o que a Adsgator mostra ao
+cliente, segue a referência https://v0-optimus-delta.vercel.app/ (estrutura,
+UI/UX, efeitos, entradas e movimentos), mesclada com a referência da Vercel e
+com a identidade da Adsgator. O branding é muito importante: manter
+identificação e conexão em tudo.
+
+**Objetivo:** um sistema visual único (cores, fontes, componentes e
+movimento), documentado e aplicado no site, que depois serve para a ajuda
+(Fase 2), as páginas dos planos (Fase 3), o checkout e os briefings (Fase 4)
+e, no que o e-mail permitir, os e-mails do painel.
+
+**Fatos conferidos (2026-10-06)**
+- Referência (feita no v0; Next.js e Tailwind, como este site), lida no código
+  publicado e em capturas de tela:
+  - Fontes: Instrument Sans (texto e títulos), Instrument Serif (destaques) e
+    JetBrains Mono (rótulos pequenos, como "—— Capabilities").
+  - Cores: neutros quentes e quase nenhuma cor de destaque (fundo `#fafaf9`,
+    texto `#080503`, cinza `#5e534a`, bordas `#dad7d0`); seções escuras com
+    textura de linhas diagonais.
+  - Estrutura: cabeçalho que vira barra flutuante arredondada ao rolar (menu
+    de três linhas no celular); topo com rótulo, título enorme cuja última
+    palavra troca, texto, dois botões em pílula e faixa de números rolando;
+    grade de linhas finas e desenho animado de caracteres no fundo; seções
+    com rótulo, título em dois tons e listas numeradas; seção escura de
+    passos que avançam sozinhos, com janela de código; números grandes; faixa
+    de logos; depoimento; planos com mensal e anual; chamada final; rodapé em
+    colunas.
+  - Movimento sem biblioteca, só CSS e IntersectionObserver: letras que sobem
+    saindo do desfoque, revelação por recorte, faixas infinitas, entradas em
+    cascata ao rolar (300 a 700 ms, curva `cubic-bezier(0.22, 1, 0.36, 1)`) e
+    granulado de 3% sobre o fundo; um canvas desenha o topo.
+  - Não respeita "reduzir animações" do sistema. No Windows, "Mostrar
+    animações" desligado já liga essa opção no Chrome.
+- Identidade da Adsgator (pasta de identidade visual; caminho em
+  `DOCS/LOCAL.md`): amarelo `#FFB100`, verde-escuro `#1F271B`, quase branco
+  `#F1F1F1`, quase preto `#1C1D1D` e um azul `#2F11DA` (só num favicon); logos
+  horizontal e vertical para fundo claro, escuro e amarelo; favicons em 5
+  cores; padrões para fundo claro e escuro; elementos (5 estrelas, cards,
+  cantos "bumerangue"); fonte Servus Slab (18 estilos), sem arquivo de
+  licença na pasta.
+- Este site hoje: Geist e Geist Mono, neutros frios do shadcn (base do
+  painel), tema claro com botão para trocar.
+
+**Passos**
+1. Decisões 17 e 18 (seção 6).
+2. Tokens no `globals.css` (cores do claro e do escuro, fontes, raios,
+   sombras e curvas de movimento) e `DOCS/IDENTIDADE-VISUAL.md` reescrito como
+   a referência de tudo o que é da Adsgator para o cliente.
+3. Componentes: cabeçalho flutuante com menu no celular, rótulo, título em
+   dois tons, botões em pílula, revelação ao rolar, faixa infinita, letras
+   com desfoque, grade e granulado de fundo, seção escura e rodapé em
+   colunas. Movimento em CSS e IntersectionObserver, como a referência
+   (biblioteca só se for preciso, pesquisada na hora); com "reduzir
+   animações", o conteúdo aparece sem movimento.
+4. Página de amostra fora do Google, com todos os componentes, para o Lucas
+   aprovar no preview.
+5. Aplicar no layout e nas páginas atuais (início provisório, Termos,
+   Privacidade e Ajuda).
+6. Testes: cliques reais, celular, "reduzir animações" ligado e desligado (o
+   conteúdo aparece nos dois), console sem erros e nada carregado de fora (as
+   fontes servidas pelo próprio site).
+
+**Critério de pronto (em produção):** as páginas com o visual novo, testadas
+com cliques reais no Chrome, no celular e com "reduzir animações" ligado e
+desligado; `DOCS/IDENTIDADE-VISUAL.md` atualizado.
+
+**Fora:** página inicial completa (Fase 3), checkout (Fase 4) e e-mails do
+painel (plano do painel; e-mail não aceita a maior parte dos efeitos).
+
+**Decisões para o Lucas:** 17 e 18 (seção 6).
+
+**Tarefas do Lucas:** aprovar a página de amostra; conferir a licença da
+Servus Slab, se ela for usada.
+
 ### Fase 2: Central de Ajuda
 
 - Artigos da ajuda antiga revisados, começando pelo de saldo. `/ajuda` com a
@@ -518,7 +677,10 @@ com as propostas destacadas para ele confirmar.
 - Comércio eletrônico (Decreto 7.962/2013, art. 2; seção 2): as páginas que
   oferecem os planos mostram, em destaque, nome empresarial, CNPJ, endereço
   físico e eletrônico, o que o serviço inclui, as condições (pagamento e
-  prazo) e as restrições. O Lucas decide qual endereço publicar.
+  prazo) e as restrições. DECIDIDO (Lucas, 2026-10-06): CNPJ e nome
+  fantasia, sem endereço físico (agência online, ele não quer o endereço
+  exposto). O decreto pede nome empresarial e endereço físico; o Lucas foi
+  avisado e decidiu assim.
 - Medição (Google Analytics, Google Ads) e aviso de cookies, se o Lucas
   quiser medir o site.
 
@@ -641,7 +803,13 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
 - Relatórios do Google Analytics e do Google Ads dos clientes são enviados em
   PDF.
 - Para o advogado avaliar: onde ficam os dados de cada serviço (transferência
-  internacional) e por quanto tempo são guardados.
+  internacional) e por quanto tempo são guardados. RESOLVIDO com o Lucas
+  (2026-10-06): na Privacidade, "principalmente nos Estados Unidos e na
+  União Europeia" e guarda por até 5 anos depois do contrato.
+- Acrescentados pelo Lucas (2026-10-06): Google Drive (arquivos e
+  planilhas) e o código dos sites e sistemas (GitHub), onde também aparecem
+  dados de clientes. Na revisão entraram a Cloudflare (landing pages novas)
+  e o Registro.br (domínios em nome do cliente).
 
 ## 6. Decisões em aberto (perguntar na fase correspondente)
 
@@ -702,6 +870,15 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
       manutenção, o plano de e-mail (decisão 12) e se o Site Pro e os
       combos (Landing Page + Ads Start) saem. Recomendado: poucos planos, porque menos dúvida é menos
       conversa.
+    - Plano de manutenção: valor novo definido pelo Lucas (2026-10-06), com
+      os clientes atuais mantendo o valor de hoje (valores em
+      `DOCS/LOCAL.md`).
+    - Plano de e-mail (Lucas, 2026-10-06): a ideia era repetir com o cliente
+      o esquema da Adsgator (ImprovMX para receber e Brevo para enviar pelo
+      Gmail). Esbarra no fim do "Enviar como" do Gmail para endereços de
+      fora (janeiro de 2027; seção 2): o plano de e-mail precisa de um
+      provedor com caixa de e-mail de verdade, pesquisado quando o plano for
+      definido.
 12. (Fase 1, Termos) Consequências do novo modelo de landing page: os
     Termos antigos (2.3 e 2.4) tratam a landing page como licença de uso por
     assinatura, que fica com a Adsgator, com taxa para levar os arquivos.
@@ -710,6 +887,10 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
       sem mudança; o modelo novo vale só para clientes novos. Os Termos
       cobrem os dois (recomendado: um texto só, com uma seção para cada
       modelo e a data a partir da qual o novo vale; o advogado valida).
+      MUDOU (Lucas, 2026-10-06): as landing pages e os sites por assinatura
+      passam a ser dos clientes, como no modelo novo, e a assinatura
+      continua como plano de manutenção, pelo mesmo valor (Fase 1, revisão
+      final).
     - Landing page nova: preço único; a Adsgator desenvolve e a página é do
       cliente, com o domínio no nome dele já incluso na contratação.
     - À parte e opcional: plano de hospedagem, suporte e manutenção,
@@ -733,6 +914,8 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
       assim por enquanto; o plano grátis da Umbler é uma ideia para depois
       (pesquisar quando for o caso). Nos Termos do modelo antigo, as contas
       de e-mail citadas não existem mais: o advogado diz como tratar.
+      RESOLVIDO (2026-10-06): o modelo antigo saiu dos Termos com a mudança
+      dos clientes atuais, e o Lucas cuida da parte jurídica.
 
     Falta definir (Fase 5, parte A): como criar a conta na Cloudflare no
     nome do cliente (proposta: com o e-mail dele; a senha e a verificação em
@@ -784,6 +967,16 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
        manutenção (decisão 11).
     c) Como a (a), mas só publicar depois do advogado: mais seguro, mas os
        links dos e-mails seguem dando 404 até lá.
+17. (Fase 1B) Fontes do sistema visual.
+    a) Recomendado: Geist e Geist Mono, que o site já usa. É a fonte da
+       Vercel, gratuita, e tem o mesmo jeito da referência.
+    b) Instrument Sans e JetBrains Mono, como a referência.
+    c) Servus Slab (fonte da marca) em títulos ou destaques, com a (a) no
+       texto, só se a licença permitir uso na web (conferir).
+18. (Fase 1B) Neutros (fundos, textos e bordas).
+    a) Recomendado: quentes, como a referência; combinam com o amarelo e o
+       verde-escuro da marca.
+    b) Frios, como o painel e o site hoje.
 
 ## 7. Andamento
 
@@ -920,3 +1113,23 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
   - Pendente: o Lucas confirmar os 9 pontos da Fase 1 e os dados do rodapé;
     levar ao advogado; preencher a data, tirar os destaques e o aviso de
     rascunho; testes 57 de 57; juntar na `main` com o OK dele.
+- 2026-10-06 (branch `fase-1`): o Lucas aprovou os textos, respondeu os
+  pontos e pediu: migrar os clientes atuais para o modelo novo, seção "O que
+  a Adsgator garante", links nas referências entre seções e cobrir o que
+  pode acontecer (detalhes na Fase 1, "Respostas do Lucas e revisão final").
+  Ele também decidiu não publicar endereço físico (Fase 3) e pediu o sistema
+  visual da referência Optimus para tudo o que é da Adsgator para o cliente
+  (Fase 1B nova; decisões 17 e 18).
+  - Pesquisado nas fontes oficiais (seção 2): registro.br (não existe
+    reserva de domínio; registro de até 10 anos), fim do "Enviar como" do
+    Gmail para endereços de fora (janeiro de 2027), ImprovMX e Brevo (planos
+    e onde guardam os dados) e o art. 7º da LGPD (bases legais).
+  - Referência Optimus estudada no código publicado e em capturas (fontes,
+    cores, estrutura e movimento, na Fase 1B); identidade da Adsgator lida
+    na pasta de identidade visual (cores dos SVGs, logos, padrões e a fonte
+    Servus Slab, sem licença na pasta).
+  - Teste do sumário: passou a clicar no link "Reembolso" do sumário, porque
+    o texto agora tem outros links com esse nome. Um 404 no console apareceu
+    uma vez no `npm run dev`, logo depois de ligar o servidor; não se
+    repetiu com as páginas já compiladas nem na sequência de cliques
+    refeita (atribuído à compilação na primeira visita, não reproduzido).
