@@ -14,6 +14,10 @@ também).
    foi feito. É a memória do projeto: atualizar ao terminar cada passo.
 2. [`DOCS/IDENTIDADE-VISUAL.md`](DOCS/IDENTIDADE-VISUAL.md): a mesma base
    visual do painel (cores, fonte, logos, componentes).
+3. O plano geral da Adsgator, em `../ADSGATOR-PAINEL/DOCS/PLANO-GERAL.md`
+   (repositório privado, no computador do Lucas): a ordem de todas as
+   partes (site, painel, landing pages e processos). Uma parte por vez, até
+   o fim.
 
 ## Este repositório é PÚBLICO
 

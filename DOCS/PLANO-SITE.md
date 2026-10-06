@@ -65,6 +65,17 @@
   completa e funcional, inclusive os planos e a página inicial com todas as
   informações. Cada parte vai até o fim (pronta, testada e publicada) antes
   de começar a próxima.
+- Plano geral (Lucas, 2026-10-06): a Adsgator inteira 100% funcional antes
+  de qualquer outra coisa (site, painel, landing pages, Central de Ajuda,
+  processos e checklists). A ordem de todas as partes fica em
+  `../ADSGATOR-PAINEL/DOCS/PLANO-GERAL.md` (repositório privado). Decidido
+  pelo Lucas: os briefings (`forms.`) vêm depois da página inicial, das
+  políticas e dos planos, e o aviso aos clientes atuais sobre os Termos
+  novos só quando tudo estiver concluído. Ordem proposta para este site
+  (esperando a aprovação do Lucas): Fase 1B; Fase 3, com os serviços e
+  planos e as políticas conferidas; Fase 2; briefings da Fase 4; Fase 5,
+  parte A; checkout da Fase 4, depois dos processos no painel; Fase 5,
+  parte B.
 
 ## 2. Fatos conferidos em 2026-10-05
 
@@ -729,8 +740,8 @@ página); aprovar a página de amostra.
 O checkout novo substitui o do WooCommerce: o cliente escolhe o plano, faz
 o cadastro, aceita os Termos e paga, e o cadastro e o pagamento vão para o
 Asaas, como antes. Fica em `checkout.adsgator.com.br`, só para novas
-contratações (Lucas, 2026-10-05). Pode vir antes da Fase 3, se o Lucas
-preferir.
+contratações (Lucas, 2026-10-05). A ordem dos briefings e do checkout fica
+no plano geral (seção 1).
 
 - Detalhar esta fase com o Lucas a partir do inventário da Fase 0 (planos e
   textos do checkout antigo) e das decisões 2, 3, 11 e 12. O checkout
@@ -899,6 +910,8 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
     Em qualquer opção, ligar o subdomínio mexe na configuração do domínio na
     Vercel (seção 3: só com autorização). Não deve precisar mudar DNS: no
     painel, o subdomínio foi ligado sem criar registro (seção 2).
+    MUDOU (Lucas, 2026-10-06): os briefings de `forms.` ficam para depois
+    da página inicial, das políticas e dos planos (seção 1, plano geral).
 11. (Fases 3 e 4) Planos à venda para clientes novos. DECIDIDO em parte
     (Lucas, 2026-10-05):
     - Landing page deixa de ser plano mensal: valor único (o cliente paga, a
@@ -1297,3 +1310,30 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
     o `font-display` para `swap` na Adobe. Depois: tirar a amostra (ela vira
     a base da página inicial da Fase 3), reescrever o
     `DOCS/IDENTIDADE-VISUAL.md`, publicar e testar em produção.
+- 2026-10-06: o Lucas decidiu deixar a Adsgator inteira 100% funcional antes
+  de qualquer outra coisa; plano geral criado no repositório do painel
+  (seção 1). Decididos por ele: os briefings (`forms.`) vêm depois da
+  página inicial, das políticas e dos planos (decisão 10), e o aviso aos
+  clientes atuais, no fim de tudo. A ordem das demais partes espera a
+  aprovação dele.
+- 2026-10-06 (branch `fase-1b`): pendências da Fase 1B.
+  - O título da Ajuda tinha ficado fora da Servus Slab (o relatório da
+    amostra 2 disse que as páginas atuais já tinham o visual novo; a Ajuda
+    tinha só o cabeçalho, o rodapé e as cores). Corrigido, e o botão da 404
+    ficou em pílula, como os outros.
+  - Teste novo: o título de Termos, Privacidade e Ajuda na Servus Slab.
+    Conferido que ele falha com a versão antiga da Ajuda (fonte Geist).
+  - `favicon.ico` (16, 32 e 48 px, gerado do `src/app/icon.svg` no Chrome):
+    o Chrome às vezes pede `/favicon.ico` por conta própria, e o 404 dele
+    aparecia no console de vez em quando. Achado com o endereço do recurso
+    que falhou, que o teste agora mostra junto de cada erro do console. Teste
+    novo confere o `/favicon.ico`.
+  - Reproduzido o 404 que apareceu uma vez na Fase 1: depois de o git
+    reescrever o arquivo de uma página (`git stash`), o `npm run dev` passou
+    a dar 404 nela até o arquivo ser salvo de novo. Só no servidor local
+    (registrado no README).
+  - Verificado: lint e tipos sem erro; `tests/site.mjs` com 64 de 65 no
+    `npm run dev` (duas rodadas) e no build de produção no computador. A
+    falha é a trava de "texto aprovado" da Privacidade (trecho da Adobe
+    Fonts esperando o Lucas).
+  - Pendente: o mesmo da entrada anterior.
