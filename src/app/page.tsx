@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { Eyebrow } from "@/components/eyebrow";
 import { buttonVariants } from "@/components/ui/button";
 import { site } from "@/config/site";
 import { cn } from "@/lib/utils";
@@ -14,8 +15,8 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <section className="mx-auto max-w-3xl px-4 py-20 sm:py-28">
-      <p className="text-sm font-medium text-muted-foreground">Ads &amp; Web Design</p>
-      <h1 className="mt-3 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+      <Eyebrow>Ads &amp; Web Design</Eyebrow>
+      <h1 className="mt-6 font-heading text-5xl leading-[1.05] tracking-tight text-balance sm:text-6xl">
         Google Ads e landing pages para negócios locais
       </h1>
       <p className="mt-5 text-lg leading-8 text-muted-foreground">
@@ -31,14 +32,17 @@ export default function Home() {
           href={site.whatsapp.link}
           className={cn(
             buttonVariants({ size: "lg" }),
-            "bg-brand text-brand-foreground hover:bg-brand/90",
+            "h-12 rounded-full bg-brand px-7 text-base text-brand-foreground hover:bg-brand/90",
           )}
         >
           Falar pelo WhatsApp
         </a>
         <a
           href={`mailto:${site.email}`}
-          className={cn(buttonVariants({ size: "lg", variant: "outline" }))}
+          className={cn(
+            buttonVariants({ size: "lg", variant: "outline" }),
+            "h-12 rounded-full bg-transparent px-7 text-base",
+          )}
         >
           Enviar e-mail
         </a>
