@@ -1,0 +1,257 @@
+/* Ilustração do topo (AnuncioClique): anúncio no Google, clique do cursor da
+   marca e conversa no WhatsApp, num laço de 8 s. Pausa pelo MotionScope
+   (classe motion-loop). Com "reduzir animações", nada se desloca: o cursor
+   fica parado no anúncio e tudo só esmaece (como a Apple recomenda). */
+
+.cena {
+  position: relative;
+  padding-bottom: 4rem;
+}
+
+.janela {
+  border: 1px solid var(--border);
+  border-radius: 1.75rem;
+  background: var(--card);
+  padding: 1.25rem;
+  box-shadow: 0 40px 80px -40px rgb(31 39 27 / 0.4);
+}
+
+.busca {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+.anuncio {
+  position: relative;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid transparent;
+  border-radius: 1.1rem;
+  animation: destaque 8s var(--ease-out) infinite;
+}
+
+.site {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+}
+
+.favicon {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.organico {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding: 0 1rem;
+}
+
+.linha {
+  height: 0.6rem;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+/* O clique acontece na ponta da seta, sobre o título do anúncio. No desenho
+   do cursor da marca (517 × 779), a ponta fica a ~27% da largura e da
+   altura, abaixo dos arcos: a onda nasce ali. */
+.cursor {
+  position: absolute;
+  top: 3.6rem;
+  left: 58%;
+  width: 2.1rem;
+  transform-origin: 27% 27%;
+  animation: cursor 8s var(--ease-out) infinite;
+}
+
+.onda {
+  position: absolute;
+  top: calc(3.6rem + 0.85rem - 1.25rem);
+  left: calc(58% + 0.57rem - 1.25rem);
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid var(--brand);
+  border-radius: 999px;
+  opacity: 0;
+  animation: onda 8s ease-out infinite;
+}
+
+.balao {
+  position: absolute;
+  bottom: 0;
+  left: -0.75rem;
+  max-width: 17.5rem;
+  padding: 0.85rem 2.2rem 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1.25rem 1.25rem 1.25rem 0.35rem;
+  background: var(--card);
+  box-shadow: 0 20px 40px -24px rgb(31 39 27 / 0.45);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  opacity: 0;
+  animation: balao 8s var(--ease-out) infinite;
+}
+
+.balaoTopo {
+  margin-bottom: 0.25rem;
+  color: var(--muted-foreground);
+  font-family: var(--font-geist-mono);
+  font-size: 0.7rem;
+}
+
+.lido {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.6rem;
+  width: 1rem;
+  height: 1rem;
+  color: var(--brand);
+}
+
+@keyframes cursor {
+  0% {
+    opacity: 0;
+    transform: translate(9rem, 7rem);
+  }
+  8% {
+    opacity: 1;
+  }
+  22% {
+    transform: none;
+  }
+  25% {
+    transform: scale(0.86);
+  }
+  29% {
+    transform: none;
+  }
+  72% {
+    opacity: 1;
+    transform: none;
+  }
+  82%,
+  100% {
+    opacity: 0;
+    transform: translate(-2rem, 3rem);
+  }
+}
+
+@keyframes onda {
+  0%,
+  24% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  26% {
+    opacity: 1;
+  }
+  45%,
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+@keyframes destaque {
+  0%,
+  24%,
+  92%,
+  100% {
+    border-color: transparent;
+    background: transparent;
+  }
+  30%,
+  82% {
+    border-color: color-mix(in oklab, var(--brand) 70%, transparent);
+    background: color-mix(in oklab, var(--brand) 12%, transparent);
+  }
+}
+
+@keyframes balao {
+  0%,
+  32% {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.96);
+  }
+  40%,
+  82% {
+    opacity: 1;
+    transform: none;
+  }
+  92%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+@keyframes cursor-suave {
+  0%,
+  10%,
+  85%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  75% {
+    opacity: 1;
+  }
+}
+
+@keyframes onda-suave {
+  0%,
+  24%,
+  45%,
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.6);
+  }
+}
+
+@keyframes balao-suave {
+  0%,
+  32%,
+  92%,
+  100% {
+    opacity: 0;
+  }
+  40%,
+  82% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation-name: cursor-suave;
+  }
+  .onda {
+    animation-name: onda-suave;
+  }
+  .balao {
+    animation-name: balao-suave;
+  }
+}
