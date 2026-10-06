@@ -38,6 +38,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Servus Slab, a fonte da marca, pelo projeto web da Adobe Fonts do
+            Lucas (a licença só permite servir pela Adobe; CSP no
+            next.config.ts). */}
+        <link rel="preconnect" href="https://use.typekit.net" crossOrigin="anonymous" />
+        <link rel="stylesheet" href="https://use.typekit.net/eaw0vap.css" />
+      </head>
       <body className="flex min-h-full flex-col">
         {/* Claro por padrão (decisão 1 do plano); o visitante pode trocar. */}
         <ThemeProvider
@@ -47,7 +54,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           disableTransitionOnChange
         >
           <SiteHeader />
-          <main className="flex-1">{children}</main>
+          {/* O cabeçalho é fixo (flutua ao rolar): o conteúdo começa abaixo dele. */}
+          <main className="flex-1 pt-16">{children}</main>
           <SiteFooter />
         </ThemeProvider>
       </body>

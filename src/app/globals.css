@@ -13,7 +13,11 @@
   --color-warning: var(--warning);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist-sans);
+  /* Servus Slab (Adobe Fonts), a fonte da marca, nos títulos. */
+  --font-heading: "servus-slab", ui-serif, Georgia, serif;
+  /* Cores da marca com nome: verde (tinta) e #F1F1F1 (papel). */
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -52,25 +56,29 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Claro: papel #F1F1F1, tinta verde #1F271B e neutros quentes (puxados para
+   o verde da marca), com o amarelo #FFB100 de destaque (decisão 18). */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --ink: #1f271b;
+  --paper: #f1f1f1;
+  --background: #f1f1f1;
+  --foreground: #1f271b;
+  --card: #fcfbf8;
+  --card-foreground: #1f271b;
+  --popover: #fcfbf8;
+  --popover-foreground: #1f271b;
+  --primary: #1f271b;
+  --primary-foreground: #f1f1f1;
+  --secondary: #e6e5df;
+  --secondary-foreground: #1f271b;
+  --muted: #e6e5df;
+  --muted-foreground: #5c6356;
+  --accent: #e6e5df;
+  --accent-foreground: #1f271b;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #d8d7cf;
+  --input: #d8d7cf;
+  --ring: #5c6356;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -92,27 +100,27 @@
   --warning: oklch(0.72 0.16 70);
 }
 
-/* Escuro no estilo do dashboard da Vercel: fundo quase preto, cartões
-   levemente elevados e bordas discretas. */
+/* Escuro: verde quase preto, cartões no verde da marca, texto #F1F1F1 e o
+   amarelo de destaque. Também vale para as seções escuras (classe .dark). */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.17 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.19 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #10150e;
+  --foreground: #f1f1f1;
+  --card: #1f271b;
+  --card-foreground: #f1f1f1;
+  --popover: #1f271b;
+  --popover-foreground: #f1f1f1;
+  --primary: #f1f1f1;
+  --primary-foreground: #1f271b;
+  --secondary: #2a3326;
+  --secondary-foreground: #f1f1f1;
+  --muted: #2a3326;
+  --muted-foreground: #a9b0a2;
+  --accent: #2a3326;
+  --accent-foreground: #f1f1f1;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: rgb(241 241 241 / 12%);
+  --input: rgb(241 241 241 / 16%);
+  --ring: #a9b0a2;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -132,6 +140,17 @@
   --warning: oklch(0.8 0.15 75);
 }
 
+/* Seções no verde da marca: usar junto com .dark. O fundo é o verde #1F271B
+   e os cartões ficam um tom acima, para não sumirem no fundo. */
+.section-ink {
+  --background: #1f271b;
+  --card: #283124;
+  --popover: #283124;
+  --secondary: #303b2b;
+  --muted: #303b2b;
+  --accent: #303b2b;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -148,9 +167,11 @@
 }
 
 /* Movimento e texturas (Fase 1B), a partir da referência do plano: só CSS;
-   o componente Reveal apenas marca quando o elemento entra na tela. Sem
-   JavaScript ou com "reduzir animações" no sistema (no Windows, "Mostrar
-   animações" desligado), o conteúdo aparece parado. */
+   o componente Reveal apenas marca quando o elemento entra na tela. A
+   animação funciona sempre (decisão do Lucas). Com "reduzir animações" no
+   sistema (no Windows, "Mostrar animações" desligado), ela é trocada como a
+   Apple recomenda: sem desfoque nem deslocamento, só esmaecimentos. O que
+   roda sozinho pausa dentro de um MotionScope pausado ([data-paused]). */
 :root {
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -172,6 +193,62 @@
   to {
     transform: translateX(-50%);
   }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Clique do cursor da marca; com "reduzir animações", só esmaece. */
+@keyframes click {
+  0%,
+  100% {
+    transform: none;
+  }
+  40% {
+    transform: scale(0.88);
+  }
+}
+
+@keyframes click-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.55;
+  }
+}
+
+/* Barra dos passos que avançam sozinhos (componente Steps). */
+@keyframes progresso {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Perguntas frequentes (<details>): abrem e fecham suavemente nos navegadores
+   que já animam a altura automática; nos outros, abrem na hora. */
+:root {
+  interpolate-size: allow-keywords;
+}
+details::details-content {
+  height: 0;
+  overflow: clip;
+  transition:
+    height 400ms var(--ease-out),
+    content-visibility 400ms allow-discrete;
+}
+details[open]::details-content {
+  height: auto;
 }
 
 @layer components {
@@ -197,7 +274,10 @@
     width: max-content;
     animation: marquee var(--marquee-duration, 40s) linear infinite;
   }
-  .marquee:hover .marquee-track {
+  .marquee:hover .marquee-track,
+  [data-paused] .marquee-track,
+  [data-paused] .motion-loop,
+  [data-paused] .motion-loop * {
     animation-play-state: paused;
   }
   /* Grade de linhas finas, como o fundo da referência. */
@@ -207,13 +287,58 @@
       linear-gradient(to bottom, var(--border) 1px, transparent 1px);
     background-size: 120px 120px;
   }
-  /* Linhas diagonais das seções escuras. */
-  .bg-diagonal {
-    background-image: repeating-linear-gradient(
-      135deg,
-      oklch(1 0 0 / 4%) 0 1px,
-      transparent 1px 14px
+  /* Marca-texto amarelo embaixo da palavra (acompanha a quebra de linha). */
+  .highlight {
+    background-image: linear-gradient(
+      to top,
+      color-mix(in oklab, var(--brand) 65%, transparent) 0.22em,
+      transparent 0.22em
     );
+    box-decoration-break: clone;
+  }
+  /* Padrões da marca (o ladrilho de 114 px que vem dentro dos SVGs da
+     identidade visual), como textura: transparente e só nas bordas, para não
+     disputar com o texto. */
+  .bg-pattern-dark,
+  .bg-pattern-light {
+    position: relative;
+    isolation: isolate;
+  }
+  .bg-pattern-dark::before,
+  .bg-pattern-light::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-size: 114px 114px;
+    opacity: 0.3;
+    mask-image: radial-gradient(ellipse at center, transparent 25%, black 100%);
+  }
+  .bg-pattern-dark::before {
+    background-image: url("/brand/padrao-escuro.png");
+  }
+  .bg-pattern-light::before {
+    background-image: url("/brand/padrao-claro.png");
+  }
+  /* Faixa com as pontas esmaecidas. */
+  .marquee {
+    mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  }
+  /* O cursor da marca em qualquer cor: o desenho entra como máscara e a cor
+     vem do texto (currentColor). */
+  .brand-cursor {
+    display: inline-block;
+    aspect-ratio: 517 / 779;
+    background-color: currentColor;
+    mask: url("/brand/cursor.svg") center / contain no-repeat;
+    /* O clique "aperta" a partir da ponta da seta. */
+    transform-origin: 27% 27%;
+  }
+  /* Dentro de um Reveal: o cursor clica duas vezes quando aparece (menos de
+     5 s, então não precisa de pausa). */
+  .reveal[data-visible] .click-on-reveal {
+    animation: click 900ms var(--ease-out) 500ms 2;
   }
   /* Granulado leve por cima do fundo. */
   .grain {
@@ -238,25 +363,21 @@
   }
 }
 
+/* "Reduzir animações": a animação continua, trocada (Apple): as letras e os
+   blocos só esmaecem, e a faixa roda na metade da velocidade. */
 @media (prefers-reduced-motion: reduce) {
   .reveal {
-    opacity: 1;
     transform: none;
-    transition: none;
+    transition: opacity 500ms var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
   }
   .char-in {
-    animation: none;
+    animation-name: fade-in;
   }
-  /* Faixa parada: os itens quebram linha e a cópia do laço some. */
   .marquee-track {
-    width: auto;
-    animation: none;
+    animation-duration: calc(var(--marquee-duration, 40s) * 2);
   }
-  .marquee-track > :first-child {
-    flex-wrap: wrap;
-    flex-shrink: 1;
-  }
-  .marquee-track > [aria-hidden] {
-    display: none;
+  .reveal[data-visible] .click-on-reveal {
+    animation-name: click-soft;
   }
 }

@@ -8,12 +8,15 @@ const isDev = process.env.NODE_ENV === "development";
 // nem conteúdo de usuário; rever na Fase 4 (checkout). O 'unsafe-inline' em
 // script-src cobre os scripts do próprio Next e o do next-themes (que aplica
 // o tema antes de a página aparecer).
+// Adobe Fonts (Servus Slab, a fonte da marca): o CSS vem de use.typekit.net,
+// que importa um arquivo vazio de contagem de p.typekit.net; as fontes vêm de
+// use.typekit.net. A licença não permite servir os arquivos daqui.
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
-  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net",
   "img-src 'self' blob: data:",
-  "font-src 'self'",
+  "font-src 'self' https://use.typekit.net",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
