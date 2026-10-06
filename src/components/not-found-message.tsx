@@ -26,7 +26,7 @@ export function NotFoundMessage({ className }: { className?: string }) {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Link href="/" className={cn(buttonVariants({ variant: "outline" }))}>
+        <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "rounded-full px-5")}>
           Voltar para o início
         </Link>
       </EmptyContent>

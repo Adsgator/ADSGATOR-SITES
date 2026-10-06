@@ -13,7 +13,9 @@ export const metadata: Metadata = {
 export default function Ajuda() {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-3xl font-semibold tracking-tight">Central de Ajuda</h1>
+      <h1 className="font-heading text-4xl tracking-tight text-balance sm:text-5xl">
+        Central de Ajuda
+      </h1>
       <p className="mt-4 leading-7">
         Os artigos da central de ajuda estão sendo atualizados. Enquanto isso,
         fale com a gente:
