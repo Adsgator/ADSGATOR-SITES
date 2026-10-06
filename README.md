@@ -23,14 +23,20 @@ npm run typecheck
 npm run build      # o mesmo build que a Vercel roda
 ```
 
+Se uma página que existe passar a dar 404 no `npm run dev` depois de um
+comando do git que reescreve arquivos (`git stash`, troca de branch), é o
+servidor local que não viu o arquivo voltar: salvar o arquivo de novo ou
+reiniciar o `npm run dev` resolve. Não afeta o site publicado (o build é
+feito do zero). Visto em 2026-10-06.
+
 ## Testes
 
 `tests/site.mjs` usa o Chrome instalado (`playwright-core`) e confere: as
 imagens dos e-mails (mesmo conteúdo, com e sem `www`), os redirecionamentos
 dos endereços antigos do WordPress, os cabeçalhos de segurança, `robots.txt`,
-`sitemap.xml`, a imagem de compartilhamento e, com cliques, cabeçalho,
-rodapé, links dos e-mails, troca de tema, sumário dos Termos, página 404 e
-tela de celular. Também falha se aparecer erro no console e confere o que a
+`sitemap.xml`, a imagem de compartilhamento, o `favicon.ico` e, com cliques,
+cabeçalho, rodapé, links dos e-mails, troca de tema, títulos na fonte da
+marca, sumário dos Termos, página 404 e tela de celular. Também falha se aparecer erro no console e confere o que a
 Política de Privacidade promete: nenhum cookie, só a preferência de tema
 guardada no navegador e nada carregado de fora do site além da Adobe Fonts
 (a Servus Slab, fonte da marca, que a licença só permite servir pela Adobe).

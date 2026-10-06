@@ -99,6 +99,9 @@ for (const [origem, esperado] of antigos) {
   check("sitemap.xml com as 4 páginas", urls.every((u) => sitemap.includes(u)));
   const og = await fetch(BASE + "/opengraph-image");
   check("imagem de compartilhamento", og.status === 200 && og.headers.get("content-type") === "image/png");
+  // O Chrome às vezes pede /favicon.ico por conta própria; sem ele, dá 404 no console.
+  const ico = await fetch(BASE + "/favicon.ico");
+  check("favicon.ico", ico.status === 200 && ico.headers.get("content-type") === "image/x-icon", `${ico.status} ${ico.headers.get("content-type")}`);
 }
 
 // 4. No Chrome, com cliques.
@@ -119,10 +122,22 @@ page.on("request", (req) => {
   if (!["data:", "blob:"].includes(u.protocol) && !origens.has(u.origin)) externos.add(u.origin);
 });
 const problemas = [];
-page.on("console", (m) => ["error", "warning"].includes(m.type()) && problemas.push(`[${m.type()}] (${new URL(page.url()).pathname}) ${m.text().slice(0, 250)}`));
+// Cada problema leva a página aberta e, quando houver, o endereço do recurso
+// que falhou (a mensagem do Chrome não diz qual foi).
+page.on("console", (m) => {
+  if (!["error", "warning"].includes(m.type())) return;
+  const recurso = m.location()?.url;
+  problemas.push(`[${m.type()}] (${new URL(page.url()).pathname}) ${m.text().slice(0, 250)}${recurso ? ` @ ${recurso}` : ""}`);
+});
 page.on("pageerror", (e) => problemas.push(`[pageerror] (${new URL(page.url()).pathname}) ${e.message}`));
 const h1 = () => page.locator("h1").first().innerText();
 const classeHtml = () => page.evaluate(() => document.documentElement.className);
+// Título da página na fonte da marca (Servus Slab, pela Adobe Fonts).
+const tituloNaServus = () =>
+  page.evaluate(async () => {
+    await document.fonts.ready;
+    return document.fonts.check("48px servus-slab") && getComputedStyle(document.querySelector("h1")).fontFamily.startsWith("servus-slab");
+  });
 
 try {
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
@@ -130,11 +145,7 @@ try {
   check("sem meta noindex", (await page.locator('meta[name="robots"][content*="noindex"]').count()) === 0);
   check("tema claro por padrão", (await classeHtml()).includes("light") && !(await classeHtml()).includes("dark"));
   check("botão do WhatsApp", (await page.getByRole("link", { name: "Falar pelo WhatsApp" }).getAttribute("href")) === "https://wa.me/5519998026222");
-  const servus = await page.evaluate(async () => {
-    await document.fonts.ready;
-    return document.fonts.check("48px servus-slab") && getComputedStyle(document.querySelector("h1")).fontFamily.startsWith("servus-slab");
-  });
-  check("título na Servus Slab (Adobe Fonts)", servus);
+  check("título na Servus Slab (Adobe Fonts)", await tituloNaServus());
   await page.screenshot({ path: new URL("inicio-claro.png", saida).pathname.slice(1), fullPage: true });
 
   // Tema: troca, continua depois de recarregar e volta.
@@ -157,6 +168,7 @@ try {
     await rodape.getByRole("link", { name: rotulo }).click();
     await page.waitForURL(`**${caminho}`);
     check(`rodapé: ${rotulo} abre ${caminho}`, (await h1()) === titulo);
+    check(`${caminho}: título na Servus Slab`, await tituloNaServus());
     await page.screenshot({ path: new URL(`${caminho.slice(1)}.png`, saida).pathname.slice(1), fullPage: true });
   }
   await page.locator("header").getByRole("link", { name: "Adsgator, página inicial" }).click();
