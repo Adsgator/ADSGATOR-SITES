@@ -61,6 +61,10 @@
 - Identidade visual (Lucas, 2026-10-06): tudo o que a Adsgator mostra ao
   cliente segue o mesmo sistema visual (Fase 1B), inclusive o que for do
   painel e chegar ao cliente, como os e-mails, no que o e-mail permitir.
+- Jeito de avançar (Lucas, 2026-10-06): a Adsgator precisa ficar 100%
+  completa e funcional, inclusive os planos e a página inicial com todas as
+  informações. Cada parte vai até o fim (pronta, testada e publicada) antes
+  de começar a próxima.
 
 ## 2. Fatos conferidos em 2026-10-05
 
@@ -588,6 +592,18 @@ UI/UX, efeitos, entradas e movimentos), mesclada com a referência da Vercel e
 com a identidade da Adsgator. O branding é muito importante: manter
 identificação e conexão em tudo.
 
+Direção do Lucas depois da primeira amostra (2026-10-06): gostou e pediu:
+- amostra mais completa;
+- a identidade da Adsgator na frente: amarelo `#FFB100`, verde `#1F271B`,
+  `#F1F1F1` e a tipografia da marca (Servus Slab, que ele licencia pela
+  assinatura Creative Cloud);
+- originalidade e personalidade da Adsgator: a referência é o caminho, não a
+  cópia;
+- visual premium, de alto padrão, seguindo padrões Apple;
+- tons quentes;
+- animações funcionando sempre, inclusive com "reduzir animações" ligado no
+  sistema ("tem que funcionar tudo certo sempre").
+
 **Objetivo:** um sistema visual único (cores, fontes, componentes e
 movimento), documentado e aplicado no site, que depois serve para a ajuda
 (Fase 2), as páginas dos planos (Fase 3), o checkout e os briefings (Fase 4)
@@ -624,6 +640,23 @@ e, no que o e-mail permitir, os e-mails do painel.
   licença na pasta.
 - Este site hoje: Geist e Geist Mono, neutros frios do shadcn (base do
   painel), tema claro com botão para trocar.
+- Elementos da marca vistos lado a lado (2026-10-06): o cursor do logo, com
+  os arcos de clique (o "A" de GATOR); cantos "bumerangue" amarelos em L para
+  emoldurar; padrões finos para fundo claro e escuro (imagem repetida dentro
+  do SVG); cards de divulgação com degradê dourado e texto em serifa slab; 5
+  estrelas douradas; um fundo verde-claro (mentolado).
+- Adobe Fonts (ajuda oficial, pela busca; as páginas da Adobe bloqueiam
+  acesso automatizado): a fonte entra no site por um projeto web, com um link
+  para o CSS em `use.typekit.net`; não precisa cadastrar domínio; o
+  `font-display` é escolhido em "Edit Project". Política de privacidade da
+  Adobe Fonts: não usa cookies para servir as fontes; recebe o IP para
+  entregar a fonte, sem guardá-lo; registra fontes servidas, ID do projeto e
+  o endereço da página, para cobrança e pagamento das fundições. Licença: só
+  servida pela Adobe (não dá para hospedar os arquivos no site).
+- Apple (critérios de "Reduced Motion" do App Store Connect e sessões da
+  WWDC): com "reduzir movimento", desligar ou trocar desfoque animado,
+  profundidade, movimento em vários eixos e giros; quando o movimento tem
+  sentido, trocar por esmaecimento, destaque ou mudança de cor.
 
 **Passos**
 1. Decisões 17 e 18 (seção 6).
@@ -634,27 +667,34 @@ e, no que o e-mail permitir, os e-mails do painel.
    dois tons, botões em pílula, revelação ao rolar, faixa infinita, letras
    com desfoque, grade e granulado de fundo, seção escura e rodapé em
    colunas. Movimento em CSS e IntersectionObserver, como a referência
-   (biblioteca só se for preciso, pesquisada na hora); com "reduzir
-   animações", o conteúdo aparece sem movimento.
+   (biblioteca só se for preciso, pesquisada na hora). Animação funciona
+   sempre (Lucas, 2026-10-06); com "reduzir animações" ligado, ela é trocada
+   como a Apple recomenda (sem desfoque nem deslocamento: esmaecimentos e
+   trocas suaves), e o que roda sozinho tem botão de pausar, como no site da
+   Apple.
 4. Página de amostra fora do Google, com todos os componentes, para o Lucas
    aprovar no preview.
 5. Aplicar no layout e nas páginas atuais (início provisório, Termos,
    Privacidade e Ajuda).
-6. Testes: cliques reais, celular, "reduzir animações" ligado e desligado (o
-   conteúdo aparece nos dois), console sem erros e nada carregado de fora (as
-   fontes servidas pelo próprio site).
+6. Testes: cliques reais, celular, "reduzir animações" ligado e desligado
+   (animação nos dois, sem desfoque nem deslocamento no reduzido), console
+   sem erros e nada carregado de fora além da Adobe Fonts.
+7. Adobe Fonts no site: CSP liberando os endereços da Adobe, Privacidade e
+   teste de "nada de fora" atualizados antes de publicar.
 
 **Critério de pronto (em produção):** as páginas com o visual novo, testadas
 com cliques reais no Chrome, no celular e com "reduzir animações" ligado e
-desligado; `DOCS/IDENTIDADE-VISUAL.md` atualizado.
+desligado; Servus Slab carregando pela Adobe; Privacidade atualizada;
+`DOCS/IDENTIDADE-VISUAL.md` atualizado.
 
 **Fora:** página inicial completa (Fase 3), checkout (Fase 4) e e-mails do
 painel (plano do painel; e-mail não aceita a maior parte dos efeitos).
 
 **Decisões para o Lucas:** 17 e 18 (seção 6).
 
-**Tarefas do Lucas:** aprovar a página de amostra; conferir a licença da
-Servus Slab, se ela for usada.
+**Tarefas do Lucas:** criar o projeto web da Servus Slab na Adobe Fonts e
+passar o link de incorporação (não é segredo: aparece no código de qualquer
+página); aprovar a página de amostra.
 
 ### Fase 2: Central de Ajuda
 
@@ -980,10 +1020,15 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
        dos visitantes). As cópias grátis que circulam são para uso pessoal, e
        os arquivos da pasta de identidade não vão para o repositório público.
        Por isso ficou fora da página de amostra.
+    DECIDIDO (Lucas, 2026-10-06): a tipografia da marca, Servus Slab, pela
+    Adobe Fonts da assinatura dele. Proposta na amostra 2: Servus Slab nos
+    títulos e destaques; Geist no texto corrido e na interface (leitura e
+    números); Geist Mono nos rótulos.
 18. (Fase 1B) Neutros (fundos, textos e bordas).
     a) Recomendado: quentes, como a referência; combinam com o amarelo e o
        verde-escuro da marca.
     b) Frios, como o painel e o site hoje.
+    DECIDIDO (Lucas, 2026-10-06): quentes, com as cores da marca na frente.
 
 ## 7. Andamento
 
@@ -1212,3 +1257,43 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
     (conferido: ele falhou no site no ar antes da correção).
   - Verificado: `tests/site.mjs` com 59 de 59 no build de produção no
     computador.
+- 2026-10-06: ajustes publicados na `main` (deploy Ready); em produção,
+  `tests/site.mjs` com 61 de 61 (com e sem `www`).
+- 2026-10-06 (branch `fase-1b`): amostra 2 da Fase 1B, com a direção nova do
+  Lucas (marca na frente, Servus Slab, tons quentes, animação sempre).
+  - Servus Slab pelo projeto web do Lucas na Adobe Fonts (`eaw0vap`): família
+    `servus-slab`, pesos 300 a 900 com itálicos, `font-display: auto` (pedir
+    ao Lucas trocar para `swap` no projeto); o CSS de `use.typekit.net`
+    importa um `p.css` vazio de `p.typekit.net` (contagem). CSP liberando só
+    esses dois endereços; `<link>` no layout (React 19, guia de CSS do Next).
+  - Tokens novos: papel `#F1F1F1`, tinta `#1F271B`, cartão `#FCFBF8`, neutros
+    quentes puxados para o verde; escuro em verde quase preto, cartões
+    `#1F271B`; `.section-ink` para seções no verde da marca.
+  - Cabeçalho fixo que vira barra flutuante translúcida ao rolar, com menu
+    em gaveta no celular (`sheet.tsx` copiado do painel; os links do menu
+    são links comuns, porque o SheetClose do Base UI os marcaria como botão);
+    rodapé no verde da marca com o padrão da identidade.
+  - Peças da marca: ilustração do topo (anúncio no Google, clique do cursor
+    da marca e conversa no WhatsApp, `AnuncioClique`), cantos bumerangue
+    (`BumerangueFrame`, traçado original), padrões claro e escuro (ladrilho
+    de 114 px tirado dos SVGs), cursor recolorível (`.brand-cursor`).
+  - Movimento: funciona sempre; com "reduzir animações", as letras e os
+    blocos só esmaecem, a faixa roda na metade da velocidade e a ilustração
+    não desloca o cursor. `MotionScope` com botão de pausar (WCAG 2.2.2,
+    como nos vídeos da Apple); passos que avançam sozinhos pelo fim da
+    animação da barra; perguntas frequentes com `<details>`.
+  - Amostra 2 em `/amostra` (topo, serviços, como funciona, planos com
+    preços a definir, perguntas, chamada final e peças do sistema). Títulos
+    dos Termos, da Privacidade e do início na Servus Slab.
+  - Privacidade: trecho novo sobre a Adobe Fonts (destacado para o Lucas
+    aprovar antes de publicar), com o que a Adobe declara coletar.
+  - Verificado (Chrome, `npm run dev` e build de produção no computador):
+    Servus Slab carregada nos títulos; no reduzido, letras com esmaecimento,
+    faixa a 80 s e palavra trocando; botão de pausa para faixa e palavra;
+    celular sem sobra lateral; menu leva à página e fecha; console sem erros;
+    de fora só a Adobe Fonts. `tests/site.mjs` com 60 de 61: a falha é a
+    trava de "texto aprovado" pelo trecho destacado da Privacidade.
+  - Pendente: o Lucas aprovar a amostra 2 e o trecho da Privacidade; trocar
+    o `font-display` para `swap` na Adobe. Depois: tirar a amostra (ela vira
+    a base da página inicial da Fase 3), reescrever o
+    `DOCS/IDENTIDADE-VISUAL.md`, publicar e testar em produção.
