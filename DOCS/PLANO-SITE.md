@@ -972,7 +972,14 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
        Vercel, gratuita, e tem o mesmo jeito da referência.
     b) Instrument Sans e JetBrains Mono, como a referência.
     c) Servus Slab (fonte da marca) em títulos ou destaques, com a (a) no
-       texto, só se a licença permitir uso na web (conferir).
+       texto, só se a licença permitir uso na web (conferir). Conferido
+       (2026-10-06, página da Adobe Fonts): a Servus Slab é da Capitalics
+       (Michał Jarociński); o uso comercial na web é pela Adobe Fonts, com
+       assinatura Creative Cloud, carregando a fonte dos servidores da Adobe
+       (o site teria de liberar isso na CSP, e a Adobe receberia os acessos
+       dos visitantes). As cópias grátis que circulam são para uso pessoal, e
+       os arquivos da pasta de identidade não vão para o repositório público.
+       Por isso ficou fora da página de amostra.
 18. (Fase 1B) Neutros (fundos, textos e bordas).
     a) Recomendado: quentes, como a referência; combinam com o amarelo e o
        verde-escuro da marca.
@@ -1163,3 +1170,27 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
     depois da Fase 1; ligar o subdomínio na Vercel precisa de autorização do
     Lucas) e a Fase 1B (página de amostra), que o Lucas liberou; depois, a
     parte A da Fase 5.
+- 2026-10-06 (branch `fase-1b`): Fase 1B iniciada com a página de amostra
+  (`/amostra`, fora do Google, só no branch; sai antes de juntar na `main`).
+  - Base de movimento no `globals.css` (curva da referência, letras saindo
+    do desfoque, faixa que rola, revelação ao rolar, grade, linhas diagonais
+    e granulado) e componentes em `src/components/motion/` (`Reveal`,
+    `RotatingWord`, `Marquee`) e `src/components/eyebrow.tsx` (rótulo de
+    seção). Sem biblioteca de animação; com "reduzir animações" ou sem
+    JavaScript, tudo aparece parado.
+  - A amostra mostra o topo no estilo da referência (palavra que troca,
+    botões em pílula, faixa só com fatos dos Termos), blocos em cascata, a
+    seção escura de passos, as fontes A e B lado a lado (decisão 17) e os
+    tons quentes e frios no claro e no escuro (decisão 18). A Servus Slab
+    ficou fora (decisão 17, licença).
+  - Verificado (Chrome, servidor local): a palavra troca a cada 3 s; os
+    blocos só aparecem ao chegar na tela; no celular (375 px) não sobra nada
+    para o lado, nem durante as trocas; com "reduzir animações", aparece o
+    aviso da amostra, a palavra não troca, os blocos ficam visíveis e a
+    faixa fica parada; console sem erros e nada carregado de fora (fontes
+    servidas pelo site). Lint e tipos sem erro; `tests/site.mjs` com 57 de
+    57 (nada mudou nas páginas no ar).
+  - Pendente: o Lucas escolher fonte e tons no preview (decisões 17 e 18).
+    Depois: tokens definitivos, cabeçalho flutuante com menu no celular,
+    passos que avançam sozinhos e aplicar no layout e nas páginas (passos 2
+    a 6).
