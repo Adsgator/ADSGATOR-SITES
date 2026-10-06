@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Faixa que rola sem parar e pausa com o mouse em cima (classes `marquee` e
- * `marquee-track` no globals.css). A segunda cópia fecha o laço e fica fora
- * dos leitores de tela e do teclado (`inert`). Com "reduzir animações", a
- * faixa fica parada e os itens quebram linha.
+ * Faixa que rola sem parar (classes `marquee` e `marquee-track` no
+ * globals.css). Pausa com o mouse em cima e pelo botão de pausa do
+ * MotionScope; com "reduzir animações", roda na metade da velocidade. A
+ * segunda cópia fecha o laço e fica fora dos leitores de tela e do teclado
+ * (`inert`).
  */
 export function Marquee({
   duration = 40,

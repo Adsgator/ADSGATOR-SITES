@@ -2,11 +2,13 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 
+import { useMotionPaused } from "@/components/motion/motion-scope";
+
 /**
  * Palavra que troca de tempos em tempos, com as letras surgindo do desfoque
- * (classe `char-in` no globals.css). Leitores de tela ouvem só a primeira
- * palavra. Para com o mouse em cima, com a aba escondida e com "reduzir
- * animações".
+ * (classe `char-in` no globals.css; com "reduzir animações", as letras só
+ * esmaecem). Leitores de tela ouvem só a primeira palavra. Para com o mouse
+ * em cima, com a aba escondida e pelo botão de pausa do MotionScope.
  */
 export function RotatingWord({
   words,
@@ -16,16 +18,17 @@ export function RotatingWord({
   interval?: number;
 }) {
   const [index, setIndex] = useState(0);
-  const paused = useRef(false);
+  const hover = useRef(false);
+  const pausado = useMotionPaused();
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (pausado) return;
     const id = window.setInterval(() => {
-      if (paused.current || document.hidden || reduce.matches) return;
+      if (hover.current || document.hidden) return;
       setIndex((i) => (i + 1) % words.length);
     }, interval);
     return () => window.clearInterval(id);
-  }, [words.length, interval]);
+  }, [pausado, words.length, interval]);
 
   const word = words[index];
   // Cada parte fica inteira (sem quebra no meio); a linha pode quebrar entre
@@ -40,8 +43,8 @@ export function RotatingWord({
 
   return (
     <span
-      onMouseEnter={() => (paused.current = true)}
-      onMouseLeave={() => (paused.current = false)}
+      onMouseEnter={() => (hover.current = true)}
+      onMouseLeave={() => (hover.current = false)}
     >
       <span className="sr-only">{words[0]}</span>
       {/* A chave nova reinicia a animação das letras a cada troca. */}
