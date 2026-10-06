@@ -190,7 +190,8 @@ try {
     );
   }
   await page.goto(BASE + "/termos", { waitUntil: "networkidle" });
-  await page.locator("article").getByRole("link", { name: "Reembolso", exact: true }).click();
+  // O sumário é a única lista numerada; o texto também tem links para Reembolso.
+  await page.locator("article ol").getByRole("link", { name: "Reembolso", exact: true }).click();
   await page.waitForURL("**/termos#reembolso");
   const topo = await page.evaluate(() => document.getElementById("reembolso").getBoundingClientRect().top);
   check("sumário dos Termos: clicar em Reembolso leva à seção", topo >= 0 && topo < 200, `${Math.round(topo)}px do topo`);
