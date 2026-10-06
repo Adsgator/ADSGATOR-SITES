@@ -183,11 +183,15 @@ try {
     check(`${caminho}: links internos levam a seções que existem`, quebrados.length === 0, quebrados.join(", "));
     const texto = await page.locator("article").innerText();
     const marcas = await page.locator("article mark").count();
+    // Marcador esquecido entre colchetes, como "[data da publicação]".
+    const marcadores = texto.match(/\[[^\]]*\]/g) ?? [];
     check(
-      `${caminho}: texto aprovado, sem rascunho e com a data`,
-      !/rascunho/i.test(texto) && marcas === 0 && /Última atualização: \d/.test(texto),
-      `${marcas} trecho(s) a confirmar${/rascunho/i.test(texto) ? ", aviso de rascunho" : ""}`,
+      `${caminho}: texto aprovado, sem rascunho nem marcador e com a data`,
+      !/rascunho/i.test(texto) && marcas === 0 && marcadores.length === 0 && /Última atualização: \d/.test(texto),
+      `${marcas} trecho(s) a confirmar${/rascunho/i.test(texto) ? ", aviso de rascunho" : ""}${marcadores.length ? ", marcadores: " + marcadores.join(" ") : ""}`,
     );
+    // Decreto 7.962/2013: nome empresarial e CNPJ (o rodapé mostra só o CNPJ).
+    check(`${caminho}: razão social e CNPJ`, texto.includes("razão social") && texto.includes("37.040.687/0001-07"));
   }
   await page.goto(BASE + "/termos", { waitUntil: "networkidle" });
   // O sumário é a única lista numerada; o texto também tem links para Reembolso.

@@ -1194,3 +1194,21 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
     Depois: tokens definitivos, cabeçalho flutuante com menu no celular,
     passos que avançam sozinhos e aplicar no layout e nas páginas (passos 2
     a 6).
+- 2026-10-06 (branch `termos-ajustes`): ajustes do Lucas nos textos no ar.
+  - Regra (Lucas): Termos e Privacidade falam só com o cliente; nada de
+    explicação ou combinado interno no texto.
+  - Domínio: o Lucas registra sempre depois dos 7 dias de desistência
+    (regra interna; saiu dos Termos, junto com a exceção de devolução).
+  - Reembolso: a devolução é feita por Pix ou transferência em até 15 dias
+    úteis (decisão do Lucas; o CDC fala em "de imediato", ele foi avisado).
+  - Razão social nos Termos e na Privacidade (seção 1 e fim da página),
+    conferida no cadastro público do CNPJ e confirmada pelo Lucas; o rodapé
+    continua só com o CNPJ.
+  - Erro corrigido: na publicação da Fase 1, a seção 6 dos Termos ficou com o
+    marcador "[data da publicação destes Termos]" (o script que tirou os
+    destaques não pegou o marcador quebrado em duas linhas, e a conferência
+    tinha o mesmo ponto cego). Agora é "antes de 6 de outubro de 2026", e o
+    teste falha com qualquer marcador entre colchetes e sem a razão social
+    (conferido: ele falhou no site no ar antes da correção).
+  - Verificado: `tests/site.mjs` com 59 de 59 no build de produção no
+    computador.
