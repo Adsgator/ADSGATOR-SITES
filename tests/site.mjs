@@ -105,9 +105,14 @@ for (const [origem, esperado] of antigos) {
 const browser = await chromium.launch({ channel: "chrome" });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 const page = await ctx.newPage();
-// A Privacidade diz que o site não carrega nada de terceiros: toda requisição
-// tem de ser para o próprio site (com ou sem www).
-const origens = new Set([BASE, SEM_WWW].filter(Boolean).map((u) => new URL(u).origin));
+// A Privacidade diz o que o site carrega de fora: só a Adobe Fonts (a Servus
+// Slab, fonte da marca). Fora isso, toda requisição é para o próprio site
+// (com ou sem www).
+const origens = new Set([
+  ...[BASE, SEM_WWW].filter(Boolean).map((u) => new URL(u).origin),
+  "https://use.typekit.net",
+  "https://p.typekit.net",
+]);
 const externos = new Set();
 page.on("request", (req) => {
   const u = new URL(req.url());
@@ -125,6 +130,11 @@ try {
   check("sem meta noindex", (await page.locator('meta[name="robots"][content*="noindex"]').count()) === 0);
   check("tema claro por padrão", (await classeHtml()).includes("light") && !(await classeHtml()).includes("dark"));
   check("botão do WhatsApp", (await page.getByRole("link", { name: "Falar pelo WhatsApp" }).getAttribute("href")) === "https://wa.me/5519998026222");
+  const servus = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return document.fonts.check("48px servus-slab") && getComputedStyle(document.querySelector("h1")).fontFamily.startsWith("servus-slab");
+  });
+  check("título na Servus Slab (Adobe Fonts)", servus);
   await page.screenshot({ path: new URL("inicio-claro.png", saida).pathname.slice(1), fullPage: true });
 
   // Tema: troca, continua depois de recarregar e volta.
@@ -217,6 +227,13 @@ try {
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await page.screenshot({ path: new URL("inicio-celular.png", saida).pathname.slice(1), fullPage: true });
 
+  // Menu do celular: abre, leva à página e fecha.
+  await page.getByRole("button", { name: "Abrir o menu" }).click();
+  await page.getByRole("dialog").getByRole("link", { name: "Central de Ajuda" }).click();
+  await page.waitForURL("**/ajuda");
+  await page.getByRole("dialog").waitFor({ state: "detached" });
+  check("celular: o menu leva à Ajuda e fecha", (await h1()) === "Central de Ajuda");
+
   // O que a Privacidade promete: nenhum cookie e, no navegador, só o tema.
   const cookies = await ctx.cookies();
   check("sem cookies", cookies.length === 0, cookies.map((c) => c.name).join(", "));
@@ -233,7 +250,7 @@ const inesperados = problemas.filter(
   (p) => !(p.includes("(/nao-existe-teste)") && p.includes("status of 404")),
 );
 check("console sem erros nem avisos", inesperados.length === 0, inesperados.join(" || "));
-check("nada carregado de fora do site", externos.size === 0, [...externos].join(", "));
+check("nada carregado de fora do site além da Adobe Fonts", externos.size === 0, [...externos].join(", "));
 console.log(resultados.join("\n"));
 const falhas = resultados.filter((r) => r.startsWith("FALHOU")).length;
 console.log(`\n${resultados.length - falhas} passaram, ${falhas} falharam (${BASE})`);

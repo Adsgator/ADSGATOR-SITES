@@ -32,8 +32,9 @@ dos endereços antigos do WordPress, os cabeçalhos de segurança, `robots.txt`,
 rodapé, links dos e-mails, troca de tema, sumário dos Termos, página 404 e
 tela de celular. Também falha se aparecer erro no console e confere o que a
 Política de Privacidade promete: nenhum cookie, só a preferência de tema
-guardada no navegador e nada carregado de fora do site. Se o site passar a
-medir visitas, a Privacidade e esse teste mudam juntos. As imagens das telas
+guardada no navegador e nada carregado de fora do site além da Adobe Fonts
+(a Servus Slab, fonte da marca, que a licença só permite servir pela Adobe).
+Se o site passar a medir visitas, a Privacidade e esse teste mudam juntos. As imagens das telas
 ficam em `tests/.saida/` (fora do Git).
 
 Termos e Privacidade só vão para a `main` aprovados: o teste falha enquanto a
