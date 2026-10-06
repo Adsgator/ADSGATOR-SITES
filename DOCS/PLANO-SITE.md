@@ -354,7 +354,7 @@ rascunho no mesmo dia (conferido: nenhum `.sql`, `.zip`, `.json` ou `.txt`
 restante; ficaram só os scripts de leitura, sem dados). A Fase 1 extrai de
 novo do backup o texto completo dos Termos e da Reembolso.
 
-### Fase 1: base do site, Termos e Privacidade (APROVADA PELO LUCAS EM 2026-10-05, EM CONSTRUÇÃO)
+### Fase 1: base do site, Termos e Privacidade (CONCLUÍDA EM 2026-10-06, NO AR)
 
 Prioridade porque os links do rodapé de todos os e-mails (`/termos`,
 `/privacidade` e `/ajuda`) dão 404 hoje.
@@ -1133,3 +1133,33 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
     uma vez no `npm run dev`, logo depois de ligar o servidor; não se
     repetiu com as páginas já compiladas nem na sequência de cliques
     refeita (atribuído à compilação na primeira visita, não reproduzido).
+- 2026-10-06: Fase 1 publicada. O Lucas respondeu: publicar agora, com o
+  visual atual (o visual novo vem na Fase 1B); prazo de 14 dias úteis; as
+  regras novas ficam todas; a Fase 1B pode começar.
+  - Textos finais com a data de 6 de outubro de 2026, sem destaques nem aviso
+    de rascunho. `tests/site.mjs` com 57 de 57 no build de produção no
+    computador. Branch `fase-1` juntado na `main` sem conflito (13 commits;
+    a `main` não tinha nada a mais) e deploy de produção Ready.
+  - Verificado em produção, com
+    `BASE=https://www.adsgator.com.br SEM_WWW=https://adsgator.com.br`:
+    59 de 59. Imagens dos e-mails com o mesmo hash de antes, com e sem
+    `www` (`banner-topo.png` 487efee51f2d, `logo-rodape.png` 26ede58094fa);
+    links dos e-mails sem `www` abrem `/termos`, `/privacidade` e `/ajuda`;
+    endereços antigos redirecionam (308); cabeçalhos de segurança; `robots`,
+    `sitemap` e imagem de compartilhamento; sem `noindex`; sem cookies; nada
+    carregado de fora; console sem erros. Documentos, testes,
+    `package.json` e `.env.local` respondem 404 no site.
+  - `npm audit`: 9 avisos altos, todos da mesma falha no `braces`
+    (GHSA-vfj7-8cjw-p6xm, sem versão corrigida). 7 deles aparecem mesmo sem
+    as ferramentas de desenvolvimento porque o pacote `shadcn` está nas
+    dependências: o `globals.css` (copiado do painel) importa
+    `shadcn/tailwind.css`. O site usa só esse CSS, montado no build; o
+    `braces` só roda no comando do shadcn que adiciona componentes. Nada
+    disso vai para o site publicado, que é estático. Rever quando sair a
+    correção.
+  - Pendente da Fase 1: avisar os clientes atuais por e-mail sobre os Termos
+    novos e a mudança para o modelo novo (com autorização do Lucas, pelo
+    painel). Próximo: os redirecionamentos de `forms.` (decisão 10, logo
+    depois da Fase 1; ligar o subdomínio na Vercel precisa de autorização do
+    Lucas) e a Fase 1B (página de amostra), que o Lucas liberou; depois, a
+    parte A da Fase 5.
