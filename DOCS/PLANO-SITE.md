@@ -71,11 +71,10 @@
   `../ADSGATOR-PAINEL/DOCS/PLANO-GERAL.md` (repositório privado). Decidido
   pelo Lucas: os briefings (`forms.`) vêm depois da página inicial, das
   políticas e dos planos, e o aviso aos clientes atuais sobre os Termos
-  novos só quando tudo estiver concluído. Ordem proposta para este site
-  (esperando a aprovação do Lucas): Fase 1B; Fase 3, com os serviços e
-  planos e as políticas conferidas; Fase 2; briefings da Fase 4; Fase 5,
-  parte A; checkout da Fase 4, depois dos processos no painel; Fase 5,
-  parte B.
+  novos só quando tudo estiver concluído. Ordem para este site (aprovada
+  pelo Lucas em 2026-10-06): Fase 1B; Fase 3, com os serviços e planos e as
+  políticas conferidas; Fase 2; briefings da Fase 4; Fase 5, parte A;
+  checkout da Fase 4, depois dos processos no painel; Fase 5, parte B.
 
 ## 2. Fatos conferidos em 2026-10-05
 
@@ -1314,8 +1313,8 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
   de qualquer outra coisa; plano geral criado no repositório do painel
   (seção 1). Decididos por ele: os briefings (`forms.`) vêm depois da
   página inicial, das políticas e dos planos (decisão 10), e o aviso aos
-  clientes atuais, no fim de tudo. A ordem das demais partes espera a
-  aprovação dele.
+  clientes atuais, no fim de tudo. A ordem das demais partes foi aprovada
+  por ele no mesmo dia.
 - 2026-10-06 (branch `fase-1b`): pendências da Fase 1B.
   - O título da Ajuda tinha ficado fora da Servus Slab (o relatório da
     amostra 2 disse que as páginas atuais já tinham o visual novo; a Ajuda
