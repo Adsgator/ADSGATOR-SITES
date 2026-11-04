@@ -1197,3 +1197,10 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
   - Pendente: publicar na `main`, ligar o domínio, repetir `tests/forms.mjs` em
     produção. Os outros 6 briefings antigos seguem sem abrir (decisão 10); o
     Hub ainda envia o link de `/briefing-pro/`.
+- 2026-11-04: briefing de Google Ads publicado, com autorização do Lucas.
+  `forms.adsgator.com.br` ligado ao projeto `adsgator-sites`, sem mudar o DNS.
+  - Verificado em produção, no Chrome: `tests/forms.mjs` 17 de 17 (celular e
+    computador) e `tests/site.mjs` 61 de 61. O endereço com a barra no fim, que
+    é o já enviado a clientes, redireciona (308) e abre.
+  - Pendente: os outros 6 briefings antigos seguem sem abrir (decisão 10); o
+    Hub ainda envia o link de `/briefing-pro/`.
