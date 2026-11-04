@@ -42,6 +42,7 @@ nos arquivos de `src/content/`) ou estiver sem a data da última atualização.
 
 ```bash
 node tests/site.mjs                       # contra o npm run dev (BASE padrão)
+node tests/forms.mjs                      # forms.adsgator.com.br, contra o npm run dev
 BASE=https://www.adsgator.com.br SEM_WWW=https://adsgator.com.br node tests/site.mjs
 ```
 

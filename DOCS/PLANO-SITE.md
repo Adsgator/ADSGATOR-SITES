@@ -1181,3 +1181,19 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
     (conferido: ele falhou no site no ar antes da correção).
   - Verificado: `tests/site.mjs` com 59 de 59 no build de produção no
     computador.
+- 2026-11-04 (branch `forms-briefing-google-ads`): o Lucas pediu o briefing de
+  Google Ads no ar para mandar a uma cliente nova, adiantando só esse pedaço da
+  Parte 4 do plano geral.
+  - Feito: `public/forms/briefing-google-ads.html` (formulário `Slda5k72` do
+    respondi incorporado, sem o cabeçalho e o rodapé do site), aberto em
+    `forms.adsgator.com.br/briefing-google-ads` por regras do `next.config.ts`
+    que só valem nesse domínio. Só essa página libera o respondi na CSP; todo o
+    domínio `forms.` fica fora do Google; a raiz leva ao site.
+  - DNS: nenhum registro muda (o curinga `*` da zona já aponta para a Vercel);
+    falta só ligar o domínio ao projeto `adsgator-sites`.
+  - Verificado no build de produção, no Chrome: `tests/forms.mjs` 17 de 17 (4 de
+    13 antes da mudança, com 404) e `tests/site.mjs` 59 de 59. O teste abre o
+    formulário e chega à primeira pergunta; não envia resposta.
+  - Pendente: publicar na `main`, ligar o domínio, repetir `tests/forms.mjs` em
+    produção. Os outros 6 briefings antigos seguem sem abrir (decisão 10); o
+    Hub ainda envia o link de `/briefing-pro/`.
