@@ -59,17 +59,63 @@ const enderecosAntigos: [origem: string, destino: string][] = [
   ["/sitemap_index.xml", "/sitemap.xml"],
 ];
 
+// Briefings em forms.adsgator.com.br (decisão 3 do plano): página simples com o
+// formulário do respondi incorporado, em public/forms/. Só essa página libera o
+// respondi na CSP; o resto do site continua fechado.
+const noForms = [{ type: "host" as const, value: "forms.adsgator.com.br" }];
+const cspBriefing = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://embed.respondi.app",
+  "style-src 'self' 'unsafe-inline' https://embed.respondi.app",
+  "frame-src https://form.respondi.app",
+  "img-src 'self' data:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+].join("; ");
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        source: "/:path*",
+        has: noForms,
+        headers: [{ key: "X-Robots-Tag", value: "noindex" }],
+      },
+      {
+        source: "/briefing-google-ads",
+        has: noForms,
+        headers: [{ key: "Content-Security-Policy", value: cspBriefing }],
+      },
+    ];
   },
   async redirects() {
-    return enderecosAntigos.map(([source, destination]) => ({
-      source,
-      destination,
-      permanent: true,
-    }));
+    return [
+      ...enderecosAntigos.map(([source, destination]) => ({
+        source,
+        destination,
+        permanent: true,
+      })),
+      {
+        source: "/",
+        has: noForms,
+        destination: "https://www.adsgator.com.br/",
+        permanent: false,
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/briefing-google-ads",
+        has: noForms,
+        destination: "/forms/briefing-google-ads.html",
+      },
+    ];
   },
 };
 
