@@ -185,10 +185,13 @@ try {
     const marcas = await page.locator("article mark").count();
     // Marcador esquecido entre colchetes, como "[data da publicação]".
     const marcadores = texto.match(/\[[^\]]*\]/g) ?? [];
+    // O aviso de rascunho usa a palavra sozinha ("Rascunho.", "rascunho de 6 de
+    // outubro"); "rascunhos de resposta", do assistente de IA na Privacidade, não conta.
+    const rascunho = /\brascunho\b/i.test(texto);
     check(
       `${caminho}: texto aprovado, sem rascunho nem marcador e com a data`,
-      !/rascunho/i.test(texto) && marcas === 0 && marcadores.length === 0 && /Última atualização: \d/.test(texto),
-      `${marcas} trecho(s) a confirmar${/rascunho/i.test(texto) ? ", aviso de rascunho" : ""}${marcadores.length ? ", marcadores: " + marcadores.join(" ") : ""}`,
+      !rascunho && marcas === 0 && marcadores.length === 0 && /Última atualização: \d/.test(texto),
+      `${marcas} trecho(s) a confirmar${rascunho ? ", aviso de rascunho" : ""}${marcadores.length ? ", marcadores: " + marcadores.join(" ") : ""}`,
     );
     // Decreto 7.962/2013: nome empresarial e CNPJ (o rodapé mostra só o CNPJ).
     check(`${caminho}: razão social e CNPJ`, texto.includes("razão social") && texto.includes("37.040.687/0001-07"));

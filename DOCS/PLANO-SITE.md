@@ -1204,3 +1204,26 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
     é o já enviado a clientes, redireciona (308) e abre.
   - Pendente: os outros 6 briefings antigos seguem sem abrir (decisão 10); o
     Hub ainda envia o link de `/briefing-pro/`.
+- 2026-11-11: Privacidade atualizada para a Fase 3 do sistema do painel
+  (mensagens do WhatsApp no painel), aprovada pelo Lucas no texto destacado
+  (branch `privacidade-ycloud`, a partir da `main`, fora do `fase-1b`).
+  - O que mudou: a data; na seção 3, as conversas de WhatsApp no cadastro, como
+    chegam ao painel (API oficial do WhatsApp pela YCloud; fica o texto e a
+    transcrição dos áudios, feita no computador da Adsgator; fotos, áudios e
+    documentos ficam só no WhatsApp; mensagem de quem não é cliente nem contato
+    é apagada) e o item "Assistente de IA" (o Claude, da Anthropic, prepara
+    rascunhos; tudo é lido, aprovado e enviado pela Adsgator); na seção 4, o
+    Supabase com as conversas e os serviços YCloud e Anthropic; na seção 6,
+    Singapura (servidores principais da YCloud, conforme a política dela em
+    vigor desde 2026-04-03, conferida em 2026-11-11).
+  - Decisão do Lucas (2026-11-11): o aviso por e-mail aos clientes (seção 10)
+    fica para quando a agência estiver completa, com todas as mudanças de uma
+    vez. A opção "Ajude a melhorar o Claude" está desligada na conta dele (ele
+    conferiu): a Anthropic não usa as conversas para treinar e guarda por 30 dias.
+  - O teste do aviso de rascunho passou a pegar só a palavra sozinha
+    ("rascunhos de resposta" é do texto aprovado). Verificado no servidor local:
+    `tests/site.mjs` 59 de 59 (numa rodada anterior, um 404 passageiro na Ajuda,
+    que não se repetiu; o site no ar, antes da mudança, passou 61 de 61).
+  - O branch `fase-1b` (parado desde 2026-10-06) tem outra mudança na
+    Privacidade (Adobe Fonts, ainda destacada): ao retomar a Fase 1B, juntar a
+    `main` nele.
