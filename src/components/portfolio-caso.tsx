@@ -11,7 +11,7 @@ import type { PaginaPortfolio } from "@/config/portfolio";
  * números (roteiro do site, Portfólio). */
 export function PortfolioCaso({ pagina }: { pagina: PaginaPortfolio }) {
   const { ativo, eventos } = usePassarMouse();
-  const { id, segmento, site, cidade, servicos, caso } = pagina;
+  const { id, segmento, site, cidade, conceito, servicos, caso } = pagina;
   return (
     <li data-cartao={id} {...eventos}>
       <Reveal>
@@ -19,12 +19,10 @@ export function PortfolioCaso({ pagina }: { pagina: PaginaPortfolio }) {
         <div className="mt-6 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
           <div>
             <h3 className="font-heading text-2xl leading-tight sm:text-3xl">{segmento}</h3>
-            {cidade && (
-              <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-                <MapPinIcon className="size-3.5" />
-                {cidade}
-              </p>
-            )}
+            <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPinIcon className="size-3.5" />
+              {cidade}
+            </p>
           </div>
           {site && (
             <a
@@ -44,6 +42,11 @@ export function PortfolioCaso({ pagina }: { pagina: PaginaPortfolio }) {
               {servico}
             </li>
           ))}
+          {conceito && (
+            <li data-conceito className="rounded-full border border-dashed px-3 py-1 text-xs text-muted-foreground">
+              Projeto conceito
+            </li>
+          )}
         </ul>
         <dl className="mt-6 space-y-3 border-t pt-5 text-sm leading-6">
           {[

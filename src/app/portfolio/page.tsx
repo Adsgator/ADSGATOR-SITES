@@ -4,13 +4,12 @@ import { ArrowRightIcon } from "lucide-react";
 
 import { ChamadaFinal } from "@/components/chamada-final";
 import { PaginasNoAr } from "@/components/colunas-subindo";
-import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
 import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
 import { PortfolioCaso } from "@/components/portfolio-caso";
 import { buttonVariants } from "@/components/ui/button";
-import { paginasNoAr, portfolio } from "@/config/portfolio";
+import { portfolio } from "@/config/portfolio";
 import { linkWhatsApp, mensagemDaPagina } from "@/config/site";
 import { cn } from "@/lib/utils";
 
@@ -22,12 +21,11 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Portfólio",
   description:
-    "Landing pages feitas pela Adsgator e no ar: adestramento, creche canina, escritório virtual e móveis planejados. Passe o mouse para ver cada página inteira.",
+    "Landing pages feitas pela Adsgator: adestramento, creche canina, escritório virtual, móveis planejados, internet e mais. Passe o mouse para ver cada página inteira.",
   alternates: { canonical: "/portfolio" },
 };
 
 const whatsapp = linkWhatsApp(mensagemDaPagina("/portfolio"));
-const anteriores = portfolio.filter((p) => !p.site);
 
 const botaoMarca = cn(
   buttonVariants({ size: "lg" }),
@@ -62,7 +60,7 @@ export default function Page() {
                 Portfólio
               </p>
               <h1 className="mt-7 font-heading text-5xl leading-[1.02] tracking-tight text-balance sm:text-6xl">
-                Páginas que já estão <span className="highlight">no ar</span>.
+                Veja de perto o que a gente <span className="highlight">entrega</span>.
               </h1>
               <p className="mt-7 text-lg leading-8 text-muted-foreground">
                 Cada uma feita para o negócio do cliente, com o jeito dele e o WhatsApp a um toque. Abra, role, compare:
@@ -80,24 +78,11 @@ export default function Page() {
         </FundoVivo>
       </MotionScope>
 
-      {/* As páginas no ar, cada uma com o mini caso. */}
-      <section id="no-ar" className="mx-auto max-w-6xl px-4 py-24">
-        <h2 className="sr-only">Páginas no ar</h2>
+      {/* As páginas, cada uma com o mini caso. */}
+      <section id="paginas" className="mx-auto max-w-6xl px-4 py-24">
+        <h2 className="sr-only">As páginas</h2>
         <ul className="grid gap-x-10 gap-y-20 md:grid-cols-2">
-          {paginasNoAr.map((pagina) => (
-            <PortfolioCaso key={pagina.id} pagina={pagina} />
-          ))}
-        </ul>
-      </section>
-
-      {/* Projetos anteriores: feitos pela Adsgator e que não estão mais no ar. */}
-      <section id="anteriores" className="mx-auto max-w-6xl px-4 pb-24">
-        <Eyebrow>Projetos anteriores</Eyebrow>
-        <h2 className="mt-6 max-w-3xl font-heading text-4xl leading-[1.05] tracking-tight text-balance sm:text-5xl">
-          Outras páginas feitas pela Adsgator. <span className="text-muted-foreground">Hoje fora do ar.</span>
-        </h2>
-        <ul className="mt-14 grid gap-x-10 gap-y-20 md:grid-cols-2">
-          {anteriores.map((pagina) => (
+          {portfolio.map((pagina) => (
             <PortfolioCaso key={pagina.id} pagina={pagina} />
           ))}
         </ul>

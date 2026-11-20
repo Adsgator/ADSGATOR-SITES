@@ -7,17 +7,20 @@
 // mostra a altura de cada uma). A cidade e o que cada uma oferece vêm do texto
 // público das páginas (2026-11-20); os serviços, do painel. O mini caso, sem
 // números (decisão 3 A do roteiro), é rascunho do Claude para o Lucas conferir.
-// Projetos anteriores (pedido do Lucas, 2026-11-20): páginas feitas pela
-// Adsgator que não estão mais no ar, sem `site` (sem link) e, quando a página
-// não dizia, sem `cidade`. Fotos das imagens guardadas da época, pelo
-// `scripts/fotos-portfolio-arquivo.mjs`; o texto, do que aparece nelas.
+// Páginas que não estão mais no ar (pedido do Lucas, 2026-11-20) entram na
+// mesma grade, sem `site` (sem link): fotos das imagens guardadas da época,
+// pelo `scripts/fotos-portfolio-arquivo.mjs`; o texto, do que aparece nelas e
+// do que o Lucas contou (cidade). A de móveis sob medida não é de cliente: foi
+// feita pela Adsgator como demonstração, e aparece marcada como conceito.
 
 export type PaginaPortfolio = {
   id: string;
   segmento: string;
-  /** Endereço da página no ar; sem ele, é um projeto anterior. */
+  /** Endereço da página no ar; sem ele, o cartão fica sem link. */
   site?: string;
-  cidade?: string;
+  cidade: string;
+  /** Página de demonstração, sem cliente real. */
+  conceito?: boolean;
   alturaInteira: number;
   servicos: ("Landing page" | "Google Ads" | "Manutenção")[];
   caso: { negocio: string; precisava: string; feito: string };
@@ -77,25 +80,28 @@ export const portfolio: PaginaPortfolio[] = [
     },
   },
   {
-    id: "sob-medida",
-    segmento: "Móveis sob medida",
-    alturaInteira: 4491,
-    servicos: ["Landing page"],
-    caso: {
-      negocio: "Planejamento, fabricação e instalação de móveis sob medida.",
-      precisava: "Mostrar a experiência e os ambientes já feitos, para quem quer pedir um orçamento.",
-      feito: "A página com os ambientes, o processo, a história da empresa, os projetos já feitos e o orçamento pelo WhatsApp.",
-    },
-  },
-  {
     id: "provedor",
-    segmento: "Provedor de internet",
+    segmento: "Internet fibra e móvel",
+    cidade: "Santo Amaro da Imperatriz (SC)",
     alturaInteira: 2377,
     servicos: ["Landing page", "Google Ads"],
     caso: {
-      negocio: "Internet fibra e internet móvel, revendedor autorizado de uma operadora.",
+      negocio: "Revenda autorizada de internet fibra e internet móvel.",
       precisava: "Mostrar muitos planos de um jeito fácil de comparar e lançar a internet móvel.",
       feito: "A página com os planos em cartões, o simulador de chips, o indique e ganhe e a assinatura pelo WhatsApp, e a campanha do Google Ads levando até ela.",
+    },
+  },
+  {
+    id: "sob-medida",
+    segmento: "Móveis sob medida",
+    cidade: "São Paulo (SP)",
+    conceito: true,
+    alturaInteira: 4491,
+    servicos: ["Landing page"],
+    caso: {
+      negocio: "Uma marcenaria de planejamento, fabricação e instalação de móveis sob medida.",
+      precisava: "Mostrar a experiência e os ambientes já feitos, para quem quer pedir um orçamento.",
+      feito: "A página com os ambientes, o processo, a história da empresa, os projetos já feitos e o orçamento pelo WhatsApp.",
     },
   },
 ];
