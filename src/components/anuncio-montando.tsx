@@ -65,6 +65,9 @@ export function AnuncioMontando() {
             <span>Notícias</span>
           </div>
 
+          {/* Altura fixa: o anúncio empurra os resultados dentro da caixa, sem
+              mudar o tamanho dela (antes, a página toda subia e descia). */}
+          <div className="h-[22rem] overflow-hidden [mask-image:linear-gradient(#000_80%,transparent)]">
           <AnimatePresence initial={false}>
             {busca.pronto && (
               <motion.div
@@ -124,6 +127,7 @@ export function AnuncioMontando() {
                 <div className="h-2 w-5/6 rounded-full bg-muted" />
               </div>
             ))}
+          </div>
           </div>
         </div>
       </motion.div>
