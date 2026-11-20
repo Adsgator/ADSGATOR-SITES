@@ -148,7 +148,7 @@ function VisualFidelidade() {
 
 function VisualMedida() {
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-3 gap-3">
       {segmentos.map((s) => (
         <div key={s.id} style={{ background: s.fundo }} className="rounded-2xl p-4 text-white">
           <span style={{ background: s.destaque, color: s.fundo }} className="flex size-8 items-center justify-center rounded-lg">

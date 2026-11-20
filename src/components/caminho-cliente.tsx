@@ -75,7 +75,7 @@ function Conteudo() {
 
   return (
     <section>
-      <div ref={trilho} data-caminho className="relative hidden h-[400vh] lg:block">
+      <div ref={trilho} data-caminho className="relative hidden h-[220vh] lg:block">
         <div className="sticky top-0 flex h-screen items-center">
           <div className="mx-auto grid w-full max-w-6xl grid-cols-[1fr_1.1fr] items-center gap-16 px-4">
             <div>

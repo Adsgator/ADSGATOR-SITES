@@ -1,14 +1,10 @@
 import {
-  BathIcon,
-  CarIcon,
   ClockIcon,
   FileTextIcon,
   HardHatIcon,
   LightbulbIcon,
-  PawPrintIcon,
   PlugIcon,
   ScaleIcon,
-  ScissorsIcon,
   ShieldCheckIcon,
   SmileIcon,
   SparklesIcon,
@@ -18,16 +14,25 @@ import {
 } from "lucide-react";
 
 // Clientes fictícios de segmentos diferentes, que se revezam na hero, no
-// caminho do cliente e nos cartões (pedido do Lucas, 2026-11-20: a página
-// geral não pode parecer feita só para eletricista). Nomes, sites e conversas
-// inventados; nenhum é cliente da Adsgator.
+// caminho do cliente, nos cartões e na chamada final (pedido do Lucas,
+// 2026-11-20: a página geral não pode parecer feita para um segmento só, e os
+// exemplos precisam ter cara de marca de verdade). Nomes, sites e conversas
+// inventados; nenhum é cliente da Adsgator. Fotos do Pexels (licença grátis
+// para uso comercial, sem crédito obrigatório; conferida em 2026-11-20):
+// 257736 (quadro elétrico), 3845810 (consultório) e 7876040 (escritório). O
+// pet shop saiu porque não havia foto grátis confiável.
 
 export type Segmento = {
   id: string;
   busca: string;
   nome: string;
+  /** Sigla ou letra do logotipo. */
+  sigla: string;
   site: string;
   icone: LucideIcon;
+  foto: string;
+  /** Títulos com serifa (mais elegante) ou sem serifa (mais forte). */
+  serifa: boolean;
   /** Cores da página do cliente: fundo escuro e destaque. */
   fundo: string;
   destaque: string;
@@ -40,22 +45,25 @@ export type Segmento = {
   tituloDestaque: string;
   sub: string;
   cta: string;
-  fotoSelo: string;
-  chips: string[];
-  servicos: { icone: LucideIcon; titulo: string }[];
+  diferenciais: string[];
+  servicos: { icone: LucideIcon; titulo: string; texto: string }[];
   passos: string[];
   chamada: string;
+  cidade: string;
 };
 
 export const segmentos: Segmento[] = [
   {
     id: "eletricista",
     busca: "eletricista em campinas",
-    nome: "Volt Elétrica",
-    site: "voltcampinas.com.br",
+    nome: "Ampère Elétrica",
+    sigla: "A",
+    site: "ampereeletrica.com.br",
     icone: ZapIcon,
-    fundo: "#0B1F3A",
-    destaque: "#22D3EE",
+    foto: "/exemplos/eletricista.jpg",
+    serifa: false,
+    fundo: "#0A1A2F",
+    destaque: "#38BDF8",
     anuncio: "Eletricista em Campinas · Atendimento hoje",
     anuncioTexto: "Orçamento pelo WhatsApp. Atendemos Campinas e região.",
     mensagem: "Oi! Vi o anúncio no Google. Vocês conseguem vir hoje?",
@@ -65,99 +73,77 @@ export const segmentos: Segmento[] = [
     tituloDestaque: "no mesmo dia",
     sub: "Instalações, reparos e quadros com segurança, para casa e empresa.",
     cta: "Pedir orçamento no WhatsApp",
-    fotoSelo: "Técnicos com NR-10",
-    chips: ["Orçamento sem custo", "Garantia no serviço", "Nota fiscal"],
+    diferenciais: ["Técnicos com NR-10", "Garantia no serviço", "Nota fiscal"],
     servicos: [
-      { icone: PlugIcon, titulo: "Tomadas e quadros" },
-      { icone: LightbulbIcon, titulo: "Iluminação" },
-      { icone: ZapIcon, titulo: "Instalações" },
-      { icone: ShieldCheckIcon, titulo: "Manutenção" },
+      { icone: PlugIcon, titulo: "Tomadas e quadros", texto: "Troca e adequação com segurança." },
+      { icone: LightbulbIcon, titulo: "Iluminação", texto: "Projetos e instalação de LED." },
+      { icone: ZapIcon, titulo: "Instalações", texto: "Obras novas e reformas." },
+      { icone: ShieldCheckIcon, titulo: "Manutenção", texto: "Preventiva para empresas." },
     ],
     passos: ["Você chama no WhatsApp", "A gente passa o orçamento", "O técnico vai até você"],
     chamada: "Precisa de um eletricista hoje?",
+    cidade: "Campinas · SP",
   },
   {
     id: "dentista",
     busca: "dentista perto de mim",
-    nome: "Clínica Sorrir",
-    site: "clinicasorrir.com.br",
+    nome: "Lumière Odontologia",
+    sigla: "L",
+    site: "lumiereodonto.com.br",
     icone: SmileIcon,
-    fundo: "#0F3D3E",
-    destaque: "#5EEAD4",
+    foto: "/exemplos/dentista.jpg",
+    serifa: true,
+    fundo: "#0E3B43",
+    destaque: "#E7CFA1",
     anuncio: "Dentista no Cambuí · Agende sua avaliação",
     anuncioTexto: "Horários à noite e aos sábados. Agende pelo WhatsApp.",
     mensagem: "Oi! Vi vocês no Google. Tem horário essa semana?",
     resposta: "Temos sim! Prefere de manhã ou à tarde?",
     selo: "Horários à noite e aos sábados",
-    titulo: "Seu sorriso cuidado",
-    tituloDestaque: "perto de você",
-    sub: "Avaliação, limpeza, clareamento e implantes, com atendimento humanizado.",
-    cta: "Agendar pelo WhatsApp",
-    fotoSelo: "Atendimento humanizado",
-    chips: ["Primeira avaliação", "Parcelamos", "Estacionamento"],
+    titulo: "O sorriso que você quer,",
+    tituloDestaque: "com cuidado de verdade",
+    sub: "Avaliação, clareamento, lentes e implantes, com atendimento humanizado.",
+    cta: "Agendar avaliação no WhatsApp",
+    diferenciais: ["Atendimento humanizado", "Parcelamos", "Estacionamento"],
     servicos: [
-      { icone: SparklesIcon, titulo: "Clareamento" },
-      { icone: SmileIcon, titulo: "Limpeza" },
-      { icone: ShieldCheckIcon, titulo: "Implantes" },
-      { icone: StethoscopeIcon, titulo: "Ortodontia" },
+      { icone: SparklesIcon, titulo: "Clareamento", texto: "Resultado natural e seguro." },
+      { icone: SmileIcon, titulo: "Lentes de contato", texto: "Planejamento do sorriso." },
+      { icone: ShieldCheckIcon, titulo: "Implantes", texto: "Com tecnologia digital." },
+      { icone: StethoscopeIcon, titulo: "Ortodontia", texto: "Aparelhos e alinhadores." },
     ],
     passos: ["Você chama no WhatsApp", "Agendamos a sua avaliação", "Você é atendido no horário"],
-    chamada: "Vamos cuidar do seu sorriso?",
+    chamada: "Vamos planejar o seu sorriso?",
+    cidade: "Cambuí · Campinas",
   },
   {
     id: "advogado",
     busca: "advogado trabalhista",
-    nome: "Silva Advocacia",
-    site: "silvaadvocacia.com.br",
+    nome: "Valente & Moraes",
+    sigla: "VM",
+    site: "valentemoraes.adv.br",
     icone: ScaleIcon,
-    fundo: "#2A1E1A",
-    destaque: "#D4A373",
+    foto: "/exemplos/advogado.jpg",
+    serifa: true,
+    fundo: "#241815",
+    destaque: "#C9A46A",
     anuncio: "Advogado Trabalhista · Fale com um especialista",
     anuncioTexto: "Análise do seu caso pelo WhatsApp, com sigilo.",
     mensagem: "Boa tarde! Fui demitido e queria entender os meus direitos.",
     resposta: "Boa tarde! Consigo te ajudar sim. Quando foi a demissão?",
-    selo: "Atendimento com sigilo",
-    titulo: "Seus direitos trabalhistas",
-    tituloDestaque: "garantidos",
+    selo: "Advocacia trabalhista · OAB/SP",
+    titulo: "Seus direitos trabalhistas,",
+    tituloDestaque: "defendidos com firmeza",
     sub: "Rescisão, horas extras e acidente de trabalho, do primeiro contato ao fim do processo.",
     cta: "Falar com um advogado",
-    fotoSelo: "OAB/SP",
-    chips: ["Atendimento online", "Sigilo", "Todo o estado de SP"],
+    diferenciais: ["Atendimento online", "Sigilo", "Todo o estado de SP"],
     servicos: [
-      { icone: FileTextIcon, titulo: "Rescisão" },
-      { icone: ClockIcon, titulo: "Horas extras" },
-      { icone: HardHatIcon, titulo: "Acidente de trabalho" },
-      { icone: ScaleIcon, titulo: "Ações trabalhistas" },
+      { icone: FileTextIcon, titulo: "Rescisão", texto: "Verbas e cálculos conferidos." },
+      { icone: ClockIcon, titulo: "Horas extras", texto: "Jornada e adicionais." },
+      { icone: HardHatIcon, titulo: "Acidente de trabalho", texto: "Estabilidade e indenização." },
+      { icone: ScaleIcon, titulo: "Ações trabalhistas", texto: "Do acordo à sentença." },
     ],
     passos: ["Você conta o seu caso", "Analisamos com você", "Seguimos juntos até o fim"],
     chamada: "Ficou com dúvida sobre os seus direitos?",
-  },
-  {
-    id: "pet",
-    busca: "banho e tosa perto de mim",
-    nome: "Patas & Cia",
-    site: "patasecia.com.br",
-    icone: PawPrintIcon,
-    fundo: "#3B0764",
-    destaque: "#F0ABFC",
-    anuncio: "Banho e Tosa em Valinhos · Leva e traz",
-    anuncioTexto: "Agende pelo WhatsApp. Buscamos e levamos o seu pet.",
-    mensagem: "Oi! Vocês buscam em casa? Queria marcar um banho pro meu cachorro.",
-    resposta: "Buscamos sim! Qual o porte dele e o seu endereço?",
-    selo: "Leva e traz em Valinhos",
-    titulo: "Banho e tosa com carinho,",
-    tituloDestaque: "sem sair de casa",
-    sub: "Buscamos o seu pet, cuidamos com calma e devolvemos cheiroso.",
-    cta: "Agendar pelo WhatsApp",
-    fotoSelo: "Equipe treinada",
-    chips: ["Leva e traz", "Produtos hipoalergênicos", "Câmera ao vivo"],
-    servicos: [
-      { icone: BathIcon, titulo: "Banho" },
-      { icone: ScissorsIcon, titulo: "Tosa" },
-      { icone: SparklesIcon, titulo: "Hidratação" },
-      { icone: CarIcon, titulo: "Leva e traz" },
-    ],
-    passos: ["Você agenda no WhatsApp", "Buscamos o seu pet", "Devolvemos cheiroso"],
-    chamada: "Seu pet merece um dia de spa?",
+    cidade: "Campinas · SP",
   },
 ];

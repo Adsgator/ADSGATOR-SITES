@@ -6,7 +6,6 @@ import { BumerangueFrame } from "@/components/bumerangue";
 import { BuscasCidade } from "@/components/buscas-cidade";
 import { CaminhoCliente } from "@/components/caminho-cliente";
 import { CliqueAnimado } from "@/components/clique-animado";
-import { FioCondutor } from "@/components/fio-condutor";
 import { MapaBuscas } from "@/components/mapa-buscas";
 import { HojeComAdsgator } from "@/components/hoje-com-adsgator";
 import { PorQueAdsgator } from "@/components/por-que-adsgator";
@@ -143,7 +142,7 @@ export default function Page() {
 
       {/* A ordem do roteiro do site (Início, seções 3 a 9); o portfólio entra
           depois da escolha das páginas. */}
-      <FioCondutor>
+      <>
         <BuscasCidade />
         <HojeComAdsgator />
         <div id="como-funciona" className="scroll-mt-24">
@@ -161,7 +160,7 @@ export default function Page() {
             <Faq itens={perguntas} />
           </div>
         </section>
-      </FioCondutor>
+      </>
 
       {/* Ponte para a chamada final: o fundo passa para o amarelo aos poucos,
           sem corte seco entre as seções. */}

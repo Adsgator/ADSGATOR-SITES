@@ -39,14 +39,48 @@ const ruas = [
 ];
 const avenida = "M-60 760 C 300 700 620 520 860 470 S 1260 330 1460 250";
 
-// Poucas casas espalhadas: menos é mais, só para o mapa ser reconhecível.
-const casas = Array.from({ length: 200 }, (_, n) => ({
-  x: arredondar((n % 20) * 72 + sorte(n * 7) * 30),
-  y: arredondar(Math.floor(n / 20) * 82 + sorte(n * 13) * 30),
-  w: arredondar(16 + sorte(n * 31) * 22),
-  h: arredondar(12 + sorte(n * 57) * 16),
-  usar: sorte(n * 91) < 0.3,
-})).filter((c) => c.usar);
+/** Pontos ao longo de uma rua ("M … C … [S …]"), para as casas não caírem em
+ * cima dela. */
+function pontosDaRua(d: string) {
+  const n = d.match(/-?\d+(\.\d+)?/g)!.map(Number);
+  const curvas: number[][] = [[n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7]]];
+  if (n.length > 8) {
+    // "S": o primeiro controle é o reflexo do último controle da curva anterior.
+    const [, , , , c2x, c2y, px, py] = curvas[0];
+    curvas.push([px, py, 2 * px - c2x, 2 * py - c2y, n[8], n[9], n[10], n[11]]);
+  }
+  const pontos: { x: number; y: number }[] = [];
+  for (const [x0, y0, x1, y1, x2, y2, x3, y3] of curvas) {
+    for (let t = 0; t <= 1; t += 0.02) {
+      const u = 1 - t;
+      pontos.push({
+        x: u * u * u * x0 + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t * x3,
+        y: u * u * u * y0 + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y3,
+      });
+    }
+  }
+  return pontos;
+}
+const bordas = [
+  ...ruas.flatMap((d) => pontosDaRua(d).map((p) => ({ ...p, meia: 9 }))),
+  ...pontosDaRua(avenida).map((p) => ({ ...p, meia: 14 })),
+];
+
+// Poucas casas, um pouco maiores, só para o mapa ser reconhecível (menos é
+// mais), e nenhuma em cima das ruas (pedido do Lucas, 2026-11-20).
+const casas = Array.from({ length: 180 }, (_, n) => ({
+  x: arredondar((n % 18) * 80 + sorte(n * 7) * 24),
+  y: arredondar(Math.floor(n / 18) * 86 + sorte(n * 13) * 24),
+  w: arredondar(24 + sorte(n * 31) * 24),
+  h: arredondar(18 + sorte(n * 57) * 14),
+  usar: sorte(n * 91) < 0.38,
+})).filter((c) => {
+  if (!c.usar) return false;
+  const cx = c.x + c.w / 2;
+  const cy = c.y + c.h / 2;
+  const raio = Math.hypot(c.w, c.h) / 2 + 8;
+  return bordas.every((p) => Math.hypot(p.x - cx, p.y - cy) > p.meia + raio);
+});
 
 function MapaCidade() {
   return (
@@ -95,11 +129,11 @@ const pontosComputador: Lugar[][] = [
 // No celular, todos à esquerda, com o balão abrindo para a direita (não sai da
 // tela); uma busca fica na faixa de cima e a outra na de baixo, sem se cobrirem.
 const pontosCelular: Lugar[][] = [
-  [{ x: 4, y: 3 }, { x: 18, y: 1 }, { x: 10, y: 6 }],
-  [{ x: 5, y: 92 }, { x: 16, y: 97 }, { x: 4, y: 88 }],
+  [{ x: 3, y: 2 }, { x: 7, y: 1 }, { x: 4, y: 4 }],
+  [{ x: 3, y: 92 }, { x: 7, y: 96 }, { x: 4, y: 89 }],
 ];
 
-function Busca({ pontos, n }: { pontos: Lugar[]; n: number }) {
+function Busca({ pontos, n, pausaBase = 5200 }: { pontos: Lugar[]; n: number; pausaBase?: number }) {
   // Cada ponto tem o seu ritmo e uma pausa escondida longa: na tela ficam uma
   // ou duas buscas por vez, aparecendo intercaladas.
   const { texto, indice, fase } = useDigitacao(buscas, {
@@ -109,7 +143,7 @@ function Busca({ pontos, n }: { pontos: Lugar[]; n: number }) {
     velocidade: 55,
     espera: 2300,
     intervalo: 1500 + (n % 2) * 400,
-    pausa: 5200 + ((n * 1700) % 3500),
+    pausa: pausaBase + ((n * 1700) % 3500),
   });
   // Em que volta está (a busca anda de 2 em 2 entre 9; 5 desfaz o "vezes 2"
   // em módulo 9), para cada volta aparecer num lugar diferente.
@@ -148,7 +182,7 @@ function Busca({ pontos, n }: { pontos: Lugar[]; n: number }) {
       <motion.span
         animate={{ opacity: escrevendo ? 1 : 0, x: escrevendo ? 0 : aDireita ? 8 : -8 }}
         transition={{ duration: 0.3 }}
-        className="flex max-w-[55vw] items-center gap-2 rounded-full bg-card px-4 py-2 text-sm whitespace-nowrap shadow-[0_8px_24px_-10px_rgb(31_39_27/0.45)] ring-1 ring-border sm:max-w-none"
+        className="flex max-w-[calc(100vw-6rem)] items-center gap-2 rounded-full bg-card px-4 py-2 text-sm whitespace-nowrap shadow-[0_8px_24px_-10px_rgb(31_39_27/0.45)] ring-1 ring-border sm:max-w-none"
       >
         <span className="truncate">{texto}</span>
         {fase === "pronto" ? (
@@ -177,7 +211,7 @@ export function MapaBuscas({ className }: { className?: string }) {
       </div>
       <div className="absolute inset-0 sm:hidden">
         {pontosCelular.map((pontos, n) => (
-          <Busca key={n} pontos={pontos} n={n} />
+          <Busca key={n} pontos={pontos} n={n} pausaBase={1200} />
         ))}
       </div>
     </div>

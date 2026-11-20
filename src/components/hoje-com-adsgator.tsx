@@ -29,9 +29,9 @@ const cartoes = [
 export function HojeComAdsgator() {
   const area = useRef<HTMLDivElement>(null);
   const [virados, setVirados] = useState(0);
-  const { scrollYProgress } = useScroll({ target: area, offset: ["start 0.8", "end 0.5"] });
+  const { scrollYProgress } = useScroll({ target: area, offset: ["start 0.55", "end 0.15"] });
   useMotionValueEvent(scrollYProgress, "change", (p) =>
-    setVirados(cartoes.filter((_, i) => p > 0.25 + i * 0.22).length),
+    setVirados(cartoes.filter((_, i) => p > 0.3 + i * 0.25).length),
   );
 
   return (
