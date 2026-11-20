@@ -5,21 +5,22 @@ import { useState, useSyncExternalStore } from "react";
 import { MenuIcon } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand";
+import { MenuServicos } from "@/components/menu-servicos";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { site } from "@/config/site";
+import { paginas, servicos } from "@/config/navegacao";
+import { linkWhatsApp, mensagemDiagnostico, site } from "@/config/site";
 import { cn } from "@/lib/utils";
 
-// Navegação do topo; cresce com as seções da página inicial (Fase 3).
-const navegacao = [{ href: "/ajuda", rotulo: "Ajuda" }];
+// Navegação do topo, depois do "Serviços" (roteiro do site, seção 2).
+const navegacao = [...paginas, { href: "/ajuda", rotulo: "Ajuda" }];
 
-// Menu do celular: tudo o que o site tem hoje.
+// Gaveta do celular: as mesmas páginas, com os serviços em grupo.
 const menu = [
   { href: "/", rotulo: "Início" },
+  ...paginas,
   { href: "/ajuda", rotulo: "Central de Ajuda" },
-  { href: "/termos", rotulo: "Termos de Serviço" },
-  { href: "/privacidade", rotulo: "Política de Privacidade" },
 ];
 
 const botaoMarca = cn(
@@ -55,23 +56,24 @@ export function SiteHeader() {
           <BrandLogo />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-0.5 lg:flex">
+          <MenuServicos />
           {navegacao.map(({ href, rotulo }) => (
             <Link
               key={href}
               href={href}
-              className={cn(buttonVariants({ variant: "ghost" }), "h-9 rounded-full px-4")}
+              className={cn(buttonVariants({ variant: "ghost" }), "h-9 rounded-full px-3.5")}
             >
               {rotulo}
             </Link>
           ))}
           <ThemeToggle />
-          <a href={site.whatsapp.link} className={cn(botaoMarca, "ml-1")}>
-            Fale conosco
+          <a href={linkWhatsApp(mensagemDiagnostico)} className={cn(botaoMarca, "ml-1")}>
+            Diagnóstico grátis
           </a>
         </nav>
 
-        <div className="flex items-center gap-1 md:hidden">
+        <div className="flex items-center gap-1 lg:hidden">
           <ThemeToggle />
           <Sheet open={menuAberto} onOpenChange={setMenuAberto}>
             <SheetTrigger
@@ -89,23 +91,35 @@ export function SiteHeader() {
               <SheetTitle className="font-mono text-xs tracking-wide text-muted-foreground">
                 Menu
               </SheetTitle>
-              <nav className="mt-6 flex flex-col">
+              <nav className="mt-6 flex flex-col overflow-y-auto">
                 {/* Links comuns (o SheetClose do Base UI os marcaria como
                     botão); o clique fecha a gaveta pelo estado. */}
+                <p className="pt-2 font-mono text-xs tracking-wide text-muted-foreground">Serviços</p>
+                {servicos.map(({ href, titulo, icone: Icone }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMenuAberto(false)}
+                    className="flex items-center gap-3 border-b py-3.5 font-heading text-xl"
+                  >
+                    <Icone className="size-4 text-brand" />
+                    {titulo}
+                  </Link>
+                ))}
                 {menu.map(({ href, rotulo }) => (
                   <Link
                     key={href}
                     href={href}
                     onClick={() => setMenuAberto(false)}
-                    className="border-b py-4 font-heading text-2xl"
+                    className="border-b py-3.5 font-heading text-xl"
                   >
                     {rotulo}
                   </Link>
                 ))}
               </nav>
-              <div className="mt-auto space-y-3 pt-10 text-sm text-muted-foreground">
-                <a href={site.whatsapp.link} className={cn(botaoMarca, "h-11 w-full")}>
-                  Fale conosco pelo WhatsApp
+              <div className="mt-auto space-y-3 pt-8 text-sm text-muted-foreground">
+                <a href={linkWhatsApp(mensagemDiagnostico)} className={cn(botaoMarca, "h-11 w-full")}>
+                  Pedir um diagnóstico grátis
                 </a>
                 <p>{site.horario}</p>
               </div>

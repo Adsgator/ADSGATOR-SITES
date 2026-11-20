@@ -12,3 +12,12 @@ export const site = {
   horario: "Segunda a sexta, das 9h às 12h e das 13h30 às 17h",
   cnpj: "37.040.687/0001-07",
 } as const;
+
+/** WhatsApp da Adsgator com a mensagem pronta. Cada página manda a sua, para
+ * o Lucas saber de onde a pessoa veio (roteiro do site, seção 1). */
+export function linkWhatsApp(mensagem: string) {
+  return `${site.whatsapp.link}?text=${encodeURIComponent(mensagem)}`;
+}
+
+export const mensagemDiagnostico =
+  "Olá! Vim pelo site da Adsgator e queria um diagnóstico grátis para o meu negócio.";
