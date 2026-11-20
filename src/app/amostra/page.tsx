@@ -9,7 +9,7 @@ import {
 import { BumerangueFrame } from "@/components/bumerangue";
 import { BuscasCidade } from "@/components/buscas-cidade";
 import { CaminhoCliente } from "@/components/caminho-cliente";
-import { FundoLuz } from "@/components/fundo-luz";
+import { SinaisBusca } from "@/components/sinais-busca";
 import { ServicosVivos } from "@/components/servicos-vivos";
 import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";
@@ -155,7 +155,7 @@ export default function Page() {
       {/* Topo: frase de posição da Base e as telas do serviço em 3D. */}
       <MotionScope>
         <section className="relative isolate overflow-x-clip">
-          <FundoLuz className="-z-10" />
+          <SinaisBusca className="-z-10" />
           <div className="mx-auto max-w-4xl px-4 pt-20 text-center">
             <p className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 font-mono text-xs text-muted-foreground backdrop-blur">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-brand" />

@@ -1,8 +1,10 @@
 "use client";
 
 import { useRef } from "react";
-import { CheckIcon, MessageCircleIcon, SearchIcon } from "lucide-react";
+import { MessageCircleIcon, SearchIcon } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
+
+import { PaginaCliente } from "@/components/pagina-cliente";
 
 /**
  * As "telas" do serviço da Adsgator (busca no Google, página no celular e a
@@ -85,30 +87,10 @@ export function Celular() {
     <div className="rounded-[2.6rem] bg-ink p-2 shadow-2xl shadow-ink/25">
       <div className="flex aspect-[9/18.5] flex-col overflow-hidden rounded-[2.1rem] bg-paper text-ink">
         <p className="border-b border-ink/10 py-2 text-center font-mono text-[0.6rem] text-ink/60">
-          seunegocio.com.br
+          voltcampinas.com.br
         </p>
-        <div className="flex flex-1 flex-col px-4 pt-5">
-          <span className="h-1.5 w-16 rounded-full bg-brand" />
-          <p className="mt-3 font-heading text-[1.4rem] leading-tight">
-            Eletricista em Campinas, no mesmo dia
-          </p>
-          <span className="mt-3 h-2 w-full rounded-full bg-ink/10" />
-          <span className="mt-2 h-2 w-4/5 rounded-full bg-ink/10" />
-          <div className="bg-pattern-light mt-4 h-24 rounded-2xl border border-ink/10" />
-          <ul className="mt-4 space-y-2.5">
-            {["w-3/4", "w-2/3", "w-4/5"].map((largura) => (
-              <li key={largura} className="flex items-center gap-2">
-                <span className="flex size-4 items-center justify-center rounded-full bg-brand text-ink">
-                  <CheckIcon className="size-2.5" />
-                </span>
-                <span className={`h-2 rounded-full bg-ink/10 ${largura}`} />
-              </li>
-            ))}
-          </ul>
-          <span className="mt-auto mb-4 flex h-10 items-center justify-center gap-2 rounded-full bg-brand text-xs font-medium text-ink">
-            <MessageCircleIcon className="size-3.5" />
-            Chamar no WhatsApp
-          </span>
+        <div className="flex-1 overflow-hidden">
+          <PaginaCliente />
         </div>
       </div>
     </div>

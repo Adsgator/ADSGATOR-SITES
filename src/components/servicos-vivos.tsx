@@ -8,6 +8,8 @@ import { AnimatePresence, motion, MotionConfig, useScroll, useTransform } from "
 import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
 import { MotionPauseButton, MotionScope, useMotionPaused } from "@/components/motion/motion-scope";
+import { useDigitacao } from "@/components/motion/use-digitacao";
+import { PaginaCliente } from "@/components/pagina-cliente";
 import { cn } from "@/lib/utils";
 
 // "O que a Adsgator faz" (roteiro do site, Início, seção 6): grade de cartões
@@ -56,7 +58,7 @@ export function ServicosVivos() {
               </div>
               <MotionPauseButton />
             </div>
-            <div ref={area} className="mt-16 grid gap-5 md:grid-cols-3">
+            <div ref={area} className="mt-16 grid grid-cols-1 gap-5 md:grid-cols-3">
               {cartoes.map((coluna, i) => (
                 <motion.div key={i} style={{ y: colunas[i] }} className="space-y-5 motion-reduce:transform-none!">
                   {coluna.map((cartao) => (
@@ -104,21 +106,30 @@ function useCiclo(passos: number, intervalo: number) {
   return passo;
 }
 
+const anuncios = [
+  { busca: "eletricista em campinas", site: "voltcampinas.com.br", titulo: "Eletricista em Campinas · Atendimento hoje" },
+  { busca: "dentista perto de mim", site: "clinicasorrir.com.br", titulo: "Dentista no Cambuí · Agende sua avaliação" },
+  { busca: "advogado trabalhista", site: "silvaadvocacia.com.br", titulo: "Advogado Trabalhista · Fale com um especialista" },
+];
+const buscasDoAnuncio = anuncios.map((a) => a.busca);
+
 function AnuncioVivo() {
-  const passo = useCiclo(3, 1800);
+  const { texto, indice, pronto, visivel } = useDigitacao(buscasDoAnuncio, { inicio: 600, espera: 2600 });
+  const anuncio = anuncios[indice];
   return (
     <div className="flex h-full flex-col gap-2.5 p-4">
       <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-xs">
-        <SearchIcon className="size-3.5 text-muted-foreground" />
-        eletricista em campinas
+        <SearchIcon className="size-3.5 shrink-0 text-muted-foreground" />
+        <span className="min-h-4">{visivel ? texto : ""}</span>
+        <span className="-ml-1.5 inline-block h-3.5 w-px animate-pulse bg-foreground" />
       </div>
       <motion.div
-        animate={{ opacity: passo > 0 ? 1 : 0, y: passo > 0 ? 0 : 12 }}
-        transition={{ duration: 0.5 }}
+        animate={{ opacity: pronto ? 1 : 0, y: pronto ? 0 : 12 }}
+        transition={{ duration: 0.45 }}
         className="rounded-xl border border-brand/50 bg-card p-3"
       >
-        <p className="text-[0.65rem] font-semibold">Patrocinado · seunegocio.com.br</p>
-        <p className="mt-1 font-heading text-sm">Eletricista em Campinas · Atendimento hoje</p>
+        <p className="text-[0.65rem] font-semibold">Patrocinado · {anuncio.site}</p>
+        <p className="mt-1 font-heading text-sm">{anuncio.titulo}</p>
       </motion.div>
       {[0, 1].map((n) => (
         <div key={n} className="rounded-xl border bg-card/50 p-3 opacity-50">
@@ -133,29 +144,15 @@ function AnuncioVivo() {
 function PaginaViva() {
   const pausado = useMotionPaused();
   return (
-    <div className="mx-auto mt-4 h-full w-36 rounded-t-[1.6rem] bg-ink p-1.5 pb-0">
+    <div className="mx-auto mt-4 h-full w-40 rounded-t-[1.6rem] bg-ink p-1.5 pb-0">
       <div className="h-full overflow-hidden rounded-t-[1.2rem] bg-paper">
         <motion.div
-          animate={pausado ? undefined : { y: [0, -150, 0] }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-          className="space-y-2.5 p-3"
+          animate={pausado ? undefined : { y: ["0%", "-62%", "0%"] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
         >
-          <span className="block h-1 w-8 rounded-full bg-brand" />
-          <p className="font-heading text-sm leading-tight text-ink">Eletricista em Campinas</p>
-          <span className="block h-1.5 w-full rounded-full bg-ink/10" />
-          <span className="block h-1.5 w-4/5 rounded-full bg-ink/10" />
-          <div className="bg-pattern-light h-16 rounded-lg border border-ink/10" />
-          {[0, 1, 2].map((n) => (
-            <span key={n} className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-full bg-brand" />
-              <span className="h-1.5 w-3/4 rounded-full bg-ink/10" />
-            </span>
-          ))}
-          <div className="h-12 rounded-lg bg-ink/5" />
-          <span className="flex h-6 items-center justify-center rounded-full bg-brand text-[0.55rem] font-medium text-ink">
-            Chamar no WhatsApp
-          </span>
-          <div className="h-16 rounded-lg bg-ink/5" />
+          <div className="w-[240px] origin-top-left scale-[0.615]">
+            <PaginaCliente />
+          </div>
         </motion.div>
       </div>
     </div>
@@ -261,7 +258,7 @@ function NoArVivo() {
 }
 
 function ResumoVivo() {
-  const passo = useCiclo(2, 3500);
+  const pausado = useMotionPaused();
   return (
     <div className="flex h-full flex-col justify-center p-4">
       <div className="rounded-2xl rounded-tl-sm border bg-card p-3">
@@ -269,10 +266,12 @@ function ResumoVivo() {
         <p className="text-[0.65rem] text-muted-foreground">Toques no WhatsApp, semana a semana</p>
         <div className="mt-3 flex h-20 items-end gap-2">
           {[0.35, 0.5, 0.45, 0.7, 0.6, 0.85].map((altura, i) => (
+            // Em onda: cada barra sobe e desce devagar, um pouco depois da anterior.
             <motion.span
               key={i}
-              animate={{ height: passo === 1 ? `${altura * 100}%` : "8%" }}
-              transition={{ duration: 0.7, delay: i * 0.08 }}
+              initial={{ height: `${altura * 45}%` }}
+              animate={pausado ? undefined : { height: [`${altura * 45}%`, `${altura * 100}%`, `${altura * 45}%`] }}
+              transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.22 }}
               className="flex-1 rounded-t-md bg-brand/80"
             />
           ))}
