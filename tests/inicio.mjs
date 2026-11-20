@@ -113,7 +113,7 @@ try {
 
       // Nada passa da borda dos cartões (o cartão esconde o que sobra, então o
       // "sem sobra lateral" não pega: no celular, o texto do "Sob medida" foi cortado).
-      const cortados = await page.$eval("article", (as) =>
+      const cortados = await page.$$eval("article", (as) =>
         as
           .filter((a) => a.querySelector("[data-visual]"))
           .filter((a) => [...a.children].some((c) => c.getBoundingClientRect().right > a.getBoundingClientRect().right + 1))
