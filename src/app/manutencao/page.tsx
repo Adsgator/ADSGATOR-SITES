@@ -40,9 +40,10 @@ import { cn } from "@/lib/utils";
 // (decisão de 2026-11-20). A linha "Enquanto você trabalha" não diz de quanto
 // em quanto tempo cada conferência roda, para não ficar errada se a rotina
 // mudar. Rodada de profundidade (Lucas, 2026-11-20): por que cuidar da página
-// (com o que a conferência de todo dia olha), a página monitorada 24 horas (aviso
-// na hora, a qualquer hora; o conserto no horário de trabalho, sem prometer
-// suporte 24 horas), o exemplo de quando algo dá errado, o resumo de cada 3
+// (com o que a conferência de todo dia olha), a página monitorada 24 horas (o
+// alerta chega à Adsgator na hora; o conserto no horário de trabalho, sem
+// prometer suporte 24 horas; o cliente não é avisado, só em caso grave que
+// dependa dele: decisão da Fase 7), o exemplo de quando algo dá errado, o resumo de cada 3
 // meses, o que cabe nos pequenos ajustes e as dúvidas mais comuns.
 
 export const metadata: Metadata = {
@@ -137,7 +138,7 @@ const semCuidado = [
     icone: ServerIcon,
     titulo: "A página cai",
     texto: "O servidor sai do ar, e você só descobre quando um cliente reclama.",
-    com: "Monitorada 24 horas, com aviso na hora.",
+    com: "Monitorada 24 horas e resolvida por um especialista.",
   },
 ];
 
@@ -288,8 +289,8 @@ export default function Page() {
             <div>
               <h3 className="font-heading text-3xl leading-tight">Quando algo dá errado</h3>
               <p className="mt-4 leading-7 text-muted-foreground">
-                O aviso chega na hora, a qualquer hora. O conserto vem no começo do horário de trabalho, e você fica
-                sabendo o que houve.
+                Você não precisa fazer nada. Muita coisa o próprio sistema resolve sozinho, e o que precisa de alguém,
+                um especialista resolve. Você só é chamado se for algo grave, que dependa de você.
               </p>
               <div className="mt-8">
                 <IncidenteExemplo />

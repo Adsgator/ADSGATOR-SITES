@@ -1,23 +1,25 @@
 "use client";
 
 import { useRef } from "react";
-import { BellRingIcon, CheckIcon, MessageCircleIcon, TriangleAlertIcon, WrenchIcon } from "lucide-react";
+import { BellRingIcon, CheckIcon, SmileIcon, TriangleAlertIcon, WrenchIcon } from "lucide-react";
 
 import { useApareceu } from "@/components/motion/numero-que-sobe";
 import { cn } from "@/lib/utils";
 
 // "Quando algo dá errado" na página de manutenção (rodada de profundidade,
 // Lucas, 2026-11-20): um exemplo do que acontece quando a página cai. O painel
-// confere a página o tempo todo e avisa no celular na hora, a qualquer hora; o
-// conserto vem no horário de trabalho, sem prometer suporte de madrugada.
+// confere a página o tempo todo e o alerta chega ao especialista na hora; o
+// conserto vem no horário de trabalho, sem prometer suporte de madrugada. O
+// cliente não é avisado (decisão da Fase 7: problema nosso se resolve sem
+// preocupar o cliente; só caso grave que dependa dele).
 // Quando aparece na tela, os passos entram um por vez.
 
 const passos = [
   { hora: "03:12", titulo: "A página para de abrir", texto: "O servidor do domínio sai do ar de madrugada.", icone: TriangleAlertIcon, tom: "bg-destructive/15 text-destructive" },
-  { hora: "03:12", titulo: "O aviso chega na hora", texto: "No celular, no mesmo minuto. Ninguém precisou te avisar.", icone: BellRingIcon, tom: "bg-brand text-brand-foreground" },
-  { hora: "08:40", titulo: "O problema é resolvido", texto: "Logo no começo do dia, antes de a maioria das pessoas procurar.", icone: WrenchIcon, tom: "bg-muted" },
+  { hora: "03:12", titulo: "O sistema percebe na hora", texto: "No mesmo minuto, o alerta chega ao especialista. Ninguém precisou reclamar.", icone: BellRingIcon, tom: "bg-brand text-brand-foreground" },
+  { hora: "08:40", titulo: "O especialista resolve", texto: "Logo no começo do dia, antes de a maioria das pessoas procurar.", icone: WrenchIcon, tom: "bg-muted" },
   { hora: "08:41", titulo: "No ar de novo", texto: "A conferência confirma: a página, o botão do WhatsApp e o cadeado funcionando.", icone: CheckIcon, tom: "bg-success text-white" },
-  { hora: "08:45", titulo: "Você fica sabendo o que houve", texto: "Uma mensagem curta explicando o que aconteceu e o que foi feito.", icone: MessageCircleIcon, tom: "bg-muted" },
+  { hora: "08:45", titulo: "Você segue o seu dia", texto: "Sem precisar ligar para ninguém nem se preocupar com o que houve.", icone: SmileIcon, tom: "bg-muted" },
 ];
 
 export function IncidenteExemplo() {
