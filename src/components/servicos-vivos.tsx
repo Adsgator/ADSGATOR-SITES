@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { ArrowUpRightIcon, CheckIcon, LockIcon, MessageCircleIcon, SearchIcon } from "lucide-react";
-import { AnimatePresence, motion, MotionConfig, useScroll, useTransform } from "motion/react";
+import { AnimatePresence, motion, MotionConfig, useReducedMotion, useScroll, useTransform } from "motion/react";
 
 import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
 import { MotionPauseButton, MotionScope, useMotionPaused } from "@/components/motion/motion-scope";
+import { useCiclo } from "@/components/motion/use-ciclo";
 import { useDigitacao } from "@/components/motion/use-digitacao";
 import { PaginaCliente } from "@/components/pagina-cliente";
+import { segmentos } from "@/config/segmentos";
 import { cn } from "@/lib/utils";
 
 // "O que a Adsgator faz" (roteiro do site, Início, seção 6): grade de cartões
@@ -94,28 +96,11 @@ function Cartao({ titulo, texto, href, visual }: { titulo: string; texto: string
   );
 }
 
-/** Repete um ciclo enquanto a área não está pausada (para os cartões vivos). */
-function useCiclo(passos: number, intervalo: number) {
-  const pausado = useMotionPaused();
-  const [passo, setPasso] = useState(0);
-  useEffect(() => {
-    if (pausado) return;
-    const id = setInterval(() => setPasso((p) => (p + 1) % passos), intervalo);
-    return () => clearInterval(id);
-  }, [pausado, passos, intervalo]);
-  return passo;
-}
-
-const anuncios = [
-  { busca: "eletricista em campinas", site: "voltcampinas.com.br", titulo: "Eletricista em Campinas · Atendimento hoje" },
-  { busca: "dentista perto de mim", site: "clinicasorrir.com.br", titulo: "Dentista no Cambuí · Agende sua avaliação" },
-  { busca: "advogado trabalhista", site: "silvaadvocacia.com.br", titulo: "Advogado Trabalhista · Fale com um especialista" },
-];
-const buscasDoAnuncio = anuncios.map((a) => a.busca);
+const buscasDoAnuncio = segmentos.map((s) => s.busca);
 
 function AnuncioVivo() {
   const { texto, indice, pronto, visivel } = useDigitacao(buscasDoAnuncio, { inicio: 600, espera: 2600 });
-  const anuncio = anuncios[indice];
+  const anuncio = segmentos[indice];
   return (
     <div className="flex h-full flex-col gap-2.5 p-4">
       <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-xs">
@@ -129,7 +114,7 @@ function AnuncioVivo() {
         className="rounded-xl border border-brand/50 bg-card p-3"
       >
         <p className="text-[0.65rem] font-semibold">Patrocinado · {anuncio.site}</p>
-        <p className="mt-1 font-heading text-sm">{anuncio.titulo}</p>
+        <p className="mt-1 font-heading text-sm">{anuncio.anuncio}</p>
       </motion.div>
       {[0, 1].map((n) => (
         <div key={n} className="rounded-xl border bg-card/50 p-3 opacity-50">
@@ -143,17 +128,24 @@ function AnuncioVivo() {
 
 function PaginaViva() {
   const pausado = useMotionPaused();
+  // Uma página de cada segmento: troca a cada volta da rolagem (12 s).
+  const s = segmentos[useCiclo(segmentos.length, 12000)];
   return (
     <div className="mx-auto mt-4 h-full w-40 rounded-t-[1.6rem] bg-ink p-1.5 pb-0">
       <div className="h-full overflow-hidden rounded-t-[1.2rem] bg-paper">
-        <motion.div
-          animate={pausado ? undefined : { y: ["0%", "-62%", "0%"] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <div className="w-[240px] origin-top-left scale-[0.615]">
-            <PaginaCliente />
-          </div>
-        </motion.div>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={s.id}
+            initial={{ opacity: 0 }}
+            animate={pausado ? { opacity: 1 } : { opacity: 1, y: ["0%", "-62%", "0%"] }}
+            exit={{ opacity: 0 }}
+            transition={{ opacity: { duration: 0.4 }, y: { duration: 12, repeat: Infinity, ease: "easeInOut" } }}
+          >
+            <div className="w-[240px] origin-top-left scale-[0.615]">
+              <PaginaCliente s={s} />
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -259,6 +251,9 @@ function NoArVivo() {
 
 function ResumoVivo() {
   const pausado = useMotionPaused();
+  // Com "reduzir animações", a altura não se mexe (o Motion bloqueia): as
+  // barras ficam cheias e a onda vira brilho (visto no computador do Lucas).
+  const reduzido = useReducedMotion();
   return (
     <div className="flex h-full flex-col justify-center p-4">
       <div className="rounded-2xl rounded-tl-sm border bg-card p-3">
@@ -270,7 +265,13 @@ function ResumoVivo() {
             <motion.span
               key={i}
               initial={{ height: `${altura * 45}%` }}
-              animate={pausado ? undefined : { height: [`${altura * 45}%`, `${altura * 100}%`, `${altura * 45}%`] }}
+              animate={
+                pausado
+                  ? undefined
+                  : reduzido
+                    ? { height: `${altura * 100}%`, opacity: [0.35, 1, 0.35] }
+                    : { height: [`${altura * 45}%`, `${altura * 100}%`, `${altura * 45}%`] }
+              }
               transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.22 }}
               className="flex-1 rounded-t-md bg-brand/80"
             />

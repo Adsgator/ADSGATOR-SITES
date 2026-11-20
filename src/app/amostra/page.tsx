@@ -19,7 +19,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { Steps } from "@/components/steps";
 import { TelasServico } from "@/components/telas-servico";
 import { buttonVariants } from "@/components/ui/button";
-import { site } from "@/config/site";
+import { linkWhatsApp, mensagemDiagnostico, site } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 // Amostra 3 da Fase 1B, só no branch: a amostra 2 (aprovada em 2026-11-20)
@@ -155,7 +155,10 @@ export default function Page() {
       {/* Topo: frase de posição da Base e as telas do serviço em 3D. */}
       <MotionScope>
         <section className="relative isolate overflow-x-clip">
-          <SinaisBusca className="-z-10" />
+          {/* A caixa do mapa termina no topo do celular da hero (TelasServico:
+              mt-14 + top-20 no celular; mt-20 + top-0 a partir de sm). */}
+          <div className="relative">
+          <SinaisBusca className="inset-x-0 top-0 -bottom-[8.5rem] -z-10 sm:-bottom-[5rem]" />
           <div className="mx-auto max-w-4xl px-4 pt-20 text-center">
             <p className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 font-mono text-xs text-muted-foreground backdrop-blur">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-brand" />
@@ -170,14 +173,15 @@ export default function Page() {
               seu nome.
             </p>
             <div className="mt-10 flex flex-wrap justify-center gap-3">
-              <a href={site.whatsapp.link} className={botaoMarca}>
-                Falar pelo WhatsApp
+              <a href={linkWhatsApp(mensagemDiagnostico)} className={botaoMarca}>
+                Quero um diagnóstico grátis
                 <ArrowRightIcon />
               </a>
               <a href="#como-funciona" className={botaoContorno}>
                 Como funciona
               </a>
             </div>
+          </div>
           </div>
           <TelasServico />
           <div className="relative mt-16 border-t bg-background/60 backdrop-blur-sm">
