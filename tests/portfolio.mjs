@@ -112,7 +112,7 @@ try {
           `fim da foto a ${rolou.faltaFim.toFixed(1)} px do fim da janela`,
         );
         await page.mouse.move(5, 5);
-        await page.waitForTimeout(1200);
+        await page.waitForTimeout(2000);
         const voltou = await page.evaluate(() => {
           const img = document.querySelector('[data-cartao="multas"] [data-inteira]');
           return img.getBoundingClientRect().top - img.parentElement.getBoundingClientRect().top;

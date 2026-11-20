@@ -68,7 +68,10 @@ export function JanelaPagina({
               data-inteira={rolando ? "rolando" : ""}
               style={{
                 transform: rolando ? "translateY(calc(-100% + 100cqh))" : "translateY(0)",
-                transition: rolando ? `transform ${segundos}s ease-in-out` : "transform 0.8s var(--ease-out)",
+                // A volta ao topo, ao tirar o mouse: 1,4 s, suave nas duas pontas
+              // (pedido do Lucas, 2026-11-20: com 0,8 s e saída rápida, quase tudo
+              // acontecia no primeiro quarto de segundo).
+              transition: rolando ? `transform ${segundos}s ease-in-out` : "transform 1.4s ease-in-out",
               }}
               className="absolute inset-x-0 top-0 h-auto w-full"
             />
