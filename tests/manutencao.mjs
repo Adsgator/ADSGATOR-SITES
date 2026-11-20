@@ -125,13 +125,13 @@ try {
 
       const blocos = await page.evaluate(() => ({
         riscos: [...document.querySelectorAll("h3")].filter((h) => ["O cadeado vence", "O domínio vence", "O botão quebra em silêncio", "A página cai"].includes(h.textContent)).length,
-        caso: document.body.innerText.includes("Já aconteceu"),
+        caso: document.querySelectorAll("[data-conferencia-do-dia] li").length === 6,
         ajustes: document.body.innerText.includes("Cabe nos pequenos ajustes"),
         duvidas: [...document.querySelectorAll("li p.font-heading")].filter((p) => p.textContent.startsWith("“")).length,
         monitorada: document.body.innerText.includes("Monitorada 24 horas"),
       }));
       check(
-        `${rotulo}: os 4 riscos com o caso real, os pequenos ajustes, as 3 dúvidas e o monitoramento 24 horas`,
+        `${rotulo}: os 4 riscos com a conferência de todo dia, os pequenos ajustes, as 3 dúvidas e o monitoramento 24 horas`,
         blocos.riscos === 4 && blocos.caso && blocos.ajustes && blocos.duvidas === 3 && blocos.monitorada,
         JSON.stringify(blocos),
       );

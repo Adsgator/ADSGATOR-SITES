@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { ChamadaFinal } from "@/components/chamada-final";
+import { ConferenciaDoDia } from "@/components/conferencia-do-dia";
 import { ConferenciasNoAr } from "@/components/colunas-subindo";
 import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";
@@ -39,7 +40,7 @@ import { cn } from "@/lib/utils";
 // (decisão de 2026-11-20). A linha "Enquanto você trabalha" não diz de quanto
 // em quanto tempo cada conferência roda, para não ficar errada se a rotina
 // mudar. Rodada de profundidade (Lucas, 2026-11-20): por que cuidar da página
-// (com um caso real, sem nome de cliente), a página monitorada 24 horas (aviso
+// (com o que a conferência de todo dia olha), a página monitorada 24 horas (aviso
 // na hora, a qualquer hora; o conserto no horário de trabalho, sem prometer
 // suporte 24 horas), o exemplo de quando algo dá errado, o resumo de cada 3
 // meses, o que cabe nos pequenos ajustes e as dúvidas mais comuns.
@@ -247,13 +248,10 @@ export default function Page() {
             </li>
           ))}
         </ul>
-        <Reveal className="dark section-ink mt-5 rounded-3xl border bg-background p-8 text-foreground">
-          <p className="font-mono text-xs text-brand">Já aconteceu</p>
-          <p className="mt-3 max-w-3xl font-heading text-2xl leading-snug">
-            Em novembro, a conferência pegou o botão do WhatsApp de duas páginas levando a um número errado. Elas
-            pareciam normais. Foi arrumado no mesmo dia, antes de alguém perceber.
-          </p>
-        </Reveal>
+        {/* O que a conferência de todo dia olha (painel, monitoramento dos
+            sites). No lugar de um caso de erro (Lucas, 2026-11-20: não mostrar
+            como erro nosso). */}
+        <ConferenciaDoDia />
       </section>
 
       {/* 2. O que entra. */}
