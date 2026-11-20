@@ -361,6 +361,24 @@ details[open]::details-content {
     /* O clique "aperta" a partir da ponta da seta. */
     transform-origin: 27% 27%;
   }
+  /* Termos e Privacidade (documento-legal.tsx): os trechos destacados para o
+     Lucas revisar, no amarelo da marca, e o marcador dos itens do resumo. */
+  .documento-legal mark {
+    border-radius: 0.25rem;
+    background-color: color-mix(in oklab, var(--brand) 35%, transparent);
+    padding-inline: 0.1rem;
+    color: inherit;
+  }
+  .resumo-legal li::before {
+    content: "";
+    position: absolute;
+    top: 0.8rem;
+    left: 0.35rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--brand);
+  }
   /* A cena da chamada final (clique-animado.tsx): o elemento clicado reage. */
   .cena-clique [data-anuncio-cena],
   .cena-clique [data-cta-whatsapp] {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { DocumentoLegal } from "@/components/documento-legal";
 import Privacidade from "@/content/privacidade.mdx";
 
 export const metadata: Metadata = {
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <article className="mx-auto max-w-3xl px-4 py-12">
+    <DocumentoLegal assunto="a Política de Privacidade" outro={{ href: "/termos", rotulo: "Ler os Termos de Serviço" }}>
       <Privacidade />
-    </article>
+    </DocumentoLegal>
   );
 }

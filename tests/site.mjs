@@ -219,8 +219,8 @@ try {
     check(`${caminho}: razão social e CNPJ`, texto.includes("razão social") && texto.includes("37.040.687/0001-07"));
   }
   await page.goto(BASE + "/termos", { waitUntil: "networkidle" });
-  // O sumário é a única lista numerada; o texto também tem links para Reembolso.
-  await page.locator("article ol").getByRole("link", { name: "Reembolso", exact: true }).click();
+  // O sumário ao lado (DocumentoLegal) acompanha a leitura e leva à seção.
+  await page.locator('nav[aria-label="Nesta página"]').getByRole("link", { name: "Reembolso", exact: true }).click();
   await page.waitForURL("**/termos#reembolso");
   const topo = await page.evaluate(() => document.getElementById("reembolso").getBoundingClientRect().top);
   check("sumário dos Termos: clicar em Reembolso leva à seção", topo >= 0 && topo < 200, `${Math.round(topo)}px do topo`);
