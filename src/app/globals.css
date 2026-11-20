@@ -361,6 +361,24 @@ details[open]::details-content {
     /* O clique "aperta" a partir da ponta da seta. */
     transform-origin: 27% 27%;
   }
+  /* A cena da chamada final (clique-animado.tsx): o elemento clicado reage. */
+  .cena-clique [data-anuncio],
+  .cena-clique [data-cta-whatsapp] {
+    transition:
+      transform 160ms var(--ease-out),
+      filter 160ms var(--ease-out),
+      box-shadow 160ms var(--ease-out),
+      background-color 160ms var(--ease-out);
+  }
+  .cena-clique[data-clique="anuncio"] [data-anuncio] {
+    transform: scale(0.97);
+    background-color: #fff8e6;
+    box-shadow: 0 0 0 3px rgb(255 177 0 / 0.45);
+  }
+  .cena-clique[data-clique="whats"] [data-cta-whatsapp] {
+    transform: scale(0.92);
+    filter: brightness(0.9);
+  }
   /* Dentro de um Reveal: o cursor clica duas vezes quando aparece (menos de
      5 s, então não precisa de pausa). */
   .reveal[data-visible] .click-on-reveal {

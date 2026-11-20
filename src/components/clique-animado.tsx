@@ -14,7 +14,8 @@ import { segmentos } from "@/config/segmentos";
 // cursor clica no botão do WhatsApp e abre a conversa; depois recomeça com
 // outro segmento. Feita em código (nítida em qualquer tela, leve e ajustável).
 // O cursor mede a posição do título do anúncio e do botão na hora, para
-// acertar em qualquer tamanho. Para no botão de pausar.
+// acertar em qualquer tamanho. O cursor é a seta branca da marca, e no clique as
+// 3 linhas da ponta aparecem em amarelo e o elemento clicado reage.
 
 type Etapa = "entrando" | "clicaAnuncio" | "pagina" | "indoWhats" | "clicaWhats" | "conversa" | "saindo";
 
@@ -32,7 +33,7 @@ const roteiro: { etapa: Etapa; ms: number }[] = [
 const PASSADA = 1.3;
 
 // A ponta da seta fica a 27% da largura e da altura do desenho (globals.css).
-const CURSOR = { largura: 34, ponta: 0.27, proporcao: 779 / 517 };
+const CURSOR = { largura: 42, ponta: 0.27, proporcao: 779 / 517 };
 
 export function CliqueAnimado() {
   return (
@@ -106,7 +107,10 @@ function Cena() {
     <div
       ref={cena}
       aria-hidden="true"
-      className="relative h-[26rem] w-[20rem] overflow-hidden rounded-[2rem] bg-paper text-ink shadow-[0_40px_80px_-40px_rgb(31_39_27/0.7)] sm:w-[22rem]"
+      // O elemento clicado reage (globals.css, .cena-clique): o anúncio afunda e
+      // ganha destaque; o botão do WhatsApp aperta.
+      data-clique={etapa === "clicaAnuncio" ? "anuncio" : etapa === "clicaWhats" ? "whats" : undefined}
+      className="cena-clique relative h-[26rem] w-[20rem] overflow-hidden rounded-[2rem] bg-paper text-ink shadow-[0_40px_80px_-40px_rgb(31_39_27/0.7)] sm:w-[22rem]"
     >
       <AnimatePresence mode="wait" initial={false}>
         {etapa === "entrando" || etapa === "clicaAnuncio" ? (
@@ -115,7 +119,7 @@ function Cena() {
               <SearchIcon className="size-4 text-ink/50" />
               {s.busca}
             </div>
-            <div className="mt-4 rounded-2xl border border-brand/60 bg-white p-4">
+            <div data-anuncio className="mt-4 rounded-2xl border border-brand/60 bg-white p-4">
               <p className="text-[0.7rem] font-semibold">Patrocinado · {s.site}</p>
               <p data-titulo-anuncio className="mt-2 font-heading text-lg leading-snug">{s.anuncio}</p>
               <p className="mt-1 text-xs leading-5 text-ink/60">{s.anuncioTexto}</p>
@@ -159,21 +163,31 @@ function Cena() {
         animate={{ x: alvo.x - CURSOR.largura * CURSOR.ponta, y: alvo.y - altura * CURSOR.ponta }}
         transition={{ duration: etapa === "saindo" ? 0.01 : PASSADA, ease: [0.22, 1, 0.36, 1] }}
       >
-        {clicando && (
-          <motion.span
-            className="absolute rounded-full border-2 border-brand"
-            style={{ left: CURSOR.largura * CURSOR.ponta - 14, top: altura * CURSOR.ponta - 14, width: 28, height: 28 }}
-            initial={{ scale: 0.3, opacity: 0.9 }}
-            animate={{ scale: 1.8, opacity: 0 }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
-          />
-        )}
+        {/* A seta branca da marca, com um contorno escuro fino para aparecer no
+            fundo claro e no amarelo; no clique, ela aperta e as 3 linhas da
+            ponta aparecem em amarelo (pedido do Lucas, 2026-11-20). */}
         <motion.span
           animate={{ scale: clicando ? 0.85 : 1 }}
           transition={{ duration: 0.15 }}
-          style={{ width: CURSOR.largura }}
-          className="brand-cursor block text-ink drop-shadow-[0_4px_6px_rgb(0_0_0/0.25)]"
-        />
+          style={{ width: CURSOR.largura, transformOrigin: "27% 27%" }}
+          className="relative block aspect-[517/779]"
+        >
+          <span
+            data-seta
+            className="absolute inset-0 bg-[url(/brand/cursor-seta-branca.svg)] bg-contain bg-no-repeat [filter:drop-shadow(0_0_1px_#1F271B)_drop-shadow(0_0_1px_#1F271B)_drop-shadow(0_4px_6px_rgb(0_0_0/0.3))]"
+          />
+          {clicando && (
+            <motion.span
+              key={`${etapa}-${volta}`}
+              data-linhas
+              className="absolute inset-0 bg-[url(/brand/cursor-linhas.svg)] bg-contain bg-no-repeat"
+              style={{ transformOrigin: "27% 27%" }}
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: [0, 1, 1, 0], scale: [0.7, 1.5, 1.35, 1.35] }}
+              transition={{ duration: 0.65, times: [0, 0.25, 0.7, 1], ease: "easeOut" }}
+            />
+          )}
+        </motion.span>
       </motion.div>
     </div>
   );
