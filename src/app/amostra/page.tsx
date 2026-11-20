@@ -3,14 +3,14 @@ import Link from "next/link";
 import {
   ArrowRightIcon,
   CheckIcon,
-  LayoutTemplateIcon,
-  MousePointerClickIcon,
-  ShieldCheckIcon,
   UploadIcon,
 } from "lucide-react";
 
 import { BumerangueFrame } from "@/components/bumerangue";
+import { BuscasCidade } from "@/components/buscas-cidade";
 import { CaminhoCliente } from "@/components/caminho-cliente";
+import { FundoLuz } from "@/components/fundo-luz";
+import { ServicosVivos } from "@/components/servicos-vivos";
 import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";
 import { Marquee } from "@/components/motion/marquee";
@@ -38,27 +38,6 @@ const fatos = [
   "A landing page é sua",
   "Atendimento de segunda a sexta",
   "Desistência em até 7 dias",
-];
-
-const servicos = [
-  {
-    icone: MousePointerClickIcon,
-    titulo: "Google Ads",
-    texto: "Campanhas criadas, otimizadas e acompanhadas na sua conta.",
-    itens: ["Conversões e remarketing", "Imagens para os anúncios", "Relatórios dos resultados"],
-  },
-  {
-    icone: LayoutTemplateIcon,
-    titulo: "Landing page",
-    texto: "Uma página rápida e profissional, publicada no seu domínio.",
-    itens: ["Entrega em até 14 dias úteis", "Domínio por 3 anos incluso", "Depois de entregue, é sua"],
-  },
-  {
-    icone: ShieldCheckIcon,
-    titulo: "Manutenção",
-    texto: "Hospedagem, suporte e manutenção num plano mensal opcional.",
-    itens: ["Hospedagem e domínio renovado", "Ajustes de texto e imagem", "Correções e segurança"],
-  },
 ];
 
 const planos = [
@@ -175,7 +154,8 @@ export default function Page() {
 
       {/* Topo: frase de posição da Base e as telas do serviço em 3D. */}
       <MotionScope>
-        <section className="overflow-x-clip bg-grid">
+        <section className="relative isolate overflow-x-clip">
+          <FundoLuz className="-z-10" />
           <div className="mx-auto max-w-4xl px-4 pt-20 text-center">
             <p className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 font-mono text-xs text-muted-foreground backdrop-blur">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-brand" />
@@ -214,37 +194,14 @@ export default function Page() {
         </section>
       </MotionScope>
 
+      {/* Você já é procurado: buscas que vão e voltam com a rolagem. */}
+      <BuscasCidade />
+
       {/* O caminho do cliente: seção presa na tela no computador. */}
       <CaminhoCliente />
 
-      {/* Serviços, entrando em cascata. */}
-      <section className="mx-auto max-w-6xl px-4 py-24">
-        <Eyebrow>O que fazemos</Eyebrow>
-        <h2 className={cn(titulo, "mt-6")}>
-          Tudo o que o seu negócio precisa.
-          <br />
-          <span className="text-muted-foreground">Nada do que não precisa.</span>
-        </h2>
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
-          {servicos.map(({ icone: Icone, titulo: nome, texto, itens }, i) => (
-            <Reveal key={nome} delay={i * 120} className="rounded-3xl border bg-card p-8">
-              <span className="flex size-12 items-center justify-center rounded-2xl bg-brand text-brand-foreground">
-                <Icone className="size-5" />
-              </span>
-              <h3 className="mt-8 font-heading text-2xl">{nome}</h3>
-              <p className="mt-2 leading-7 text-muted-foreground">{texto}</p>
-              <ul className="mt-6 space-y-2 border-t pt-6 text-sm">
-                {itens.map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <CheckIcon className="mt-0.5 size-4 shrink-0 text-brand" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </Reveal>
-          ))}
-        </div>
-      </section>
+      {/* O que a Adsgator faz: cartões vivos. */}
+      <ServicosVivos />
 
       {/* Como funciona: seção no verde da marca, com o padrão e os passos. */}
       <MotionScope>
