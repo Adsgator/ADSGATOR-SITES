@@ -1,5 +1,6 @@
 // Página "Quem está por trás": a foto, a trajetória que se marca com a
-// rolagem, a frase do Lucas, os cinco pontos, o fundo e a mensagem pronta do
+// rolagem, os números, a frase do Lucas, uma pessoa e um sistema, os cinco
+// pontos, as dúvidas, o fundo e a mensagem pronta do
 // WhatsApp. Roda nos dois modos de animação (o Windows do Lucas está com
 // "Mostrar animações" desligado).
 // Uso: node tests/quem-esta-por-tras.mjs [endereço]   (padrão: http://localhost:3005/quem-esta-por-tras)
@@ -77,6 +78,46 @@ try {
       }));
       check(`${rotulo}: a frase do Lucas, literal`, conteudo.frase.includes("Eu sinto prazer em criar coisas digitais"), conteudo.frase);
       check(`${rotulo}: os cinco pontos`, conteudo.pontos === 5, `${conteudo.pontos}`);
+
+      // Os números e "uma pessoa e um sistema": parados até a pessoa chegar.
+      // Volta ao topo antes de recarregar: o Chrome devolve a rolagem de antes.
+      await rolarPara(0);
+      await page.reload({ waitUntil: "networkidle" });
+      await rolarPara(0);
+      const numeros = () => page.$$eval("[data-numeros] dd", (dds) => dds.map((d) => d.textContent).join(" "));
+      const numerosAntes = await numeros();
+      const marcadosAntes = await page.$$eval("[data-comigo-marcado]", (e) => e.length);
+      await page.$eval("[data-numeros]", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.waitForTimeout(2000);
+      const numerosDepois = await numeros();
+      const anos = new Date().getFullYear() - 2020;
+      check(
+        `${rotulo}: os números sobem quando a pessoa chega`,
+        numerosAntes === "+0 +0 0" && numerosDepois === `+20 +10 ${anos}`,
+        `${numerosAntes} → ${numerosDepois}`,
+      );
+
+      await page.$eval("[data-eu-e-o-sistema]", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.waitForTimeout(1500);
+      const marcados = await page.$$eval("[data-comigo-marcado]", (e) => e.length);
+      const topoDoRegistro = () => page.$eval("[data-registro]", (li) => li.textContent);
+      const registros = new Set([await topoDoRegistro()]);
+      for (let i = 0; i < 4; i++) {
+        await page.waitForTimeout(1000);
+        registros.add(await topoDoRegistro());
+      }
+      await page.locator("[data-eu-e-o-sistema]").getByRole("button", { name: "Pausar as animações" }).click();
+      const parado = await topoDoRegistro();
+      await page.waitForTimeout(2500);
+      const aindaParado = (await topoDoRegistro()) === parado;
+      check(
+        `${rotulo}: uma pessoa e um sistema: o que é comigo se marca, o registro anda e para no botão`,
+        marcadosAntes === 0 && marcados === 4 && registros.size >= 2 && aindaParado,
+        `marcados ${marcadosAntes} → ${marcados}, ${registros.size} registros no topo, parado ${aindaParado}`,
+      );
+
+      const duvidas = await page.$$eval("li p.font-heading", (ps) => ps.filter((p) => p.textContent.startsWith("“")).length);
+      check(`${rotulo}: as 3 dúvidas`, duvidas === 3, `${duvidas}`);
 
       const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check(`${rotulo}: sem sobra lateral`, sobra === 0, `${sobra} px`);

@@ -5,11 +5,13 @@ import { ArrowRightIcon } from "lucide-react";
 import { BumerangueFrame } from "@/components/bumerangue";
 import { ChamadaFinal } from "@/components/chamada-final";
 import { TrajetoriaNoAr } from "@/components/colunas-subindo";
+import { EuEOSistema } from "@/components/eu-e-o-sistema";
 import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
 import { ListaQueSeMarca } from "@/components/lista-que-se-marca";
 import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
+import { NumerosEmFaixa } from "@/components/numeros-em-faixa";
 import { buttonVariants } from "@/components/ui/button";
 import { linkWhatsApp, mensagemDaPagina } from "@/config/site";
 import { cn } from "@/lib/utils";
@@ -20,6 +22,9 @@ import { cn } from "@/lib/utils";
 // "por que faço" são as respostas dele no roteiro (seção 6); a frase em
 // destaque é dele, literal. Sem fingir equipe (Base): a marca na frente e o
 // Lucas aqui. A foto é a do perfil do WhatsApp Business, por enquanto.
+// Rodada de profundidade (Lucas, 2026-11-20): os números (do painel e da
+// trajetória), uma pessoa e um sistema (o que o painel faz o dia inteiro e o
+// que fica com o Lucas) e as dúvidas sobre trabalhar com uma pessoa só.
 
 export const metadata: Metadata = {
   title: "Quem está por trás",
@@ -48,6 +53,32 @@ const trajetoria = [
   },
   { titulo: "2010, o primeiro curso de web design", texto: "Na época em que os sites ainda eram feitos em Flash." },
   { titulo: "2020, nasce a Adsgator", texto: "Google Ads e landing pages para negócios locais." },
+];
+
+// Os números são do painel (22 clientes em 2026-11-20, um deles com 4 negócios)
+// e da trajetória (web design desde 2010; a Adsgator desde 2020).
+const numeros = [
+  { valor: 20, antes: "+", rotulo: "negócios atendidos desde 2020" },
+  { valor: 10, antes: "+", rotulo: "anos criando sites" },
+  { valor: new Date().getFullYear() - 2020, rotulo: "anos de Google Ads com a Adsgator" },
+];
+
+const objecoes = [
+  {
+    duvida: "“Uma pessoa só dá conta?”",
+    resposta:
+      "Dá, porque eu não fico olhando tudo sozinho: o sistema acompanha cada conta e cada página o dia inteiro e me avisa na hora. Eu cuido do que precisa de gente.",
+  },
+  {
+    duvida: "“E se você ficar doente ou sair de férias?”",
+    resposta:
+      "A conta e a página continuam no ar e monitoradas, e tudo está no seu nome: nada depende de mim para continuar funcionando. Férias e recessos são avisados com antecedência.",
+  },
+  {
+    duvida: "“Uma agência grande não seria melhor?”",
+    resposta:
+      "Em agência grande, quem vende costuma não ser quem faz. Aqui, quem conversa com você é quem mexe na sua conta e na sua página, e conhece o seu negócio.",
+  },
 ];
 
 const pontos = [
@@ -147,6 +178,9 @@ export default function Page() {
             }}
           />
         </div>
+        <div className="mx-auto max-w-6xl px-4 pb-24">
+          <NumerosEmFaixa itens={numeros} />
+        </div>
       </section>
 
       {/* Por que eu faço isso: a frase dele, literal. */}
@@ -158,6 +192,23 @@ export default function Page() {
               “É o que eu gosto de fazer. Eu sinto prazer em criar <span className="text-brand">coisas digitais</span>.”
             </blockquote>
           </Reveal>
+        </div>
+      </section>
+
+      {/* Uma pessoa e um sistema. */}
+      <section className="mx-auto max-w-6xl px-4 pt-24">
+        <Eyebrow>Uma pessoa e um sistema</Eyebrow>
+        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+          Eu não fico olhando tudo sozinho. <span className="text-muted-foreground">Eu construí quem olha.</span>
+        </h2>
+        <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
+          A Adsgator tem um sistema próprio que acompanha cada conta e cada página o dia inteiro. Ele confere, mede e
+          me avisa na hora. Eu fico com o que precisa de gente.
+        </p>
+        <div className="mt-14">
+          <MotionScope>
+            <EuEOSistema />
+          </MotionScope>
         </div>
       </section>
 
@@ -178,6 +229,24 @@ export default function Page() {
             </li>
           ))}
         </ol>
+      </section>
+
+      {/* Talvez você esteja pensando. */}
+      <section className="mx-auto max-w-6xl px-4 pb-24">
+        <Eyebrow>Talvez você esteja pensando</Eyebrow>
+        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+          As dúvidas sobre trabalhar comigo. <span className="text-muted-foreground">E as respostas.</span>
+        </h2>
+        <ul className="mt-14 grid gap-5 md:grid-cols-3">
+          {objecoes.map(({ duvida, resposta }, i) => (
+            <li key={duvida}>
+              <Reveal delay={i * 120} className="h-full rounded-3xl border bg-card p-8">
+                <p className="font-heading text-2xl leading-tight">{duvida}</p>
+                <p className="mt-4 leading-7 text-muted-foreground">{resposta}</p>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <ChamadaFinal
