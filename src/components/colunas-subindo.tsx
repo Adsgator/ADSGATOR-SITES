@@ -251,7 +251,9 @@ export function PaginasNoAr() {
       <Image src={`/portfolio/${id}-cel.jpg`} alt="" width={390} height={844} sizes="13rem" className="block h-auto w-full rounded-[1.2rem]" />
     </div>
   ));
-  return <ColunasSubindo pecas={[...celulares, ...celulares.slice(2), ...celulares.slice(0, 2)]} espaco="gap-6" minimo={1} />;
+  // Só as páginas, sem repetir na lista: repetida, a mesma página caía duas
+  // vezes seguidas numa coluna (o Lucas viu, 2026-11-20).
+  return <ColunasSubindo pecas={celulares} espaco="gap-6" minimo={1} />;
 }
 
 const trajetoria = [

@@ -73,7 +73,7 @@ const oQueEntra = [
   { icone: RefreshCwIcon, titulo: "Atualizações", texto: "O que a página usa, sempre em dia." },
   { icone: DatabaseBackupIcon, titulo: "Cópias de segurança", texto: "Se algo der errado, a página volta." },
   { icone: PencilIcon, titulo: "Pequenos ajustes", texto: "Até 2 horas por mês: um texto, uma foto, um horário." },
-  { icone: MessageCircleIcon, titulo: "Suporte", texto: "Resposta em até 2 dias úteis." },
+  { icone: MessageCircleIcon, titulo: "Suporte rápido", texto: "Pelo WhatsApp, direto com o especialista." },
   { icone: FileBarChartIcon, titulo: "Resumo a cada 3 meses", texto: "As visitas e os toques no WhatsApp, numa mensagem." },
 ];
 
@@ -179,7 +179,7 @@ const perguntas = [
     resposta:
       "Trocar um texto, uma foto, um telefone, um horário. São até 2 horas por mês, que não acumulam. Página nova, mudança de layout e seção nova são combinadas à parte.",
   },
-  { pergunta: "Em quanto tempo vocês respondem?", resposta: "Em até 2 dias úteis." },
+  { pergunta: "Em quanto tempo vocês respondem?", resposta: "Rápido, pelo WhatsApp, no horário de atendimento. Quem responde é o especialista que cuida da sua página." },
   {
     pergunta: "Vocês cuidam de um site que eu já tenho?",
     // Base, "Serviços e preços", Manutenção (Lucas, 2026-11-20).
@@ -205,7 +205,7 @@ export default function Page() {
                 Sua página sempre no ar, sem você se <span className="highlight">preocupar</span>.
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-8 text-muted-foreground">
-                A sua página monitorada 24 horas por dia, e a gente cuida da hospedagem, do cadeado e do domínio. Você
+                A sua página monitorada 24 horas por dia, e a gente cuida da hospedagem, da segurança e do domínio. Você
                 cuida do seu negócio.
               </p>
               <div className="mt-10 flex flex-wrap gap-3">
@@ -218,7 +218,7 @@ export default function Page() {
                 </a>
               </div>
               <p className="mt-8 font-mono text-xs text-muted-foreground">
-                Monitorada 24 horas · Suporte em até 2 dias úteis · Sem fidelidade
+                Monitorada 24 horas · Suporte rápido · Sem fidelidade
               </p>
             </div>
             <PainelSituacao />
