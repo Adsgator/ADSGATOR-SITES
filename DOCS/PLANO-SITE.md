@@ -1402,3 +1402,12 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
   59 e `tests/forms.mjs` 17 de 17. A `main` foi juntada no `fase-1b` (conflito
   só neste registro, resolvido em ordem de data). Decisão 1 da Parte 1 do plano
   geral: o Motion (A). O Lucas aprovou o trecho da Adobe Fonts na Privacidade.
+- 2026-11-20: decisão do Lucas: os efeitos funcionam sempre, mesmo com
+  "reduzir animações" ligado no sistema ("tem que funcionar independente
+  disso"). Substitui a regra da Fase 1B (2026-10-06) de trocar o movimento por
+  esmaecimento: saíram o bloco `prefers-reduced-motion` do `globals.css` e as
+  classes `motion-reduce` dos componentes, e o Motion passou a ignorar a
+  preferência (`MotionConfig reducedMotion="never"`). O que roda sozinho
+  continua com o botão de pausar. O Lucas foi avisado de que quem desliga as
+  animações costuma fazer isso por enjoo com movimento. O detalhe das peças da
+  amostra 3 está no plano geral (Parte 1, "Andamento").
