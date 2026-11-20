@@ -1,6 +1,7 @@
 import { ArrowRightIcon, CheckIcon, MapPinIcon, MenuIcon, PlusIcon, StarIcon } from "lucide-react";
 
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
+import { IconeInstagram } from "@/components/icones-redes";
 import type { Segmento } from "@/config/segmentos";
 import { cn } from "@/lib/utils";
 
@@ -81,7 +82,7 @@ export function PaginaCliente({ s, montados, destaque }: { s: Segmento; montados
       <Parte i={1} montados={montados} destaque={destaque}>
       <div className="px-3 pt-4 pb-3">
         <p className={rotulo}>O que fazemos</p>
-        <p className={tituloSecao}>Serviços sob medida para você</p>
+        <p className={tituloSecao}>{s.titulos.servicos}</p>
         <div className="mt-2.5 grid grid-cols-2 gap-1.5">
           {s.servicos.map(({ icone: Icone, titulo: nome, texto }) => (
             <div key={nome} className="rounded-xl bg-white p-2 shadow-[0_4px_12px_-6px_rgb(0_0_0/0.25)]">
@@ -98,6 +99,7 @@ export function PaginaCliente({ s, montados, destaque }: { s: Segmento; montados
 
       <Parte i={2} montados={montados} destaque={destaque}>
       <div className="px-3 pt-1 pb-3">
+        <p className={cn(tituloSecao, "mb-2")}>{s.titulos.sobre}</p>
         <div className="flex gap-2.5 rounded-xl bg-white p-2.5 shadow-[0_4px_12px_-6px_rgb(0_0_0/0.25)]">
           <div style={{ backgroundImage: `url(${s.foto})` }} className="size-12 shrink-0 rounded-lg bg-cover bg-center" />
           <div>
@@ -128,7 +130,7 @@ export function PaginaCliente({ s, montados, destaque }: { s: Segmento; montados
       <Parte i={4} montados={montados} destaque={destaque}>
       <div className="px-3 pt-4 pb-2">
         <p className={rotulo}>Depoimentos</p>
-        <p className={tituloSecao}>Quem já chamou recomenda</p>
+        <p className={tituloSecao}>{s.titulos.depoimentos}</p>
         <div className="mt-2 space-y-1.5">
           {s.depoimentos.map(({ nome, texto }) => (
             <div key={nome} className="rounded-xl bg-white p-2 shadow-[0_4px_12px_-6px_rgb(0_0_0/0.25)]">
@@ -186,23 +188,60 @@ export function PaginaCliente({ s, montados, destaque }: { s: Segmento; montados
       </Parte>
 
       <Parte i={8} montados={montados} destaque={destaque}>
-      <div className="flex items-center justify-between bg-(--fundo) px-3 py-2.5 text-[7px] text-white/70">
-        <span className="flex items-center gap-1">
-          <MapPinIcon className="size-2.5" />
-          {s.cidade}
+      {/* O rodapé completo, montado como o das páginas reais da Adsgator: a
+          frase do negócio, o contato rápido, onde e quando atende, os links,
+          os serviços e as páginas legais. O botão flutuante entra com ele. */}
+      <div className="relative bg-(--fundo) px-3 pt-4 pb-3 text-white">
+        <span className="absolute -top-11 right-2 flex size-8 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg">
+          <IconeWhatsApp className="size-4" />
         </span>
-        <span>{s.site}</span>
+        <span className="flex items-center gap-1.5">
+          <span
+            className={cn(
+              "flex size-5 items-center justify-center rounded-full border border-(--destaque) text-[8px] font-bold text-(--destaque)",
+              s.serifa && "font-heading font-normal",
+            )}
+          >
+            {s.sigla}
+          </span>
+          <span className={cn("text-[9px] leading-none", s.serifa ? "font-heading" : "font-bold tracking-wide uppercase")}>
+            {s.nome}
+          </span>
+        </span>
+        <p className="mt-2 text-[7px] leading-[1.5] text-white/70">{s.rodape.descricao}</p>
+        <div className="mt-2.5 rounded-lg bg-white/10 p-2">
+          <p className="text-[7px] font-semibold">Contato rápido</p>
+          <p className="mt-0.5 text-[6.5px] text-white/65">Tire suas dúvidas e peça o seu orçamento.</p>
+          <span className="mt-1.5 flex h-5 items-center justify-center gap-1 rounded-full bg-[#25D366] text-[7px] font-semibold text-[#0B2A17]">
+            <IconeWhatsApp className="size-2.5" />
+            Falar pelo WhatsApp
+          </span>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-3 text-[6.5px] leading-[1.6] text-white/75">
+          <div>
+            <p className="mb-0.5 text-[6px] font-semibold tracking-[0.14em] text-(--destaque) uppercase">Atendimento</p>
+            <p>{s.area.slice(0, 3).join(" · ")}</p>
+            <p>{s.rodape.horario}</p>
+          </div>
+          <div>
+            <p className="mb-0.5 text-[6px] font-semibold tracking-[0.14em] text-(--destaque) uppercase">Navegar</p>
+            {["Serviços", "Quem somos", "Depoimentos", "Perguntas"].map((link) => (
+              <p key={link}>{link}</p>
+            ))}
+          </div>
+        </div>
+        <p className="mt-3 border-t border-white/15 pt-2 text-[6px] text-white/55">{s.servicos.map((x) => x.titulo).join(" • ")}</p>
+        <div className="mt-2 flex items-center justify-between gap-2 text-[5.5px] text-white/45">
+          <span className="flex items-center gap-1.5">
+            <IconeInstagram className="size-2.5" />
+            <MapPinIcon className="size-2.5" />
+            {s.cidade}
+          </span>
+          <span>Privacidade · Termos de Uso</span>
+        </div>
+        <p className="mt-1 text-[5.5px] text-white/40">© 2026 {s.nome}. Todos os direitos reservados.</p>
       </div>
       </Parte>
-
-      <span
-        className={cn(
-          "absolute right-2 bottom-12 flex size-8 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-500",
-          montados !== undefined && montados < PARTES_DA_PAGINA && "scale-50 opacity-0",
-        )}
-      >
-        <IconeWhatsApp className="size-4" />
-      </span>
     </div>
   );
 }

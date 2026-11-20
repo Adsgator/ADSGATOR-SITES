@@ -56,6 +56,12 @@ export type Segmento = {
   depoimentos: { nome: string; texto: string }[];
   perguntas: string[];
   area: string[];
+  /** Títulos com a personalidade do negócio, como nas páginas reais da
+   * Adsgator (Lucas, 2026-11-20: nada de título genérico). */
+  titulos: { servicos: string; sobre: string; depoimentos: string };
+  /** O rodapé completo, como o das páginas reais: a frase do negócio e o
+   * horário (sem telefone nem @ inventados, que podem existir de verdade). */
+  rodape: { descricao: string; horario: string };
 };
 
 export const segmentos: Segmento[] = [
@@ -96,6 +102,15 @@ export const segmentos: Segmento[] = [
     ],
     perguntas: ["Vocês atendem no mesmo dia?", "Dão garantia no serviço?", "Emitem nota fiscal?"],
     area: ["Campinas", "Valinhos", "Sumaré", "Hortolândia"],
+    titulos: {
+      servicos: "Do chuveiro ao quadro, resolvido com segurança",
+      sobre: "Quem entra na sua casa tem NR-10",
+      depoimentos: "Chamou, a gente foi. Quem já chamou conta",
+    },
+    rodape: {
+      descricao: "Instalações e reparos elétricos com segurança, para casa e empresa em Campinas e região.",
+      horario: "Segunda a sábado, das 7h às 19h",
+    },
   },
   {
     id: "dentista",
@@ -134,6 +149,15 @@ export const segmentos: Segmento[] = [
     ],
     perguntas: ["A avaliação tem custo?", "Vocês parcelam o tratamento?", "Atendem aos sábados?"],
     area: ["Cambuí", "Centro", "Taquaral", "Guanabara"],
+    titulos: {
+      servicos: "Um tratamento para cada momento do seu sorriso",
+      sobre: "Aqui, o medo de dentista fica na porta",
+      depoimentos: "Sorrisos que mudaram",
+    },
+    rodape: {
+      descricao: "Odontologia com atendimento humanizado no Cambuí, em Campinas.",
+      horario: "Segunda a sexta, das 8h às 20h · sábado, das 8h às 13h",
+    },
   },
   {
     id: "advogado",
@@ -172,5 +196,14 @@ export const segmentos: Segmento[] = [
     ],
     perguntas: ["A primeira conversa tem custo?", "Vocês atendem online?", "Quanto tempo leva um processo?"],
     area: ["Campinas", "Jundiaí", "Sorocaba", "Todo o estado de SP"],
+    titulos: {
+      servicos: "Os casos que mais chegam até nós",
+      sobre: "Direito do trabalho, explicado sem juridiquês",
+      depoimentos: "Quem confiou o seu caso a nós",
+    },
+    rodape: {
+      descricao: "Advocacia trabalhista com atendimento próximo, em Campinas e em todo o estado de SP.",
+      horario: "Segunda a sexta, das 9h às 18h",
+    },
   },
 ];

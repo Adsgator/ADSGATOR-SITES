@@ -327,8 +327,8 @@ export default function Page() {
             Uma página completa. <span className="text-muted-foreground">Cada parte leva ao seu WhatsApp.</span>
           </h2>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-            Cada página tem as seções que o seu negócio precisa. Esta é de um exemplo, com nove: cada uma tem um
-            trabalho, e todas levam ao mesmo botão.
+            Uma página bem feita tem várias partes, e cada uma tem um trabalho. Veja, uma por uma, como fica a de um
+            eletricista.
           </p>
           <div className="mt-14">
             <PaginaPorDentro />

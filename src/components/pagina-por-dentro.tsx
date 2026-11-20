@@ -48,7 +48,7 @@ const partes = [
   },
   {
     titulo: "O rodapé e o botão flutuante",
-    texto: "A cidade e os dados do negócio, e o botão do WhatsApp sempre à mão, em qualquer ponto da página.",
+    texto: "Tudo para quem quer chamar ou conferir: o contato rápido, onde e quando você atende, os serviços e as páginas legais. E o botão do WhatsApp sempre à mão, em qualquer ponto da página.",
   },
 ];
 
