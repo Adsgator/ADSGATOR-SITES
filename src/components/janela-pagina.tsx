@@ -45,7 +45,7 @@ export function JanelaPagina({
           <span className="size-2.5 rounded-full bg-muted" />
           <span className="size-2.5 rounded-full bg-muted" />
           <span className="size-2.5 rounded-full bg-muted" />
-          <span className="ml-3 truncate font-mono text-xs text-muted-foreground">{site}</span>
+          <span className="ml-3 truncate font-mono text-xs text-muted-foreground">{site ?? "projeto anterior"}</span>
         </div>
         <div className="relative aspect-[16/10] overflow-hidden [container-type:size]">
           <Image

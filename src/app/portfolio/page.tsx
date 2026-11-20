@@ -4,12 +4,13 @@ import { ArrowRightIcon } from "lucide-react";
 
 import { ChamadaFinal } from "@/components/chamada-final";
 import { PaginasNoAr } from "@/components/colunas-subindo";
+import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
 import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
 import { PortfolioCaso } from "@/components/portfolio-caso";
 import { buttonVariants } from "@/components/ui/button";
-import { portfolio } from "@/config/portfolio";
+import { paginasNoAr, portfolio } from "@/config/portfolio";
 import { linkWhatsApp, mensagemDaPagina } from "@/config/site";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 };
 
 const whatsapp = linkWhatsApp(mensagemDaPagina("/portfolio"));
+const anteriores = portfolio.filter((p) => !p.site);
 
 const botaoMarca = cn(
   buttonVariants({ size: "lg" }),
@@ -45,6 +47,13 @@ export default function Page() {
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 -z-10 bg-background/85 lg:bg-transparent lg:bg-[linear-gradient(to_right,var(--background)_42%,transparent_78%)]"
+          />
+          {/* O pattern da Adsgator no lado do texto, para o fundo não ficar liso
+              (pedido do Lucas, 2026-11-20), sumindo antes dos celulares. */}
+          <div
+            aria-hidden="true"
+            data-pattern
+            className="pointer-events-none absolute inset-0 -z-10 bg-[url(/brand/padrao-claro.png)] bg-[length:114px_114px] opacity-50 [mask-image:linear-gradient(to_bottom,black_40%,transparent)] lg:[mask-image:linear-gradient(to_right,black_25%,transparent_60%)] dark:bg-[url(/brand/padrao-escuro.png)] dark:opacity-40"
           />
           <div className="relative mx-auto max-w-6xl px-4 pt-32 pb-24 lg:pt-40 lg:pb-32">
             <div className="max-w-xl">
@@ -71,10 +80,24 @@ export default function Page() {
         </FundoVivo>
       </MotionScope>
 
-      {/* As páginas, cada uma com o mini caso. */}
-      <section className="mx-auto max-w-6xl px-4 py-24">
+      {/* As páginas no ar, cada uma com o mini caso. */}
+      <section id="no-ar" className="mx-auto max-w-6xl px-4 py-24">
+        <h2 className="sr-only">Páginas no ar</h2>
         <ul className="grid gap-x-10 gap-y-20 md:grid-cols-2">
-          {portfolio.map((pagina) => (
+          {paginasNoAr.map((pagina) => (
+            <PortfolioCaso key={pagina.id} pagina={pagina} />
+          ))}
+        </ul>
+      </section>
+
+      {/* Projetos anteriores: feitos pela Adsgator e que não estão mais no ar. */}
+      <section id="anteriores" className="mx-auto max-w-6xl px-4 pb-24">
+        <Eyebrow>Projetos anteriores</Eyebrow>
+        <h2 className="mt-6 max-w-3xl font-heading text-4xl leading-[1.05] tracking-tight text-balance sm:text-5xl">
+          Outras páginas feitas pela Adsgator. <span className="text-muted-foreground">Hoje fora do ar.</span>
+        </h2>
+        <ul className="mt-14 grid gap-x-10 gap-y-20 md:grid-cols-2">
+          {anteriores.map((pagina) => (
             <PortfolioCaso key={pagina.id} pagina={pagina} />
           ))}
         </ul>

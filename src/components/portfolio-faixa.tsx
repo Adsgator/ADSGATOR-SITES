@@ -7,11 +7,11 @@ import { motion } from "motion/react";
 import { Eyebrow } from "@/components/eyebrow";
 import { JanelaPagina, usePassarMouse } from "@/components/janela-pagina";
 import { margemDaFila, useFilaNaRolagem } from "@/components/motion/use-fila-na-rolagem";
-import { portfolio, type PaginaPortfolio } from "@/config/portfolio";
+import { paginasNoAr, type PaginaPortfolio } from "@/config/portfolio";
 import { cn } from "@/lib/utils";
 
 // O portfólio no Início (roteiro do site, Início, seção 8): as páginas de
-// config/portfolio.ts numa fila que anda de lado com a rolagem.
+// config/portfolio.ts que estão no ar numa fila que anda de lado com a rolagem.
 
 /**
  * A seção fica presa no topo enquanto a rolagem leva a fila de lado (pedido
@@ -45,7 +45,7 @@ export function PortfolioFaixa() {
           style={{ x }}
           className={cn("mt-10 flex w-max gap-8", margemDaFila)}
         >
-          {portfolio.map((pagina) => (
+          {paginasNoAr.map((pagina) => (
             <Cartao key={pagina.id} pagina={pagina} />
           ))}
         </motion.ul>

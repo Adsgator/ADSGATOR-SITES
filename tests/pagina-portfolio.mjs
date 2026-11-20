@@ -1,4 +1,4 @@
-// Página Portfólio: as 4 páginas com cidade, serviços e mini caso; a página
+// Página Portfólio: as 4 páginas no ar com cidade, serviços e mini caso, os 2 projetos anteriores sem link, o pattern no topo; a página
 // inteira rolando ao passar o mouse (e ao focar o link pelo teclado); o fundo
 // com as páginas no celular; a mensagem pronta do WhatsApp. Roda nos dois modos
 // de animação (o Windows do Lucas está com "Mostrar animações" desligado).
@@ -53,22 +53,32 @@ try {
         `${fotosFundo} fotos visíveis, ${subindo} → ${parada}`,
       );
 
-      // As 4 páginas, cada uma completa.
-      const cartoes = await page.$$eval("main [data-cartao]", (cs) =>
-        cs.map((c) => ({
-          id: c.dataset.cartao,
-          cidade: c.querySelector("h2 + p")?.textContent.trim(),
-          servicos: c.querySelectorAll('ul[aria-label="Serviços"] li').length,
-          caso: c.querySelectorAll("dt").length,
-          link: c.querySelector('a[target="_blank"]')?.href,
-        })),
-      );
-      check(`${rotulo}: 4 páginas`, cartoes.length === 4, cartoes.map((c) => c.id).join(", "));
+      // As 4 páginas no ar, cada uma completa, e os 2 projetos anteriores, sem link.
+      const lerCartoes = (secao) =>
+        page.$$eval(`${secao} [data-cartao]`, (cs) =>
+          cs.map((c) => ({
+            id: c.dataset.cartao,
+            cidade: c.querySelector("h3 + p")?.textContent.trim(),
+            servicos: c.querySelectorAll('ul[aria-label="Serviços"] li').length,
+            caso: c.querySelectorAll("dt").length,
+            link: c.querySelector('a[target="_blank"]')?.href,
+          })),
+        );
+      const cartoes = await lerCartoes("#no-ar");
+      check(`${rotulo}: 4 páginas no ar`, cartoes.length === 4, cartoes.map((c) => c.id).join(", "));
       check(
         `${rotulo}: cada uma com cidade, serviços, o mini caso e o link`,
         cartoes.every((c) => c.cidade && c.servicos >= 2 && c.caso === 3 && c.link?.startsWith("https://")),
         cartoes.map((c) => `${c.id}: ${c.cidade}, ${c.servicos} serviços, ${c.caso} linhas`).join(" | "),
       );
+      const anteriores = await lerCartoes("#anteriores");
+      check(
+        `${rotulo}: 2 projetos anteriores, com serviços e mini caso, sem link`,
+        anteriores.length === 2 && anteriores.every((c) => c.servicos >= 1 && c.caso === 3 && !c.link),
+        anteriores.map((c) => `${c.id}: ${c.servicos} serviços, ${c.caso} linhas, link ${c.link ?? "nenhum"}`).join(" | "),
+      );
+      const pattern = await page.$eval("[data-pattern]", (el) => getComputedStyle(el).backgroundImage);
+      check(`${rotulo}: o pattern da Adsgator no fundo do topo`, pattern.includes("padrao-"), pattern.slice(0, 80));
 
       const posicaoDaFoto = (id) =>
         page.evaluate((i) => {
@@ -96,6 +106,16 @@ try {
         await page.waitForTimeout(1200);
         const voltou = await posicaoDaFoto("planejados");
         check(`${rotulo}: ao tirar o mouse, volta ao topo`, Math.abs(voltou.topo) < 2, `${voltou.topo.toFixed(1)} px`);
+
+        // Um projeto anterior: a foto inteira (das imagens da época) também rola.
+        const antiga = page.locator('[data-cartao="provedor"] [class*="aspect-"]');
+        await antiga.scrollIntoViewIfNeeded();
+        await antiga.hover();
+        const rolouAntiga = await page
+          .waitForFunction(() => document.querySelector('[data-cartao="provedor"] [data-inteira="rolando"]'), null, { timeout: 10_000 })
+          .then(() => true, () => false);
+        check(`${rotulo}: num projeto anterior, a página inteira também rola com o mouse`, rolouAntiga);
+        await page.mouse.move(5, 5);
       }
 
       // Pelo teclado: focar o link do cartão também mostra a página inteira.

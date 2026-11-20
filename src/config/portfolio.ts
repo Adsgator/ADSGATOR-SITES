@@ -7,12 +7,17 @@
 // mostra a altura de cada uma). A cidade e o que cada uma oferece vêm do texto
 // público das páginas (2026-11-20); os serviços, do painel. O mini caso, sem
 // números (decisão 3 A do roteiro), é rascunho do Claude para o Lucas conferir.
+// Projetos anteriores (pedido do Lucas, 2026-11-20): páginas feitas pela
+// Adsgator que não estão mais no ar, sem `site` (sem link) e, quando a página
+// não dizia, sem `cidade`. Fotos das imagens guardadas da época, pelo
+// `scripts/fotos-portfolio-arquivo.mjs`; o texto, do que aparece nelas.
 
 export type PaginaPortfolio = {
   id: string;
   segmento: string;
-  site: string;
-  cidade: string;
+  /** Endereço da página no ar; sem ele, é um projeto anterior. */
+  site?: string;
+  cidade?: string;
   alturaInteira: number;
   servicos: ("Landing page" | "Google Ads" | "Manutenção")[];
   caso: { negocio: string; precisava: string; feito: string };
@@ -71,4 +76,29 @@ export const portfolio: PaginaPortfolio[] = [
       feito: "A página com os ambientes, a galeria de projetos e as dúvidas frequentes.",
     },
   },
+  {
+    id: "sob-medida",
+    segmento: "Móveis sob medida",
+    alturaInteira: 4491,
+    servicos: ["Landing page"],
+    caso: {
+      negocio: "Planejamento, fabricação e instalação de móveis sob medida.",
+      precisava: "Mostrar a experiência e os ambientes já feitos, para quem quer pedir um orçamento.",
+      feito: "A página com os ambientes, o processo, a história da empresa, os projetos já feitos e o orçamento pelo WhatsApp.",
+    },
+  },
+  {
+    id: "provedor",
+    segmento: "Provedor de internet",
+    alturaInteira: 2377,
+    servicos: ["Landing page", "Google Ads"],
+    caso: {
+      negocio: "Internet fibra e internet móvel, revendedor autorizado de uma operadora.",
+      precisava: "Mostrar muitos planos de um jeito fácil de comparar e lançar a internet móvel.",
+      feito: "A página com os planos em cartões, o simulador de chips, o indique e ganhe e a assinatura pelo WhatsApp, e a campanha do Google Ads levando até ela.",
+    },
+  },
 ];
+
+/** As páginas que estão no ar, com link: as da faixa do Início. */
+export const paginasNoAr = portfolio.filter((p) => p.site);

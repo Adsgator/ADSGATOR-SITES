@@ -18,21 +18,25 @@ export function PortfolioCaso({ pagina }: { pagina: PaginaPortfolio }) {
         <JanelaPagina pagina={pagina} ativo={ativo} sizes="(min-width: 768px) 34rem, 92vw" />
         <div className="mt-6 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
           <div>
-            <h2 className="font-heading text-2xl leading-tight sm:text-3xl">{segmento}</h2>
-            <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-              <MapPinIcon className="size-3.5" />
-              {cidade}
-            </p>
+            <h3 className="font-heading text-2xl leading-tight sm:text-3xl">{segmento}</h3>
+            {cidade && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+                <MapPinIcon className="size-3.5" />
+                {cidade}
+              </p>
+            )}
           </div>
-          <a
-            href={`https://${site}/`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-1 pt-1.5 text-sm font-medium underline-offset-4 hover:underline"
-          >
-            Ver a página no ar
-            <ArrowUpRightIcon className="size-4" />
-          </a>
+          {site && (
+            <a
+              href={`https://${site}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center gap-1 pt-1.5 text-sm font-medium underline-offset-4 hover:underline"
+            >
+              Ver a página no ar
+              <ArrowUpRightIcon className="size-4" />
+            </a>
+          )}
         </div>
         <ul aria-label="Serviços" className="mt-4 flex flex-wrap gap-2">
           {servicos.map((servico) => (
