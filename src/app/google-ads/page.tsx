@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 import { AnuncioMontando } from "@/components/anuncio-montando";
-import { BuscasNoAr } from "@/components/buscas-no-ar";
+import { BuscasNoAr } from "@/components/colunas-subindo";
 import { ChamadaFinal } from "@/components/chamada-final";
 import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";

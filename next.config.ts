@@ -48,7 +48,7 @@ const enderecosAntigos: [origem: string, destino: string][] = [
   ["/termos-de-servico", "/termos"],
   ["/politicas-de-privacidade", "/privacidade"],
   ["/politicas-de-reembolso", "/termos#reembolso"],
-  ["/landing-page-pro", "/"],
+  ["/landing-page-pro", "/landing-page"],
   ["/portfolios", "/"],
   ["/portfolio", "/"],
   ["/links", "/"],

@@ -1,0 +1,169 @@
+import { SearchIcon, StarIcon } from "lucide-react";
+
+import { IconeWhatsApp } from "@/components/icone-whatsapp";
+import { cn } from "@/lib/utils";
+
+// Fundo das heros das páginas de serviço (pedido do Lucas, 2026-11-20): peças
+// subindo devagar em colunas, cada uma num ritmo. Aparecem do lado do visual e
+// ficam bem apagadas atrás do texto, para não atrapalhar a leitura. Só CSS
+// (classe `subir` no globals.css): para no botão de pausar da área
+// (MotionScope). Decorativo. Cada página escolhe as peças: as buscas
+// acontecendo (Google Ads) ou as partes de uma página (landing page).
+
+// Duração da volta e o ponto em que cada coluna começa, para não andarem juntas.
+const colunas = [
+  { duracao: 70, atraso: -12 },
+  { duracao: 54, atraso: -40 },
+  { duracao: 82, atraso: -5 },
+  { duracao: 62, atraso: -30 },
+  { duracao: 76, atraso: -50 },
+  { duracao: 58, atraso: -20 },
+];
+
+function ColunasSubindo({ pecas, espaco = "gap-7" }: { pecas: React.ReactNode[]; espaco?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden [mask-image:linear-gradient(transparent,#000_15%,#000_75%,transparent)]"
+    >
+      <div className="flex h-full justify-between gap-4 px-4 [mask-image:linear-gradient(to_right,rgb(0_0_0/0.1),rgb(0_0_0/0.1)_48%,#000_72%)] max-lg:[mask-image:linear-gradient(rgb(0_0_0/0.12),rgb(0_0_0/0.12)_50%,#000_80%)]">
+        {colunas.map(({ duracao, atraso }, c) => {
+          // Cada coluna mostra uma parte diferente da lista.
+          const daColuna = pecas
+            .filter((_, i) => i % colunas.length === c)
+            .concat(pecas.filter((_, i) => i % colunas.length === (c + 3) % colunas.length));
+          return (
+            <div key={c} className={cn("w-52 shrink-0", c >= 3 && "max-sm:hidden", c >= 4 && "max-lg:hidden")}>
+              <div
+                style={{ "--subir-duracao": `${duracao}s`, animationDelay: `${atraso}s` } as React.CSSProperties}
+                className={cn("motion-loop subir flex flex-col", espaco)}
+              >
+                {/* A lista duas vezes, para a volta não ter emenda. */}
+                {[...daColuna, ...daColuna].map((peca, i) => (
+                  <div key={i}>{peca}</div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const buscas = [
+  "eletricista em campinas",
+  "dentista perto de mim",
+  "advogado trabalhista",
+  "encanador 24 horas",
+  "pet shop aberto agora",
+  "conserto de ar condicionado",
+  "nutricionista online",
+  "móveis planejados",
+  "adestrador de cães",
+  "clínica de estética",
+  "chaveiro perto de mim",
+  "fisioterapeuta em sorocaba",
+  "contador para mei",
+  "dedetização residencial",
+  "psicólogo online",
+  "desentupidora",
+  "oficina mecânica",
+  "creche para cães",
+  "vidraçaria em jundiaí",
+  "veterinário 24h",
+  "escola de inglês",
+  "pintor residencial",
+  "marmoraria",
+  "academia perto de mim",
+];
+
+/** Google Ads: as buscas acontecendo agora. */
+export function BuscasNoAr() {
+  return (
+    <ColunasSubindo
+      pecas={buscas.map((busca, i) => (
+        <span
+          key={busca}
+          className="flex items-center gap-2 rounded-full border bg-card/60 px-3.5 py-2 text-xs whitespace-nowrap text-muted-foreground/80"
+        >
+          <SearchIcon className="size-3 shrink-0" />
+          {busca}
+          {i % 5 === 2 && <span className="ml-auto size-1.5 shrink-0 rounded-full bg-brand" />}
+        </span>
+      ))}
+    />
+  );
+}
+
+/** Landing page: as partes de uma página, em contorno, como num rascunho. */
+export function PartesNoAr() {
+  const linha = "block h-1.5 rounded-full bg-muted-foreground/20";
+  const caixa = (rotulo: string, conteudo: React.ReactNode) => (
+    <div key={rotulo} className="rounded-2xl border border-dashed border-muted-foreground/35 bg-card/50 p-3.5">
+      <p className="font-mono text-[0.65rem] text-muted-foreground/80">{rotulo}</p>
+      <div className="mt-2.5">{conteudo}</div>
+    </div>
+  );
+  const partes = [
+    caixa(
+      "Topo",
+      <>
+        <span className={cn(linha, "h-2.5 w-4/5")} />
+        <span className={cn(linha, "mt-1.5 w-3/5")} />
+        <span className="mt-3 block h-5 w-24 rounded-full bg-brand/50" />
+      </>,
+    ),
+    caixa(
+      "Serviços",
+      <div className="grid grid-cols-2 gap-1.5">
+        {[0, 1, 2, 3].map((i) => (
+          <span key={i} className="block h-8 rounded-lg bg-muted-foreground/12" />
+        ))}
+      </div>,
+    ),
+    caixa(
+      "Depoimentos",
+      <>
+        <span className="flex gap-0.5 text-brand/70">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <StarIcon key={i} className="size-3 fill-current" />
+          ))}
+        </span>
+        <span className={cn(linha, "mt-2 w-full")} />
+        <span className={cn(linha, "mt-1.5 w-2/3")} />
+      </>,
+    ),
+    caixa(
+      "WhatsApp",
+      <span className="flex h-6 items-center justify-center gap-1.5 rounded-full bg-success/45 text-[0.6rem] text-white">
+        <IconeWhatsApp className="size-3" />
+        Chamar agora
+      </span>,
+    ),
+    caixa(
+      "Como funciona",
+      <div className="space-y-1.5">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="flex items-center gap-1.5">
+            <span className="size-3 shrink-0 rounded-full bg-brand/45" />
+            <span className={cn(linha, "w-3/4")} />
+          </span>
+        ))}
+      </div>,
+    ),
+    caixa(
+      "Perguntas",
+      <div className="space-y-2">
+        {[0, 1].map((i) => (
+          <span key={i} className="flex items-center justify-between">
+            <span className={cn(linha, "w-2/3")} />
+            <span className="text-[0.65rem] text-muted-foreground/70">+</span>
+          </span>
+        ))}
+      </div>,
+    ),
+  ];
+  // Duas vezes, para as 6 colunas terem peças diferentes em ordens diferentes.
+  return <ColunasSubindo pecas={[...partes, ...partes.slice(3), ...partes.slice(0, 3)]} espaco="gap-6" />;
+}

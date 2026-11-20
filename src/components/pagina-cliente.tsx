@@ -10,12 +10,20 @@ import { cn } from "@/lib/utils";
 // logotipo e paleta próprios, títulos com ou sem serifa conforme o segmento e
 // mais seções, como uma página real da Adsgator. Fluida, de 200 a 270 px de
 // largura; o celular pequeno dos cartões reduz com `scale`.
+//
+// `montados` (página de landing page, topo): mostra só as primeiras partes; as
+// outras ficam como contorno tracejado, ocupando o mesmo lugar (a página não
+// muda de altura enquanto se monta). Sem ele, tudo aparece.
 
-export function PaginaCliente({ s }: { s: Segmento }) {
+/** Quantas partes a página tem, para quem a monta aos poucos. */
+export const PARTES_DA_PAGINA = 5;
+
+export function PaginaCliente({ s, montados }: { s: Segmento; montados?: number }) {
   const cores = { "--fundo": s.fundo, "--destaque": s.destaque } as React.CSSProperties;
   const titulo = s.serifa ? "font-heading font-normal tracking-tight" : "font-extrabold tracking-[-0.02em] uppercase";
   return (
     <div style={cores} className="relative w-full min-w-[200px] bg-[#F7F6F3] text-[#141414]">
+      <Parte i={0} montados={montados}>
       <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 py-2.5 text-white">
         <span className="flex items-center gap-1.5">
           <span
@@ -63,7 +71,9 @@ export function PaginaCliente({ s }: { s: Segmento }) {
           ))}
         </div>
       </div>
+      </Parte>
 
+      <Parte i={1} montados={montados}>
       <div className="px-3 pt-4 pb-3">
         <p className="text-[7px] font-semibold tracking-[0.18em] text-(--fundo) uppercase">O que fazemos</p>
         <p className={cn("mt-1 text-[13px] leading-tight", s.serifa ? "font-heading" : "font-bold")}>Serviços sob medida para você</p>
@@ -79,7 +89,9 @@ export function PaginaCliente({ s }: { s: Segmento }) {
           ))}
         </div>
       </div>
+      </Parte>
 
+      <Parte i={2} montados={montados}>
       <div className="mx-3 overflow-hidden rounded-xl bg-(--fundo) text-white">
         <div style={{ backgroundImage: `url(${s.foto})` }} className="h-16 bg-cover bg-center opacity-80" />
         <div className="p-2.5">
@@ -94,7 +106,9 @@ export function PaginaCliente({ s }: { s: Segmento }) {
           ))}
         </div>
       </div>
+      </Parte>
 
+      <Parte i={3} montados={montados}>
       <div className="m-3 rounded-xl border border-(--fundo)/15 bg-white p-3 text-center">
         <p className={cn("text-[12px] leading-tight", s.serifa ? "font-heading" : "font-bold")}>{s.chamada}</p>
         <span className="mt-2 inline-flex h-6 items-center gap-1 rounded-full bg-[#25D366] px-3 text-[8px] font-semibold text-[#0B2A17]">
@@ -102,7 +116,9 @@ export function PaginaCliente({ s }: { s: Segmento }) {
           Chamar no WhatsApp
         </span>
       </div>
+      </Parte>
 
+      <Parte i={4} montados={montados}>
       <div className="flex items-center justify-between bg-(--fundo) px-3 py-2.5 text-[7px] text-white/70">
         <span className="flex items-center gap-1">
           <MapPinIcon className="size-2.5" />
@@ -110,10 +126,39 @@ export function PaginaCliente({ s }: { s: Segmento }) {
         </span>
         <span>{s.site}</span>
       </div>
+      </Parte>
 
-      <span className="absolute right-2 bottom-12 flex size-8 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg">
+      <span
+        className={cn(
+          "absolute right-2 bottom-12 flex size-8 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-500",
+          montados !== undefined && montados < PARTES_DA_PAGINA && "scale-50 opacity-0",
+        )}
+      >
         <IconeWhatsApp className="size-4" />
       </span>
+    </div>
+  );
+}
+
+/** Uma parte da página. Ainda não montada, o conteúdo fica invisível no mesmo
+ * lugar e um contorno tracejado mostra onde ele vai entrar. */
+function Parte({ i, montados, children }: { i: number; montados?: number; children: React.ReactNode }) {
+  const montada = montados === undefined || i < montados;
+  return (
+    <div data-parte={i} className="relative">
+      <div className={cn("transition-all duration-700 ease-(--ease-out)", !montada && "translate-y-2 opacity-0 blur-[2px]")}>
+        {children}
+      </div>
+      <div
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-1.5 rounded-lg border border-dashed border-[#141414]/30 bg-[#141414]/[0.03] p-2 transition-opacity duration-500",
+          montada && "opacity-0",
+        )}
+      >
+        <span className="block h-1.5 w-1/3 rounded-full bg-[#141414]/15" />
+        <span className="mt-1.5 block h-1.5 w-2/3 rounded-full bg-[#141414]/10" />
+      </div>
     </div>
   );
 }
