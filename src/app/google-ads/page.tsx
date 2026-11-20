@@ -389,7 +389,19 @@ export default function Page() {
                 conta, explicado sem complicação.
               </p>
             </div>
-            <ResumoDoMes />
+            <ResumoDoMes
+              titulo="Resumo do mês · Ampère Elétrica"
+              numeros={[
+                { rotulo: "Pessoas que viram o anúncio", valor: 4812, fracao: 0.88 },
+                { rotulo: "Visitas à página", valor: 386, fracao: 0.56 },
+                { rotulo: "Toques no WhatsApp", valor: 41, fracao: 0.3 },
+              ]}
+              fizemos={[
+                "Cortamos buscas de quem procurava curso, não o serviço",
+                "Os anúncios passaram a aparecer só no seu horário de atendimento",
+                "Testamos um título novo com “atendimento hoje”",
+              ]}
+            />
           </div>
         </div>
       </section>

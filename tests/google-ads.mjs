@@ -151,6 +151,9 @@ try {
         }));
       // Página recarregada: a rolagem das verificações anteriores já passou pelo
       // resumo, e ele anima uma vez só.
+      // Volta ao topo antes de recarregar: o Chrome devolve a rolagem de antes, e
+      // a animação já começaria ao carregar.
+      await rolarPara(0);
       await page.reload({ waitUntil: "networkidle" });
       await rolarPara(0);
       const resumoAntes = await lerResumo();

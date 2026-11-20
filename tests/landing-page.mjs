@@ -145,6 +145,9 @@ try {
       // O roteiro de exemplo: parado até a pessoa chegar; depois, as seções se
       // marcam e o "Aprovado" entra (página recarregada: a rolagem anterior já
       // passou por ele).
+      // Volta ao topo antes de recarregar: o Chrome devolve a rolagem de antes, e
+      // a animação já começaria ao carregar.
+      await rolarPara(0);
       await page.reload({ waitUntil: "networkidle" });
       await rolarPara(0);
       const antesRoteiro = await page.$eval("[data-roteiro]", (r) => r.hasAttribute("data-apareceu"));

@@ -4,6 +4,7 @@ import {
   ActivityIcon,
   ArrowRightIcon,
   BellRingIcon,
+  CheckIcon,
   CalendarCheckIcon,
   DatabaseBackupIcon,
   FileBarChartIcon,
@@ -22,10 +23,12 @@ import { ConferenciasNoAr } from "@/components/colunas-subindo";
 import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";
 import { FundoVivo } from "@/components/fundo-vivo";
+import { IncidenteExemplo } from "@/components/incidente-exemplo";
 import { LinhaDoTempo } from "@/components/linha-do-tempo";
 import { MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
 import { PainelSituacao } from "@/components/painel-situacao";
+import { ResumoDoMes } from "@/components/resumo-do-mes";
 import { buttonVariants } from "@/components/ui/button";
 import { linkWhatsApp, mensagemDaPagina } from "@/config/site";
 import { cn } from "@/lib/utils";
@@ -35,7 +38,11 @@ import { cn } from "@/lib/utils";
 // que entra e o que não entra são da Base ("Serviços e preços"). Sem preço
 // (decisão de 2026-11-20). A linha "Enquanto você trabalha" não diz de quanto
 // em quanto tempo cada conferência roda, para não ficar errada se a rotina
-// mudar.
+// mudar. Rodada de profundidade (Lucas, 2026-11-20): por que cuidar da página
+// (com um caso real, sem nome de cliente), a página monitorada 24 horas (aviso
+// na hora, a qualquer hora; o conserto no horário de trabalho, sem prometer
+// suporte 24 horas), o exemplo de quando algo dá errado, o resumo de cada 3
+// meses, o que cabe nos pequenos ajustes e as dúvidas mais comuns.
 
 export const metadata: Metadata = {
   title: "Manutenção de página",
@@ -60,7 +67,7 @@ const oQueEntra = [
   { icone: ServerIcon, titulo: "Hospedagem", texto: "A página num lugar rápido e seguro." },
   { icone: LockIcon, titulo: "Cadeado de segurança", texto: "O certificado sempre válido." },
   { icone: GlobeIcon, titulo: "Domínio renovado", texto: "Todo ano, antes de vencer." },
-  { icone: ActivityIcon, titulo: "Monitoramento", texto: "A página no ar, o botão do WhatsApp e a medição conferidos." },
+  { icone: ActivityIcon, titulo: "Monitoramento 24 horas", texto: "A página monitorada o tempo todo; o botão do WhatsApp, a medição e o cadeado conferidos todo dia." },
   { icone: RefreshCwIcon, titulo: "Atualizações", texto: "O que a página usa, sempre em dia." },
   { icone: DatabaseBackupIcon, titulo: "Cópias de segurança", texto: "Se algo der errado, a página volta." },
   { icone: PencilIcon, titulo: "Pequenos ajustes", texto: "Até 2 horas por mês: um texto, uma foto, um horário." },
@@ -70,9 +77,9 @@ const oQueEntra = [
 
 const enquantoVoceTrabalha = [
   {
-    quando: "O tempo todo",
-    titulo: "A página no ar",
-    texto: "Se ela cair, a gente fica sabendo na hora.",
+    quando: "24 horas por dia",
+    titulo: "A página monitorada",
+    texto: "Se ela cair, a gente fica sabendo na hora, a qualquer hora.",
     icone: <BellRingIcon className="size-4.5" />,
   },
   {
@@ -96,6 +103,59 @@ const enquantoVoceTrabalha = [
 ];
 
 const naoEntra = ["Página nova", "Mudança de layout", "Seção nova"];
+
+// Exemplos do que cabe nas até 2 horas de pequenos ajustes por mês (Base).
+const cabeNosAjustes = [
+  "Trocar o telefone, o endereço ou o horário",
+  "Trocar uma foto ou um texto",
+  "Incluir um serviço na lista",
+  "Um aviso de feriado ou de férias",
+];
+
+// O que acontece com uma página sem cuidado, e o que a manutenção faz.
+const semCuidado = [
+  {
+    icone: LockIcon,
+    titulo: "O cadeado vence",
+    texto: "O navegador passa a avisar “não seguro”, e muita gente desiste ali.",
+    com: "Renovado sem você ver.",
+  },
+  {
+    icone: GlobeIcon,
+    titulo: "O domínio vence",
+    texto: "A página some do ar, e o endereço pode acabar registrado por outra pessoa.",
+    com: "Renovado antes de vencer.",
+  },
+  {
+    icone: MessageCircleIcon,
+    titulo: "O botão quebra em silêncio",
+    texto: "A página parece normal, mas o WhatsApp para de abrir e ninguém consegue chamar.",
+    com: "Conferido todo dia.",
+  },
+  {
+    icone: ServerIcon,
+    titulo: "A página cai",
+    texto: "O servidor sai do ar, e você só descobre quando um cliente reclama.",
+    com: "Monitorada 24 horas, com aviso na hora.",
+  },
+];
+
+const objecoes = [
+  {
+    duvida: "“Minha página nunca deu problema.”",
+    resposta:
+      "Que bom, e a ideia é continuar assim. Mas o cadeado e o domínio vencem todo ano, e um botão quebrado não avisa ninguém. A manutenção existe para você não descobrir isso por um cliente.",
+  },
+  {
+    duvida: "“Eu mesmo posso cuidar.”",
+    resposta: "Pode. Você recebe os arquivos e a página numa conta no seu nome, e cuida do jeito que preferir.",
+  },
+  {
+    duvida: "“É mais um custo todo mês.”",
+    resposta:
+      "Para quem tem o Google Ads com a Adsgator, já vem incluída. Para quem tem só a página, é o que mantém no ar o que você investiu, sem você correr atrás de hospedagem, renovação e ajuste.",
+  },
+];
 
 const perguntas = [
   {
@@ -143,8 +203,8 @@ export default function Page() {
                 Sua página sempre no ar, sem você se <span className="highlight">preocupar</span>.
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-8 text-muted-foreground">
-                A gente cuida da hospedagem, do cadeado, do domínio e confere a página todo dia. Você cuida do seu
-                negócio.
+                A sua página monitorada 24 horas por dia, e a gente cuida da hospedagem, do cadeado e do domínio. Você
+                cuida do seu negócio.
               </p>
               <div className="mt-10 flex flex-wrap gap-3">
                 <a href={whatsapp} className={botaoMarca}>
@@ -156,7 +216,7 @@ export default function Page() {
                 </a>
               </div>
               <p className="mt-8 font-mono text-xs text-muted-foreground">
-                Sem fidelidade · Suporte em até 2 dias úteis · Inclusa com o Google Ads
+                Monitorada 24 horas · Suporte em até 2 dias úteis · Sem fidelidade
               </p>
             </div>
             <PainelSituacao />
@@ -164,8 +224,40 @@ export default function Page() {
         </FundoVivo>
       </MotionScope>
 
-      {/* 2. O que entra. */}
+      {/* Por que cuidar da página. */}
       <section className="mx-auto max-w-6xl px-4 py-24">
+        <Eyebrow>Por que cuidar da página</Eyebrow>
+        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+          Página sem cuidado <span className="text-muted-foreground">não avisa quando para de funcionar.</span>
+        </h2>
+        <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {semCuidado.map(({ icone: Icone, titulo: t, texto, com }, i) => (
+            <li key={t}>
+              <Reveal delay={i * 100} className="flex h-full flex-col rounded-3xl border bg-card p-6">
+                <span className="flex size-10 items-center justify-center rounded-full bg-muted">
+                  <Icone className="size-4.5" />
+                </span>
+                <h3 className="mt-5 font-heading text-xl leading-tight">{t}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{texto}</p>
+                <p className="mt-auto flex items-center gap-2 border-t pt-4 text-sm font-medium">
+                  <CheckIcon className="size-4 shrink-0 text-success" />
+                  {com}
+                </p>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+        <Reveal className="dark section-ink mt-5 rounded-3xl border bg-background p-8 text-foreground">
+          <p className="font-mono text-xs text-brand">Já aconteceu</p>
+          <p className="mt-3 max-w-3xl font-heading text-2xl leading-snug">
+            Em novembro, a conferência pegou o botão do WhatsApp de duas páginas levando a um número errado. Elas
+            pareciam normais. Foi arrumado no mesmo dia, antes de alguém perceber.
+          </p>
+        </Reveal>
+      </section>
+
+      {/* 2. O que entra. */}
+      <section className="mx-auto max-w-6xl border-t px-4 py-24">
         <Eyebrow>O que entra</Eyebrow>
         <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
           Tudo o que mantém a página de pé. <span className="text-muted-foreground">Num serviço só.</span>
@@ -193,6 +285,40 @@ export default function Page() {
           </h2>
           <div className="mt-14">
             <LinhaDoTempo marcos={enquantoVoceTrabalha} />
+          </div>
+          <div className="mt-20 grid items-start gap-10 lg:grid-cols-2">
+            <div>
+              <h3 className="font-heading text-3xl leading-tight">Quando algo dá errado</h3>
+              <p className="mt-4 leading-7 text-muted-foreground">
+                O aviso chega na hora, a qualquer hora. O conserto vem no começo do horário de trabalho, e você fica
+                sabendo o que houve.
+              </p>
+              <div className="mt-8">
+                <IncidenteExemplo />
+              </div>
+            </div>
+            <div>
+              <h3 className="font-heading text-3xl leading-tight">A cada 3 meses, o resumo</h3>
+              <p className="mt-4 leading-7 text-muted-foreground">
+                Quantas pessoas visitaram a página e quantas tocaram no WhatsApp, e o que foi feito nela.
+              </p>
+              <div className="mt-8">
+                <ResumoDoMes
+                  titulo="Resumo dos últimos 3 meses · Lumière Odontologia"
+                  legenda="no seu WhatsApp"
+                  numeros={[
+                    { rotulo: "Visitas à página", valor: 2140, fracao: 0.9 },
+                    { rotulo: "Toques no WhatsApp", valor: 186, fracao: 0.42 },
+                    { rotulo: "Dias no ar, de 92", valor: 92, fracao: 1 },
+                  ]}
+                  fizemos={[
+                    "Renovamos o cadeado de segurança",
+                    "Atualizamos o horário de sábado",
+                    "Trocamos as fotos da equipe",
+                  ]}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -231,20 +357,51 @@ export default function Page() {
         </div>
       </section>
 
-      {/* 4. O que não entra. */}
-      <section className="mx-auto grid max-w-6xl items-start gap-10 px-4 py-24 lg:grid-cols-[1fr_1.2fr]">
-        <div>
-          <Eyebrow>O que não entra</Eyebrow>
-          <h2 className="mt-6 font-heading text-3xl leading-tight sm:text-4xl">Mudança grande é combinada à parte.</h2>
-          <p className="mt-4 max-w-md text-lg leading-8 text-muted-foreground">
-            Com o preço fechado na conversa, antes de começar.
-          </p>
+      {/* 4. O que cabe nos pequenos ajustes e o que não entra. */}
+      <section className="mx-auto max-w-6xl px-4 py-24">
+        <Eyebrow>Pequenos ajustes</Eyebrow>
+        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+          Até 2 horas por mês <span className="text-muted-foreground">para manter a página em dia.</span>
+        </h2>
+        <div className="mt-14 grid gap-5 md:grid-cols-2">
+          <Reveal className="h-full rounded-3xl border bg-card p-8">
+            <p className="font-mono text-xs text-muted-foreground">Cabe nos pequenos ajustes</p>
+            <ul className="mt-6 space-y-4">
+              {cabeNosAjustes.map((item) => (
+                <li key={item} className="flex gap-3 leading-7">
+                  <CheckIcon className="mt-1 size-5 shrink-0 text-brand" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+          <Reveal delay={120} className="h-full rounded-3xl border p-8">
+            <p className="font-mono text-xs text-muted-foreground">Combinado à parte, com preço fechado antes</p>
+            <ul className="mt-6 space-y-4">
+              {naoEntra.map((item) => (
+                <li key={item} className="flex gap-3 leading-7 text-muted-foreground">
+                  <XIcon className="mt-1 size-5 shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
         </div>
-        <ul className="divide-y border-y lg:mt-14">
-          {naoEntra.map((item) => (
-            <li key={item} className="flex gap-4 py-4 text-lg leading-7 text-muted-foreground">
-              <XIcon className="mt-1 size-5 shrink-0" />
-              {item}
+      </section>
+
+      {/* Talvez você esteja pensando. */}
+      <section className="mx-auto max-w-6xl px-4 pb-24">
+        <Eyebrow>Talvez você esteja pensando</Eyebrow>
+        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+          As dúvidas mais comuns. <span className="text-muted-foreground">E as respostas.</span>
+        </h2>
+        <ul className="mt-14 grid gap-5 md:grid-cols-3">
+          {objecoes.map(({ duvida, resposta }, i) => (
+            <li key={duvida}>
+              <Reveal delay={i * 120} className="h-full rounded-3xl border bg-card p-8">
+                <p className="font-heading text-2xl leading-tight">{duvida}</p>
+                <p className="mt-4 leading-7 text-muted-foreground">{resposta}</p>
+              </Reveal>
             </li>
           ))}
         </ul>

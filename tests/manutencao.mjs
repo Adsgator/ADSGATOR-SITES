@@ -100,6 +100,42 @@ try {
       const acesos = await page.$$eval("[data-aceso]", (e) => e.length);
       check(`${rotulo}: a linha do tempo acende os marcos`, apagados === 0 && acesos === 4, `${apagados} → ${acesos}`);
 
+      // Quando algo dá errado e o resumo de 3 meses: parados até a pessoa chegar
+      // (página recarregada: a rolagem anterior já passou por eles).
+      // Volta ao topo antes de recarregar: o Chrome devolve a rolagem de antes, e
+      // a animação já começaria ao carregar.
+      await rolarPara(0);
+      await page.reload({ waitUntil: "networkidle" });
+      await rolarPara(0);
+      const antes = await page.evaluate(() => ({
+        passos: document.querySelectorAll("[data-passo-visivel]").length,
+        numeros: [...document.querySelectorAll("[data-resumo] .tabular-nums")].map((n) => n.textContent).join(" "),
+      }));
+      await page.$eval("[data-incidente]", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.waitForTimeout(3200);
+      const incidente = await page.$$eval("[data-incidente] li", (lis) => lis.filter((li) => Number(getComputedStyle(li).opacity) > 0.95).length);
+      await page.$eval("[data-resumo]", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.waitForTimeout(2600);
+      const numeros = await page.$$eval("[data-resumo] .tabular-nums", (ns) => ns.map((n) => n.textContent).join(" "));
+      check(
+        `${rotulo}: o exemplo de quando algo dá errado e o resumo de 3 meses entram quando a pessoa chega`,
+        antes.passos === 0 && antes.numeros === "0 0 0" && incidente === 5 && numeros === "2.140 186 92",
+        `antes ${antes.passos} passos e ${antes.numeros}; depois ${incidente} passos e ${numeros}`,
+      );
+
+      const blocos = await page.evaluate(() => ({
+        riscos: [...document.querySelectorAll("h3")].filter((h) => ["O cadeado vence", "O domínio vence", "O botão quebra em silêncio", "A página cai"].includes(h.textContent)).length,
+        caso: document.body.innerText.includes("Já aconteceu"),
+        ajustes: document.body.innerText.includes("Cabe nos pequenos ajustes"),
+        duvidas: [...document.querySelectorAll("li p.font-heading")].filter((p) => p.textContent.startsWith("“")).length,
+        monitorada: document.body.innerText.includes("Monitorada 24 horas"),
+      }));
+      check(
+        `${rotulo}: os 4 riscos com o caso real, os pequenos ajustes, as 3 dúvidas e o monitoramento 24 horas`,
+        blocos.riscos === 4 && blocos.caso && blocos.ajustes && blocos.duvidas === 3 && blocos.monitorada,
+        JSON.stringify(blocos),
+      );
+
       const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check(`${rotulo}: sem sobra lateral`, sobra === 0, `${sobra} px`);
       check(`${rotulo}: console sem erros`, erros.length === 0, erros.join(" | ").slice(0, 400));
