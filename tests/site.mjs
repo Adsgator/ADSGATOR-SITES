@@ -141,10 +141,10 @@ const tituloNaServus = () =>
 
 try {
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
-  check("início abre", (await h1()).includes("Google Ads e landing pages"));
+  check("início abre", (await h1()).includes("chega ao seu WhatsApp"));
   check("sem meta noindex", (await page.locator('meta[name="robots"][content*="noindex"]').count()) === 0);
   check("tema claro por padrão", (await classeHtml()).includes("light") && !(await classeHtml()).includes("dark"));
-  check("botão do WhatsApp", (await page.getByRole("link", { name: "Falar pelo WhatsApp" }).getAttribute("href")) === "https://wa.me/5519998026222");
+  check("botão do WhatsApp, com a mensagem do diagnóstico", ((await page.locator("main").getByRole("link", { name: "Quero um diagnóstico grátis" }).first().getAttribute("href")) ?? "").startsWith("https://wa.me/5519998026222?text="));
   check("título na Servus Slab (Adobe Fonts)", await tituloNaServus());
   await page.screenshot({ path: new URL("inicio-claro.png", saida).pathname.slice(1), fullPage: true });
 
@@ -173,7 +173,7 @@ try {
   }
   await page.locator("header").getByRole("link", { name: "Adsgator, página inicial" }).click();
   await page.waitForURL((u) => u.pathname === "/");
-  check("logo volta para o início", (await h1()).includes("Google Ads"));
+  check("logo volta para o início", (await h1()).includes("chega ao seu WhatsApp"));
   await page.locator("header").getByRole("link", { name: "Ajuda" }).click();
   await page.waitForURL("**/ajuda");
   check("cabeçalho: Ajuda", (await h1()) === "Central de Ajuda");
@@ -230,7 +230,7 @@ try {
   check("404 com mensagem", r404?.status() === 404 && (await page.getByText("Página não encontrada").first().isVisible()));
   await page.getByRole("link", { name: "Voltar para o início" }).click();
   await page.waitForURL((u) => u.pathname === "/");
-  check("404: voltar para o início", (await h1()).includes("Google Ads"));
+  check("404: voltar para o início", (await h1()).includes("chega ao seu WhatsApp"));
 
   // Celular: nada sai para o lado.
   await page.setViewportSize({ width: 375, height: 800 });

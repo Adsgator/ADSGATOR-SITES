@@ -3,11 +3,11 @@
 // borda direita; ao passar o mouse, a foto da página inteira rola até o fim e
 // volta ao sair. Roda nos dois modos de animação (o Windows do Lucas está com
 // "Mostrar animações" desligado).
-// Uso: node tests/portfolio.mjs [endereço]   (padrão: http://localhost:3005/amostra)
+// Uso: node tests/portfolio.mjs [endereço]   (padrão: http://localhost:3005/)
 
 import { chromium } from "playwright-core";
 
-const URL_PAGINA = process.argv[2] ?? "http://localhost:3005/amostra";
+const URL_PAGINA = process.argv[2] ?? "http://localhost:3005/";
 let falhas = 0;
 function check(nome, ok, detalhe = "") {
   console.log(`${ok ? "ok  " : "FALHA"} ${nome}${detalhe ? ` (${detalhe})` : ""}`);
