@@ -112,6 +112,43 @@ try {
       const acesos = await page.$$eval("[data-aceso]", (e) => e.length);
       check(`${rotulo}: a linha do tempo acende os marcos`, apagados === 0 && acesos === 4, `${apagados} → ${acesos}`);
 
+      // O anúncio por dentro: cada parte acende com a rolagem, a mesma no
+      // anúncio e na explicação, e cada explicação fica à vista enquanto acesa
+      // (no celular, abaixo do anúncio preso).
+      const partes = await page.evaluate(() => {
+        const r = document.querySelector("ol:has([data-ativa])").getBoundingClientRect();
+        return { topo: r.top + window.scrollY, fim: r.bottom + window.scrollY };
+      });
+      const vistas = [];
+      for (let k = 0; k <= 20; k++) {
+        await rolarPara(partes.topo - tela.height * 0.65 + ((partes.fim - partes.topo) * k) / 20);
+        vistas.push(
+          await page.evaluate(() => {
+            const itens = [...document.querySelectorAll("ol:has([data-ativa]) > li")];
+            const ativa = itens.findIndex((li) => li.hasAttribute("data-ativa"));
+            const noAnuncio = [...document.querySelectorAll("[data-parte-anuncio]")].findIndex((p) => p.className.includes("ring-brand"));
+            const anuncio = document.querySelector("[data-anuncio-grande]").getBoundingClientRect();
+            const item = itens[ativa].getBoundingClientRect();
+            return { ativa, noAnuncio, aVista: item.top >= anuncio.bottom - 4 || item.left >= anuncio.right - 4, itemTopo: Math.round(item.top), anuncioFim: Math.round(anuncio.bottom) };
+          }),
+        );
+      }
+      const acesas = new Set(vistas.map((v) => v.ativa));
+      check(`${rotulo}: o anúncio por dentro acende as 5 partes, uma por vez`, [0, 1, 2, 3, 4].every((n) => acesas.has(n)), [...acesas].join(","));
+      check(`${rotulo}: a parte acesa no anúncio é a mesma da explicação`, vistas.every((v) => v.ativa === v.noAnuncio), vistas.map((v) => `${v.ativa}/${v.noAnuncio}`).join(" "));
+      // Cada explicação, em algum momento, acesa e inteira à vista (no celular,
+      // a última passa por baixo do anúncio preso só depois de lida, quando a
+      // seção já está acabando).
+      const lidas = [0, 1, 2, 3, 4].filter((n) => vistas.some((v) => v.ativa === n && v.aVista));
+      check(`${rotulo}: cada explicação fica acesa e à vista, fora de trás do anúncio`, lidas.length === 5, `à vista: ${lidas.join(",")}`);
+
+      const blocos = await page.evaluate(() => ({
+        diagnostico: document.body.innerText.includes("Diagnóstico · exemplo"),
+        resumo: document.body.innerText.includes("Resumo do mês · Ampère Elétrica"),
+        objecoes: [...document.querySelectorAll("li p.font-heading")].filter((p) => p.textContent.startsWith("“")).length,
+      }));
+      check(`${rotulo}: o diagnóstico de exemplo, o resumo do mês e as 4 objeções`, blocos.diagnostico && blocos.resumo && blocos.objecoes === 4, JSON.stringify(blocos));
+
       // A verba correndo e a pausa.
       const verba = page.locator(".fluxo").first();
       await verba.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));

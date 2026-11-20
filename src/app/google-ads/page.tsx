@@ -9,11 +9,16 @@ import {
   MapPinIcon,
   MousePointerClickIcon,
   RefreshCwIcon,
+  SearchIcon,
+  SmartphoneIcon,
   UsersIcon,
   XIcon,
 } from "lucide-react";
 
 import { AnuncioMontando } from "@/components/anuncio-montando";
+import { AnuncioPorDentro } from "@/components/anuncio-por-dentro";
+import { DiagnosticoExemplo } from "@/components/diagnostico-exemplo";
+import { ResumoDoMes } from "@/components/resumo-do-mes";
 import { BuscasNoAr } from "@/components/colunas-subindo";
 import { ChamadaFinal } from "@/components/chamada-final";
 import { Eyebrow } from "@/components/eyebrow";
@@ -31,7 +36,10 @@ import { cn } from "@/lib/utils";
 // Página de Google Ads, na ordem do roteiro do site (ADSGATOR-PAINEL,
 // DOCS/ROTEIRO-SITE.md, "Google Ads"), aprovado pelo Lucas em 2026-11-20. Sem
 // preço (decisão de 2026-11-20): o investimento é dito na conversa, depois do
-// diagnóstico.
+// diagnóstico. Rodada de profundidade (Lucas, 2026-11-20): o porquê do Google,
+// o diagnóstico de exemplo, o que cada passo do começo quer dizer (processo de
+// Google Ads da Base), o anúncio por dentro, o que a revisão olha, o resumo do
+// mês e as objeções reais ("Desconto e objeções", processo comercial da Base).
 
 export const metadata: Metadata = {
   title: "Gestão de Google Ads",
@@ -58,12 +66,82 @@ const diagnostico = [
   { icone: MapPinIcon, titulo: "Quantos contatos a verba compra", texto: "para você saber o que esperar antes de investir." },
 ];
 
+const porQueGoogle = [
+  {
+    icone: MousePointerClickIcon,
+    titulo: "Você paga pelo clique",
+    texto: "Na pesquisa do Google, o anúncio aparecer não custa nada. Você paga quando alguém clica.",
+  },
+  {
+    icone: MapPinIcon,
+    titulo: "Você escolhe onde e quando",
+    texto: "As cidades em que você atende e os horários em que você responde.",
+  },
+  {
+    icone: FileBarChartIcon,
+    titulo: "Você vê quem chamou",
+    texto: "Cada toque no WhatsApp é medido, e o resumo do mês mostra o que chegou.",
+  },
+];
+
+// Do processo de Google Ads da Base (etapas 3 a 8), no que o cliente ganha.
 const comeco = [
-  { titulo: "A conta do Google Ads", texto: "Criada no seu nome, ou conferida, se você já tem uma." },
-  { titulo: "O seu perfil no Google", texto: "Criado ou ajustado, com os dados do seu negócio certos." },
-  { titulo: "A medição dos contatos", texto: "Cada toque no WhatsApp é contado, para você saber o que o anúncio trouxe." },
-  { titulo: "A campanha", texto: "Montada para as buscas de quem quer contratar, na sua região." },
-  { titulo: "Os visuais dos anúncios", texto: "As imagens e os textos, com a cara do seu negócio." },
+  {
+    titulo: "A conta do Google Ads",
+    texto: "Criada no seu nome, ou conferida, se você já tem uma: campanhas antigas pausadas, a verificação do Google feita e a forma de pagamento conferida.",
+  },
+  {
+    titulo: "O seu perfil no Google",
+    texto: "Nome, categoria, área atendida, horário, telefone, WhatsApp e fotos conferidos, e o perfil ligado aos anúncios.",
+  },
+  {
+    titulo: "A medição dos contatos",
+    texto: "Cada toque no WhatsApp vira um contato contado no Google Ads, testado antes de a campanha ir ao ar, com o aviso de cookies funcionando.",
+  },
+  {
+    titulo: "A campanha",
+    texto: "As palavras de quem quer contratar, não de quem só pesquisa; as cidades e os horários em que você atende; e a lista do que não interessa, para a verba não ir embora em clique errado.",
+  },
+  {
+    titulo: "Os anúncios",
+    texto: "Até 15 títulos e 4 descrições por grupo, os links extras, as frases de destaque e o botão do WhatsApp no próprio anúncio.",
+  },
+];
+
+// O que a revisão semanal olha (processo de Google Ads da Base, etapa 9, e o
+// painel: termos, negativas, conversões, saldo e mudanças feitas por fora).
+const revisao = [
+  "O que as pessoas digitaram, e o que cortar",
+  "Os contatos que chegaram e de onde vieram",
+  "Quanto custou cada contato",
+  "Os anúncios que funcionam melhor",
+  "O saldo e o ritmo do gasto",
+  "Se alguém mexeu na conta por fora",
+];
+
+// "Desconto e objeções" (processo comercial da Base): o caminho de cada
+// resposta, em texto de site.
+const objecoes = [
+  {
+    duvida: "“Já tentei e não deu certo.”",
+    resposta:
+      "Mostre o que foi feito: a conta, a página, quanto foi gasto. Quase sempre dá para achar o motivo, e a gente explica em palavras simples o que muda, sem falar mal de quem fez antes.",
+  },
+  {
+    duvida: "“E se não der resultado?”",
+    resposta:
+      "Ninguém sério promete resultado. Os primeiros meses são de ajuste, mas já no primeiro mês você vê os números no resumo. E é sem fidelidade.",
+  },
+  {
+    duvida: "“Está caro.”",
+    resposta:
+      "Vale entender o que pesa: a gestão, a verba ou a página. Dá para começar com uma verba menor, numa região menor, ou só com o Google Ads usando o site que você já tem.",
+  },
+  {
+    duvida: "“Eu mesmo faço.”",
+    resposta:
+      "Ótimo, tem quem faça bem. Se precisar de ajuda numa parte, como a medição dos contatos, dá para conversar. A porta fica aberta.",
+  },
 ];
 
 const todoMes = [
@@ -132,11 +210,6 @@ const perguntas = [
       </>
     ),
   },
-  {
-    pergunta: "Vocês garantem resultado?",
-    resposta:
-      "Ninguém sério garante. Garantimos que quem procura o seu serviço vai encontrar você, e todo mês você vê o que chegou.",
-  },
   { pergunta: "Quem atende os contatos?", resposta: "Você. O anúncio traz a conversa; quem fecha é você." },
 ];
 
@@ -178,41 +251,78 @@ export default function Page() {
         </FundoVivo>
       </MotionScope>
 
-      {/* 2. Antes de começar, o diagnóstico. */}
+      {/* Por que o Google: quem procura já quer contratar. */}
       <section className="mx-auto max-w-6xl px-4 py-24">
-        <Eyebrow>Antes de começar</Eyebrow>
+        <Eyebrow>Por que o Google</Eyebrow>
         <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
-          Primeiro, o diagnóstico. <span className="text-muted-foreground">Grátis, antes de você decidir.</span>
+          Quem procura no Google <span className="text-muted-foreground">já quer contratar.</span>
         </h2>
-        <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-          Antes de falar em verba, a gente olha a sua região. Assim você começa com a verba certa para a sua realidade,
-          e não com um número chutado.
-        </p>
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
-          {diagnostico.map(({ icone: Icone, titulo: t, texto }, i) => (
-            <Reveal key={t} delay={i * 120}>
-              <div className="h-full rounded-3xl border bg-card p-7">
-                <span className="flex size-11 items-center justify-center rounded-full bg-brand/15 text-foreground">
-                  <Icone className="size-5" />
-                </span>
-                <h3 className="mt-6 font-heading text-2xl leading-tight">{t}</h3>
-                <p className="mt-2 leading-7 text-muted-foreground">{texto}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-        <Reveal delay={360}>
-          <div className="mt-5 flex flex-col gap-5 rounded-3xl border bg-card p-7 md:flex-row md:items-center md:justify-between">
-            <p className="max-w-md font-heading text-2xl leading-tight">
-              A verba é indicada para a sua realidade. <span className="text-muted-foreground">E quem escolhe é você.</span>
+        <div className="mt-14 grid gap-5 md:grid-cols-2">
+          <Reveal className="h-full rounded-3xl border bg-card p-8">
+            <span className="flex size-11 items-center justify-center rounded-full bg-muted">
+              <SmartphoneIcon className="size-5" />
+            </span>
+            <p className="mt-6 font-mono text-xs text-muted-foreground">Nas redes sociais</p>
+            <h3 className="mt-2 font-heading text-2xl leading-tight">O anúncio interrompe quem está rolando o feed.</h3>
+            <p className="mt-3 leading-7 text-muted-foreground">
+              A pessoa ainda não pensou no seu serviço. Serve para ser lembrado; para ser chamado hoje, ela precisa
+              estar precisando.
             </p>
-            <div aria-hidden="true" className="flex flex-wrap gap-2 text-sm">
-              <span className="rounded-full border px-4 py-2 text-muted-foreground">Começar menor</span>
-              <span className="rounded-full bg-brand px-4 py-2 font-medium text-brand-foreground">Indicada para a sua região</span>
-              <span className="rounded-full border px-4 py-2 text-muted-foreground">Ir mais longe</span>
-            </div>
+          </Reveal>
+          <Reveal delay={120} className="dark section-ink h-full rounded-3xl border bg-background p-8 text-foreground">
+            <span className="flex size-11 items-center justify-center rounded-full bg-brand text-brand-foreground">
+              <SearchIcon className="size-5" />
+            </span>
+            <p className="mt-6 font-mono text-xs text-brand">No Google</p>
+            <h3 className="mt-2 font-heading text-2xl leading-tight">O anúncio aparece para quem acabou de digitar o seu serviço.</h3>
+            <p className="mt-3 leading-7 text-muted-foreground">
+              A pessoa já quer resolver e está escolhendo quem chamar. A Adsgator faz você ser essa escolha.
+            </p>
+          </Reveal>
+        </div>
+        <ul className="mt-5 grid gap-5 md:grid-cols-3">
+          {porQueGoogle.map(({ icone: Icone, titulo: t, texto }, i) => (
+            <li key={t}>
+              <Reveal delay={i * 100} className="flex h-full gap-4 rounded-3xl border p-6">
+                <Icone className="mt-1 size-5 shrink-0" />
+                <div>
+                  <h3 className="font-heading text-xl leading-tight">{t}</h3>
+                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{texto}</p>
+                </div>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* 2. Antes de começar, o diagnóstico, com um exemplo. */}
+      <section className="border-t">
+        <div className="mx-auto grid max-w-6xl gap-14 px-4 py-24 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <Eyebrow>Antes de começar</Eyebrow>
+            <h2 className={cn(titulo, "mt-6")}>
+              Primeiro, o diagnóstico. <span className="text-muted-foreground">Grátis, antes de você decidir.</span>
+            </h2>
+            <p className="mt-6 text-lg leading-8 text-muted-foreground">
+              Antes de falar em verba, a gente olha a sua região. Assim você começa com a verba certa para a sua
+              realidade, e não com um número chutado.
+            </p>
+            <ul className="mt-10 space-y-5">
+              {diagnostico.map(({ icone: Icone, titulo: t, texto }) => (
+                <li key={t} className="flex gap-4">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand/15">
+                    <Icone className="size-4.5" />
+                  </span>
+                  <div>
+                    <h3 className="font-heading text-xl leading-tight">{t}</h3>
+                    <p className="mt-1 leading-7 text-muted-foreground">{texto}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
-        </Reveal>
+          <DiagnosticoExemplo />
+        </div>
       </section>
 
       {/* 3. O que fazemos para começar. */}
@@ -228,19 +338,55 @@ export default function Page() {
           </div>
           <ListaQueSeMarca
             itens={comeco}
-            final={{ titulo: "No ar.", texto: "Quem procura o seu serviço na sua região já pode encontrar você." }}
+            final={{
+              titulo: "No ar.",
+              texto: "Quem procura o seu serviço na sua região já pode encontrar você. Nas primeiras 48 horas, a gente confere se os anúncios foram aprovados e se o gasto começou.",
+            }}
           />
         </div>
       </section>
 
-      {/* 4. Todo mês. */}
-      <section className="mx-auto max-w-6xl px-4 py-24">
-        <Eyebrow>Depois, todo mês</Eyebrow>
-        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
-          A conta não fica largada. <span className="text-muted-foreground">Toda semana tem alguém olhando.</span>
-        </h2>
-        <div className="mt-16">
-          <LinhaDoTempo marcos={todoMes} />
+      {/* O anúncio por dentro. */}
+      <section className="border-t">
+        <div className="mx-auto max-w-6xl px-4 py-24">
+          <Eyebrow>O anúncio por dentro</Eyebrow>
+          <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+            Cada parte do anúncio <span className="text-muted-foreground">tem um trabalho.</span>
+          </h2>
+          <div className="mt-14">
+            <AnuncioPorDentro />
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Todo mês: a linha do tempo, o que a revisão olha e o resumo. */}
+      <section className="border-t">
+        <div className="mx-auto max-w-6xl px-4 py-24">
+          <Eyebrow>Depois, todo mês</Eyebrow>
+          <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+            A conta não fica largada. <span className="text-muted-foreground">Toda semana tem alguém olhando.</span>
+          </h2>
+          <div className="mt-16">
+            <LinhaDoTempo marcos={todoMes} />
+          </div>
+          <div className="mt-20 grid items-start gap-10 lg:grid-cols-2">
+            <div>
+              <h3 className="font-heading text-3xl leading-tight">O que a revisão de toda semana olha</h3>
+              <ul className="mt-6 divide-y border-y">
+                {revisao.map((item) => (
+                  <li key={item} className="flex gap-4 py-4 leading-7">
+                    <CheckIcon className="mt-1 size-5 shrink-0 text-brand" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-6 leading-7 text-muted-foreground">
+                E todo mês o resumo chega no seu WhatsApp e no seu e-mail, com o que chegou e o que foi feito na sua
+                conta, explicado sem complicação.
+              </p>
+            </div>
+            <ResumoDoMes />
+          </div>
         </div>
       </section>
 
@@ -291,6 +437,24 @@ export default function Page() {
             </div>
           </div>
         </Reveal>
+      </section>
+
+      {/* Talvez você esteja pensando: as objeções reais. */}
+      <section className="mx-auto max-w-6xl px-4 pt-24">
+        <Eyebrow>Talvez você esteja pensando</Eyebrow>
+        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+          As dúvidas de quem já conversou com a gente. <span className="text-muted-foreground">E as respostas.</span>
+        </h2>
+        <ul className="mt-14 grid gap-5 md:grid-cols-2">
+          {objecoes.map(({ duvida, resposta }, i) => (
+            <li key={duvida}>
+              <Reveal delay={(i % 2) * 120} className="h-full rounded-3xl border bg-card p-8">
+                <p className="font-heading text-2xl leading-tight sm:text-3xl">{duvida}</p>
+                <p className="mt-4 leading-7 text-muted-foreground">{resposta}</p>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* 7 e 8. Para quem é e o que não inclui. */}
