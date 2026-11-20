@@ -1336,3 +1336,14 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
     falha é a trava de "texto aprovado" da Privacidade (trecho da Adobe
     Fonts esperando o Lucas).
   - Pendente: o mesmo da entrada anterior.
+- 2026-11-20: o plano geral foi reescrito (2026-11-19) e pôs o site primeiro:
+  esta Fase 1B é a Parte 1 dele, seguida da Fase 3 (Parte 2), da Fase 2
+  (Parte 3) e da Fase 4 (Partes 4 e 5). O Lucas aprovou a amostra 2, vista no
+  computador dele (`next dev -p 3005`; a prévia antiga da Vercel não existe
+  mais), e pediu mais modernidade, movimento e efeitos de rolagem, com
+  https://zouti.com.br/, https://vercel.com/ e https://www.framer.com/ de
+  referência e o tema mais claro que escuro. O detalhe da continuação (amostra
+  3: referências estudadas, direção, passos e a decisão sobre a biblioteca de
+  movimento) está no plano geral, Parte 1. Mudou o que valia na Fase 3: o
+  botão principal leva ao WhatsApp, e o link do checkout vai só quando o
+  cliente decide fechar.
