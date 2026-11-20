@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
 
-import { BumerangueFrame } from "@/components/bumerangue";
 import { BuscasCidade } from "@/components/buscas-cidade";
 import { CaminhoCliente } from "@/components/caminho-cliente";
-import { CliqueAnimado } from "@/components/clique-animado";
+import { ChamadaFinal } from "@/components/chamada-final";
 import { MapaBuscas } from "@/components/mapa-buscas";
 import { HojeComAdsgator } from "@/components/hoje-com-adsgator";
 import { PorQueAdsgator } from "@/components/por-que-adsgator";
@@ -18,7 +17,7 @@ import { Marquee } from "@/components/motion/marquee";
 import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
 import { TelasServico } from "@/components/telas-servico";
 import { buttonVariants } from "@/components/ui/button";
-import { linkWhatsApp, mensagemDiagnostico, site } from "@/config/site";
+import { linkWhatsApp, mensagemDiagnostico } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 // Amostra 3 da Fase 1B, só no branch: a amostra 2 (aprovada em 2026-11-20)
@@ -164,46 +163,16 @@ export default function Page() {
         </section>
       </>
 
-      {/* Ponte para a chamada final: o fundo passa para o amarelo aos poucos,
-          sem corte seco entre as seções. */}
-      <div aria-hidden="true" className="h-40 bg-[linear-gradient(to_bottom,transparent,var(--brand))]" />
-
-      {/* Chamada final no amarelo da marca, com os cantos em verde. */}
-      <section className="bg-brand text-brand-foreground">
-        <div className="mx-auto max-w-6xl px-4 py-24">
-          <BumerangueFrame
-            cantoClassName="text-ink"
-            className="grid items-center gap-10 px-6 py-14 sm:px-16 lg:grid-cols-[1fr_auto]"
-          >
-            <div>
-              <h2 className="font-heading text-4xl leading-[1.05] tracking-tight sm:text-6xl">
-                Seu negócio no Google.
-                <br />
-                Com página própria.
-              </h2>
-              <p className="mt-6 max-w-xl text-lg leading-8">
-                Fale com a Adsgator pelo WhatsApp, de segunda a sexta, das 9h às 12h
-                e das 13h30 às 17h.
-              </p>
-              <a
-                href={site.whatsapp.link}
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "mt-10 h-12 rounded-full bg-ink px-7 text-base text-paper hover:bg-ink/90",
-                )}
-              >
-                Chamar no WhatsApp
-                <ArrowRightIcon />
-              </a>
-            </div>
-            {/* O cursor da marca clica no anúncio, a página abre e o clique no
-                WhatsApp vira conversa (pedido do Lucas, 2026-11-20). */}
-            <div className="mx-auto lg:mx-0">
-              <CliqueAnimado />
-            </div>
-          </BumerangueFrame>
-        </div>
-      </section>
+      <ChamadaFinal
+        titulo={
+          <>
+            Quem procura você já está no Google.
+            <br />
+            A gente leva até o seu WhatsApp.
+          </>
+        }
+        mensagem={mensagemDiagnostico}
+      />
 
       {/* As peças do sistema, para aprovar. */}
       <section className="mx-auto max-w-6xl px-4 py-24">

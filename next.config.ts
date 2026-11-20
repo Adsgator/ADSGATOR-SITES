@@ -49,7 +49,6 @@ const enderecosAntigos: [origem: string, destino: string][] = [
   ["/politicas-de-privacidade", "/privacidade"],
   ["/politicas-de-reembolso", "/termos#reembolso"],
   ["/landing-page-pro", "/"],
-  ["/google-ads", "/"],
   ["/portfolios", "/"],
   ["/portfolio", "/"],
   ["/links", "/"],

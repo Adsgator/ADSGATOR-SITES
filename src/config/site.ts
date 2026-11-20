@@ -21,3 +21,13 @@ export function linkWhatsApp(mensagem: string) {
 
 export const mensagemDiagnostico =
   "Olá! Vim pelo site da Adsgator e queria um diagnóstico grátis para o meu negócio.";
+
+/** Mensagem pronta das páginas que têm a sua; as outras usam a geral. */
+const mensagensPorPagina: Record<string, string> = {
+  "/google-ads":
+    "Olá! Vim pelo site da Adsgator, pela página de Google Ads, e queria um diagnóstico grátis para o meu negócio.",
+};
+
+export function mensagemDaPagina(caminho: string) {
+  return mensagensPorPagina[caminho] ?? mensagemDiagnostico;
+}

@@ -14,10 +14,11 @@ import {
 
 import { BrandLogo } from "@/components/brand";
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
+import { LinkConvite } from "@/components/link-convite";
 import { IconeGoogle, IconeInstagram, IconeLinkedIn } from "@/components/icones-redes";
 import { RodapeLogo } from "@/components/rodape-logo";
 import { servicos } from "@/config/navegacao";
-import { linkWhatsApp, mensagemDiagnostico, site } from "@/config/site";
+import { site } from "@/config/site";
 
 const colunas: { titulo: string; links: { href: string; rotulo: string; icone: LucideIcon }[] }[] = [
   { titulo: "Serviços", links: servicos.map(({ href, titulo, icone }) => ({ href, rotulo: titulo, icone })) },
@@ -63,13 +64,12 @@ export function SiteFooter() {
               Conte sobre o seu negócio e receba um diagnóstico grátis pelo WhatsApp.
             </p>
           </div>
-          <a
-            href={linkWhatsApp(mensagemDiagnostico)}
+          <LinkConvite
             className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-brand px-6 text-base font-medium text-brand-foreground transition-colors hover:bg-brand/90"
           >
             <IconeWhatsApp className="size-5" />
             Quero um diagnóstico grátis
-          </a>
+          </LinkConvite>
         </div>
 
         <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1.5fr] lg:gap-0 lg:divide-x lg:divide-white/10">

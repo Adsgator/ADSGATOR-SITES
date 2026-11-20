@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
 import { MenuIcon } from "lucide-react";
 
@@ -10,7 +11,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { paginas, servicos } from "@/config/navegacao";
-import { linkWhatsApp, mensagemDiagnostico, site } from "@/config/site";
+import { linkWhatsApp, mensagemDaPagina, site } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 // Navegação do topo, depois do "Serviços" (roteiro do site, seção 2).
@@ -45,6 +46,8 @@ export function SiteHeader() {
     () => false,
   );
   const [menuAberto, setMenuAberto] = useState(false);
+  // O WhatsApp abre com a mensagem da página aberta (roteiro do site, seção 1).
+  const whatsapp = linkWhatsApp(mensagemDaPagina(usePathname()));
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 px-3">
@@ -68,7 +71,7 @@ export function SiteHeader() {
             </Link>
           ))}
           <ThemeToggle />
-          <a href={linkWhatsApp(mensagemDiagnostico)} className={cn(botaoMarca, "ml-1")}>
+          <a href={whatsapp} className={cn(botaoMarca, "ml-1")}>
             Diagnóstico grátis
           </a>
         </nav>
@@ -118,7 +121,7 @@ export function SiteHeader() {
                 ))}
               </nav>
               <div className="mt-auto space-y-3 pt-8 text-sm text-muted-foreground">
-                <a href={linkWhatsApp(mensagemDiagnostico)} className={cn(botaoMarca, "h-11 w-full")}>
+                <a href={whatsapp} className={cn(botaoMarca, "h-11 w-full")}>
                   Pedir um diagnóstico grátis
                 </a>
                 <p>{site.horario}</p>

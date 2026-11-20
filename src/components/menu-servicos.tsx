@@ -5,8 +5,8 @@ import { useRef, useState } from "react";
 import { ArrowRightIcon, ChevronDownIcon } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { LinkConvite } from "@/components/link-convite";
 import { servicos } from "@/config/navegacao";
-import { linkWhatsApp, mensagemDiagnostico } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 /**
@@ -75,8 +75,7 @@ export function MenuServicos() {
               </Link>
             ))}
           </div>
-          <a
-            href={linkWhatsApp(mensagemDiagnostico)}
+          <LinkConvite
             className="mt-2 flex items-center justify-between rounded-2xl bg-muted/60 px-4 py-3 text-sm transition-colors hover:bg-muted"
           >
             <span>
@@ -84,7 +83,7 @@ export function MenuServicos() {
               <span className="text-muted-foreground">Peça um diagnóstico grátis.</span>
             </span>
             <ArrowRightIcon className="size-4" />
-          </a>
+          </LinkConvite>
         </div>
       </div>
     </div>

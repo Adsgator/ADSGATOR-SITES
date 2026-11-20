@@ -235,6 +235,18 @@
   }
 }
 
+/* Ponto que corre de uma ponta à outra de uma faixa (a verba indo direto ao
+   Google, na página de Google Ads). Anima uma caixa da largura da faixa, com o
+   ponto na ponta direita, para andar por transform. */
+@keyframes fluxo {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 /* Perguntas frequentes (<details>): abrem e fecham suavemente nos navegadores
    que já animam a altura automática; nos outros, abrem na hora. */
 :root {
@@ -273,6 +285,9 @@ details[open]::details-content {
     display: flex;
     width: max-content;
     animation: marquee var(--marquee-duration, 40s) linear infinite;
+  }
+  .fluxo {
+    animation: fluxo 2.4s linear infinite;
   }
   .marquee:hover .marquee-track,
   [data-paused] .marquee-track,

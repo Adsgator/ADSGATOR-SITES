@@ -54,7 +54,7 @@ const antigos = [
   ["/politicas-de-privacidade/", "/privacidade"],
   ["/politicas-de-reembolso/", "/termos#reembolso"],
   ["/landing-page-pro/", "/"],
-  ["/google-ads/", "/"],
+  ["/google-ads/", "/google-ads"],
   ["/portfolios/?utm_source=prospection", "/?utm_source=prospection"],
   ["/links/", "/"],
   ["/home/", "/"],
