@@ -120,16 +120,9 @@ const perguntas = [
   { pergunta: "Em quanto tempo vocês respondem?", resposta: "Em até 2 dias úteis." },
   {
     pergunta: "Vocês cuidam de um site que eu já tenho?",
-    resposta: (
-      <>
-        A manutenção é para as páginas feitas pela Adsgator. Se você já tem um site, me chama que a gente conversa
-        sobre o que dá para fazer, ou sobre uma{" "}
-        <Link className="font-medium text-foreground underline underline-offset-4" href="/landing-page">
-          landing page nova
-        </Link>
-        .
-      </>
-    ),
+    // Base, "Serviços e preços", Manutenção (Lucas, 2026-11-20).
+    resposta:
+      "A manutenção é para as páginas feitas pela Adsgator. Se você já tem um site e quer que a gente cuide dele, primeiro fazemos uma análise do que precisa ser feito. Se for preciso refazer o site ou fazer muitas mudanças, você recebe um orçamento à parte.",
   },
 ];
 
