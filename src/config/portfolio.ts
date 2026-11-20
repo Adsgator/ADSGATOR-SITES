@@ -1,23 +1,25 @@
-// Páginas do portfólio: feitas pela Adsgator e no ar. As quatro escolhidas em
-// 2026-11-20 (o Lucas aprovou; o portfólio todo está autorizado pelos
-// clientes, segundo ele). Usadas pela faixa do Início e pela página
-// Portfólio. Fotos tiradas das páginas no ar em 2026-11-20
-// (`public/portfolio/`): a primeira tela (`-pc`, `-cel`) e a página inteira
-// (`-inteira`, 960 px de largura, pelo `scripts/fotos-portfolio.mjs`, que
-// mostra a altura de cada uma). A cidade e o que cada uma oferece vêm do texto
-// público das páginas (2026-11-20); os serviços, do painel. O mini caso, sem
-// números (decisão 3 A do roteiro), é rascunho do Claude para o Lucas conferir.
-// Páginas que não estão mais no ar (pedido do Lucas, 2026-11-20) entram na
-// mesma grade, sem `site` (sem link): fotos das imagens guardadas da época,
-// pelo `scripts/fotos-portfolio-arquivo.mjs`; o texto, do que aparece nelas e
-// do que o Lucas contou (cidade). A de móveis sob medida não é de cliente: foi
-// feita pela Adsgator como demonstração, e aparece marcada como conceito.
+// Páginas do portfólio, feitas pela Adsgator (o portfólio todo está autorizado
+// pelos clientes, segundo o Lucas). Usadas pela página Portfólio, pelo fundo do
+// topo dela e, as 5 primeiras, pela faixa do Início. Sem link para as páginas
+// (decisão do Lucas, 2026-11-20: link direto leva tráfego desqualificado; quem
+// quiser ver tem o endereço na janela), e sem separar as que estão no ar das que
+// não estão: o portfólio mostra a qualidade da entrega.
+//
+// Fotos em `public/portfolio/`: a primeira tela (`-pc`, `-cel`) e a página
+// inteira (`-inteira`, 960 px de largura), pelo `scripts/fotos-portfolio.mjs`
+// (as páginas no ar e as que rodam no computador) ou pelo
+// `scripts/fotos-portfolio-arquivo.mjs` (das imagens guardadas da época). A
+// cidade e o que cada uma oferece vêm do texto das páginas e do que o Lucas
+// contou; os serviços, do painel. O mini caso, sem números (decisão 3 A do
+// roteiro), é rascunho do Claude para o Lucas conferir. A de móveis sob medida
+// não é de cliente: foi feita pela Adsgator como demonstração, e aparece
+// marcada como conceito (decisão do Lucas, 2026-11-20).
 
 export type PaginaPortfolio = {
   id: string;
   segmento: string;
-  /** Endereço da página no ar; sem ele, o cartão fica sem link. */
-  site?: string;
+  /** O endereço, mostrado na janela (sem link). */
+  site: string;
   cidade: string;
   /** Página de demonstração, sem cliente real. */
   conceito?: boolean;
@@ -41,19 +43,6 @@ export const portfolio: PaginaPortfolio[] = [
     },
   },
   {
-    id: "creche",
-    segmento: "Creche e hospedagem canina",
-    site: "natuespacocanino.com.br",
-    cidade: "Piranguçu (MG)",
-    alturaInteira: 8293,
-    servicos: ["Landing page", "Manutenção"],
-    caso: {
-      negocio: "Creche educativa e hospedagem para cães.",
-      precisava: "Explicar que é mais do que uma creche e mostrar a rotina e a estrutura.",
-      feito: "A página com a creche e a hospedagem lado a lado, a rotina dos cães, as fotos do espaço e o mapa.",
-    },
-  },
-  {
     id: "escritorios",
     segmento: "Escritório virtual e endereço fiscal",
     site: "wesharescritorios.com.br",
@@ -64,6 +53,19 @@ export const portfolio: PaginaPortfolio[] = [
       negocio: "Endereço fiscal, escritórios privativos e salas de reunião.",
       precisava: "Aparecer para quem procura endereço fiscal na cidade e mostrar os planos e o espaço com clareza.",
       feito: "A página com os planos, as fotos do espaço e as perguntas frequentes, e a campanha do Google Ads levando até ela.",
+    },
+  },
+  {
+    id: "nutricionista",
+    segmento: "Nutrição",
+    site: "anaesternutricionista.com.br",
+    cidade: "Poços de Caldas (MG)",
+    alturaInteira: 6621,
+    servicos: ["Landing page", "Google Ads"],
+    caso: {
+      negocio: "Nutricionista com acompanhamento individual, presencial e online.",
+      precisava: "Mostrar um atendimento diferente das dietas restritivas e passar confiança para a primeira consulta.",
+      feito: "A página com o jeito dela de atender, como funciona o acompanhamento, as avaliações do Google, o consultório e o mapa.",
     },
   },
   {
@@ -80,8 +82,35 @@ export const portfolio: PaginaPortfolio[] = [
     },
   },
   {
+    id: "multas",
+    segmento: "Recursos de multas de trânsito",
+    site: "cancelamulta.com.br",
+    cidade: "Online, em todo o Brasil",
+    alturaInteira: 4088,
+    servicos: ["Landing page", "Google Ads"],
+    caso: {
+      negocio: "Recursos administrativos de multas e defesa da CNH, com atendimento online.",
+      precisava: "Explicar cada situação de um jeito simples, para quem levou multa ou pode ter a CNH suspensa.",
+      feito: "A página com as situações em cartões, por que confiar, os valores de cada recurso e as perguntas frequentes, e a campanha do Google Ads levando até ela.",
+    },
+  },
+  {
+    id: "mentoria",
+    segmento: "Mentoria de adestramento",
+    site: "mentoria.abeak9adestramento.com.br",
+    cidade: "Online, em todo o Brasil",
+    alturaInteira: 7016,
+    servicos: ["Landing page", "Google Ads", "Manutenção"],
+    caso: {
+      negocio: "Mentoria individual e online de adestramento, para tutores e profissionais.",
+      precisava: "Mostrar o método da mentoria e separar o que ela oferece para tutores e para profissionais.",
+      feito: "A página com o método em etapas, os planos de sessões, as perguntas frequentes e o formulário de análise.",
+    },
+  },
+  {
     id: "provedor",
     segmento: "Internet fibra e móvel",
+    site: "neoredevendas.com.br",
     cidade: "Santo Amaro da Imperatriz (SC)",
     alturaInteira: 2377,
     servicos: ["Landing page", "Google Ads"],
@@ -94,6 +123,7 @@ export const portfolio: PaginaPortfolio[] = [
   {
     id: "sob-medida",
     segmento: "Móveis sob medida",
+    site: "sobmedidamoveis.com.br",
     cidade: "São Paulo (SP)",
     conceito: true,
     alturaInteira: 4491,
@@ -106,5 +136,5 @@ export const portfolio: PaginaPortfolio[] = [
   },
 ];
 
-/** As páginas que estão no ar, com link: as da faixa do Início. */
-export const paginasNoAr = portfolio.filter((p) => p.site);
+/** As da faixa do Início: as 5 primeiras, para a fila não ficar longa demais. */
+export const destaques = portfolio.slice(0, 5);

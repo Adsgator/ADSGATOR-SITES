@@ -35,8 +35,10 @@ export function JanelaPagina({
   const [carregou, setCarregou] = useState(false);
   if (ativo && !pediu) setPediu(true);
   const rolando = ativo && carregou;
-  // Mais longa a página, mais tempo para rolar (a janela mostra 0,625 da largura).
-  const segundos = Math.max(3, (alturaInteira / 960 - 0.625) * 0.95);
+  // Mais longa a página, mais tempo para rolar (a janela mostra 0,625 da largura):
+  // cerca de 2,6 s por altura de janela, para dar tempo de ver os detalhes
+  // (pedido do Lucas, 2026-11-20: antes, 0,95 s, rápido demais).
+  const segundos = Math.max(6, (alturaInteira / 960 - 0.625) * 2.6);
 
   return (
     <div className="relative pb-8">

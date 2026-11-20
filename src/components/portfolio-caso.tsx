@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRightIcon, MapPinIcon } from "lucide-react";
+import { MapPinIcon } from "lucide-react";
 
 import { JanelaPagina, usePassarMouse } from "@/components/janela-pagina";
 import { Reveal } from "@/components/motion/reveal";
@@ -8,12 +8,19 @@ import type { PaginaPortfolio } from "@/config/portfolio";
 
 /** Uma página na grade do Portfólio: a janela que rola a página inteira ao
  * passar o mouse, o segmento, a cidade, os serviços e o mini caso sem
- * números (roteiro do site, Portfólio). */
+ * números (roteiro do site, Portfólio). Sem link para a página (decisão do
+ * Lucas): o cartão recebe o foco pelo teclado, e focar também rola a página. */
 export function PortfolioCaso({ pagina }: { pagina: PaginaPortfolio }) {
   const { ativo, eventos } = usePassarMouse();
-  const { id, segmento, site, cidade, conceito, servicos, caso } = pagina;
+  const { id, segmento, cidade, conceito, servicos, caso } = pagina;
   return (
-    <li data-cartao={id} {...eventos}>
+    <li
+      data-cartao={id}
+      tabIndex={0}
+      aria-label={`${segmento}: ver a página inteira`}
+      className="rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-8 focus-visible:ring-offset-background"
+      {...eventos}
+    >
       <Reveal>
         <JanelaPagina pagina={pagina} ativo={ativo} sizes="(min-width: 768px) 34rem, 92vw" />
         <div className="mt-6 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
@@ -24,17 +31,6 @@ export function PortfolioCaso({ pagina }: { pagina: PaginaPortfolio }) {
               {cidade}
             </p>
           </div>
-          {site && (
-            <a
-              href={`https://${site}/`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center gap-1 pt-1.5 text-sm font-medium underline-offset-4 hover:underline"
-            >
-              Ver a página no ar
-              <ArrowUpRightIcon className="size-4" />
-            </a>
-          )}
         </div>
         <ul aria-label="Serviços" className="mt-4 flex flex-wrap gap-2">
           {servicos.map((servico) => (

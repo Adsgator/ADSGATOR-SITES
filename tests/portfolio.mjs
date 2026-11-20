@@ -90,15 +90,18 @@ try {
       check(`${rotulo}: depois do fim, a seção solta`, depois.palcoTopo < -300, `${depois.palcoTopo.toFixed(0)}`);
       check(`${rotulo}: sem sobra lateral`, depois.sobra === 0, `${depois.sobra} px`);
 
+      const cartoes = await page.$$eval("[data-portfolio] [data-cartao]", (cs) => ({ total: cs.length, links: cs.reduce((n, c) => n + c.querySelectorAll("a").length, 0) }));
+      check(`${rotulo}: 5 páginas na fila, sem link para elas`, cartoes.total === 5 && cartoes.links === 0, JSON.stringify(cartoes));
+
       if (tela.mouse) {
-        // A página mais curta (móveis planejados, ~3,5 s de rolagem), no fim da fila.
+        // A última da fila (recursos de multas, ~9,5 s de rolagem, devagar).
         await rolarPara(fim);
-        const janela = page.locator('[data-cartao="planejados"] [class*="aspect-"]');
+        const janela = page.locator('[data-cartao="multas"] [class*="aspect-"]');
         await janela.hover();
         await page.waitForFunction(() => document.querySelector('[data-inteira="rolando"]'), null, { timeout: 10_000 });
-        await page.waitForTimeout(4500);
+        await page.waitForTimeout(11_000);
         const rolou = await page.evaluate(() => {
-          const img = document.querySelector('[data-cartao="planejados"] [data-inteira]');
+          const img = document.querySelector('[data-cartao="multas"] [data-inteira]');
           const quadro = img.parentElement.getBoundingClientRect();
           const foto = img.getBoundingClientRect();
           return { faltaFim: foto.bottom - quadro.bottom, alturaFoto: foto.height, alturaQuadro: quadro.height };
@@ -111,7 +114,7 @@ try {
         await page.mouse.move(5, 5);
         await page.waitForTimeout(1200);
         const voltou = await page.evaluate(() => {
-          const img = document.querySelector('[data-cartao="planejados"] [data-inteira]');
+          const img = document.querySelector('[data-cartao="multas"] [data-inteira]');
           return img.getBoundingClientRect().top - img.parentElement.getBoundingClientRect().top;
         });
         check(`${rotulo}: ao tirar o mouse, volta ao topo`, Math.abs(voltou) < 2, `${voltou.toFixed(1)} px`);

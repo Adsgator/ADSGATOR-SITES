@@ -4,10 +4,12 @@ import { ArrowRightIcon } from "lucide-react";
 
 import { ChamadaFinal } from "@/components/chamada-final";
 import { PaginasNoAr } from "@/components/colunas-subindo";
+import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
 import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
 import { PortfolioCaso } from "@/components/portfolio-caso";
+import { TodaPaginaTem } from "@/components/toda-pagina-tem";
 import { buttonVariants } from "@/components/ui/button";
 import { portfolio } from "@/config/portfolio";
 import { linkWhatsApp, mensagemDaPagina } from "@/config/site";
@@ -21,7 +23,7 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Portfólio",
   description:
-    "Landing pages feitas pela Adsgator: adestramento, creche canina, escritório virtual, móveis planejados, internet e mais. Passe o mouse para ver cada página inteira.",
+    "Landing pages feitas pela Adsgator: adestramento, escritório virtual, nutrição, móveis planejados, recursos de multas, internet e mais. Passe o mouse para ver cada página inteira.",
   alternates: { canonical: "/portfolio" },
 };
 
@@ -88,8 +90,27 @@ export default function Page() {
         </ul>
       </section>
 
+      {/* O que toda página tem. */}
+      <section className="border-y bg-muted/30">
+        <div className="mx-auto max-w-6xl px-4 py-24">
+          <Eyebrow>Em toda página</Eyebrow>
+          <h2 className="mt-6 max-w-4xl font-heading text-4xl leading-[1.05] tracking-tight text-balance sm:text-6xl">
+            Cada uma é diferente. <span className="text-muted-foreground">O cuidado é o mesmo.</span>
+          </h2>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
+            O jeito muda de negócio para negócio, mas toda página da Adsgator sai com o que faz a pessoa confiar e
+            chamar. E, com a manutenção, a conferência de todo dia olha esses itens por você.
+          </p>
+          <div className="mt-14">
+            <MotionScope>
+              <TodaPaginaTem />
+            </MotionScope>
+          </div>
+        </div>
+      </section>
+
       {/* A próxima pode ser a sua. */}
-      <section className="mx-auto max-w-6xl px-4 pb-24">
+      <section className="mx-auto max-w-6xl px-4 py-24">
         <Reveal className="grid gap-6 rounded-3xl border bg-card p-8 sm:p-10 md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <h2 className="font-heading text-3xl leading-tight sm:text-4xl">A próxima página aqui pode ser a sua.</h2>

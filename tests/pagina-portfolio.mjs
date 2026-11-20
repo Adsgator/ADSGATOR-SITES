@@ -1,6 +1,6 @@
-// Página Portfólio: as 6 páginas numa grade só, com cidade, serviços e mini
-// caso (o link só nas que estão no ar), o pattern no topo; a página
-// inteira rolando ao passar o mouse (e ao focar o link pelo teclado); o fundo
+// Página Portfólio: as 8 páginas numa grade só, com o endereço (sem link), cidade, serviços e mini
+// caso, o pattern no topo, "Em toda página"; a página
+// inteira rolando ao passar o mouse (e ao focar o cartão pelo teclado); o fundo
 // com as páginas no celular; a mensagem pronta do WhatsApp. Roda nos dois modos
 // de animação (o Windows do Lucas está com "Mostrar animações" desligado).
 // Uso: node tests/pagina-portfolio.mjs [endereço]   (padrão: http://localhost:3005/portfolio)
@@ -54,31 +54,27 @@ try {
         `${fotosFundo} fotos visíveis, ${subindo} → ${parada}`,
       );
 
-      // As 6 páginas numa grade só, cada uma completa; o link só nas que estão no
-      // ar, e a de demonstração marcada como conceito.
+      // As 8 páginas numa grade só, cada uma completa, com o endereço na janela e
+      // sem link (decisão do Lucas); a de demonstração marcada como conceito.
       const cartoes = await page.$$eval("#paginas [data-cartao]", (cs) =>
         cs.map((c) => ({
           id: c.dataset.cartao,
           cidade: c.querySelector("h3 + p")?.textContent.trim(),
           servicos: c.querySelectorAll('ul[aria-label="Serviços"] li:not([data-conceito])').length,
           caso: c.querySelectorAll("dt").length,
-          link: c.querySelector('a[target="_blank"]')?.href,
+          links: c.querySelectorAll("a").length,
+          endereco: c.querySelector(".font-mono.truncate")?.textContent.trim() ?? "",
           conceito: !!c.querySelector("[data-conceito]"),
         })),
       );
-      check(`${rotulo}: 6 páginas numa grade só`, cartoes.length === 6, cartoes.map((c) => c.id).join(", "));
+      check(`${rotulo}: 8 páginas numa grade só`, cartoes.length === 8, cartoes.map((c) => c.id).join(", "));
       check(
-        `${rotulo}: cada uma com cidade, serviços e o mini caso`,
-        cartoes.every((c) => c.cidade && c.servicos >= 1 && c.caso === 3),
-        cartoes.map((c) => `${c.id}: ${c.cidade}, ${c.servicos} serviços, ${c.caso} linhas`).join(" | "),
+        `${rotulo}: cada uma com cidade, serviços, o mini caso e o endereço, sem link`,
+        cartoes.every((c) => c.cidade && c.servicos >= 1 && c.caso === 3 && c.endereco.endsWith(".com.br") && c.links === 0),
+        cartoes.map((c) => `${c.id}: ${c.endereco}, ${c.cidade}, ${c.servicos} serviços, ${c.links} links`).join(" | "),
       );
-      const comLink = cartoes.filter((c) => c.link?.startsWith("https://")).map((c) => c.id).join(",");
       const conceitos = cartoes.filter((c) => c.conceito).map((c) => c.id).join(",");
-      check(
-        `${rotulo}: link nas 4 páginas no ar e "Projeto conceito" só na de demonstração`,
-        comLink === "adestradora,creche,escritorios,planejados" && conceitos === "sob-medida",
-        `link: ${comLink}; conceito: ${conceitos}`,
-      );
+      check(`${rotulo}: "Projeto conceito" só na de demonstração`, conceitos === "sob-medida", conceitos);
       const pattern = await page.$eval("[data-pattern]", (el) => getComputedStyle(el).backgroundImage);
       check(`${rotulo}: o pattern da Adsgator no fundo do topo`, pattern.includes("padrao-"), pattern.slice(0, 80));
 
@@ -92,12 +88,17 @@ try {
         }, id);
 
       if (tela.mouse) {
-        // A página mais curta (móveis planejados, ~3,5 s de rolagem).
+        // A página mais curta das de cliente (móveis planejados, ~9 s de
+        // rolagem): devagar, para dar tempo de ver (pedido do Lucas), e até o fim.
         const janela = page.locator('[data-cartao="planejados"] [class*="aspect-"]');
         await janela.scrollIntoViewIfNeeded();
         await janela.hover();
         await page.waitForFunction(() => document.querySelector('[data-cartao="planejados"] [data-inteira="rolando"]'), null, { timeout: 10_000 });
-        await page.waitForTimeout(4500);
+        await page.waitForTimeout(3000);
+        const aos3 = await posicaoDaFoto("planejados");
+        const percorrido = -aos3.topo / (aos3.alturaFoto - aos3.alturaQuadro);
+        check(`${rotulo}: a rolagem vai devagar (aos 3 s, ainda no começo)`, percorrido > 0.05 && percorrido < 0.45, `${Math.round(percorrido * 100)}% aos 3 s`);
+        await page.waitForTimeout(7500);
         const rolou = await posicaoDaFoto("planejados");
         check(
           `${rotulo}: com o mouse, a página inteira rola até o fim`,
@@ -120,13 +121,35 @@ try {
         await page.mouse.move(5, 5);
       }
 
-      // Pelo teclado: focar o link do cartão também mostra a página inteira.
-      await page.locator('[data-cartao="creche"] a[target="_blank"]').focus();
+      // Pelo teclado: focar o cartão também mostra a página inteira.
+      await page.locator('[data-cartao="nutricionista"]').focus();
       const peloTeclado = await page
-        .waitForFunction(() => document.querySelector('[data-cartao="creche"] [data-inteira="rolando"]'), null, { timeout: 10_000 })
+        .waitForFunction(() => document.querySelector('[data-cartao="nutricionista"] [data-inteira="rolando"]'), null, { timeout: 10_000 })
         .then(() => true)
         .catch(() => false);
-      check(`${rotulo}: focar o link pelo teclado faz a página rolar`, peloTeclado);
+      check(`${rotulo}: focar o cartão pelo teclado faz a página rolar`, peloTeclado);
+      await page.locator('[data-cartao="nutricionista"]').blur();
+
+      // Em toda página: os 8 itens se marcam quando a pessoa chega, o celular
+      // passa pelas páginas e para no botão de pausar.
+      await page.$eval("[data-toda-pagina]", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.waitForTimeout(2200);
+      const marcados = await page.$$eval("[data-item-marcado]", (els) => els.length);
+      const celular = () => page.$eval("[data-celular-atual]", (el) => el.getAttribute("src"));
+      const fotos = new Set([await celular()]);
+      for (let i = 0; i < 6; i++) {
+        await page.waitForTimeout(1000);
+        fotos.add(await celular());
+      }
+      await page.locator("[data-toda-pagina]").getByRole("button", { name: "Pausar as animações" }).click();
+      const parado = await celular();
+      await page.waitForTimeout(3000);
+      const aindaParado = (await celular()) === parado;
+      check(
+        `${rotulo}: em toda página, os 8 itens se marcam e o celular passa pelas páginas e para no botão`,
+        marcados === 8 && fotos.size >= 2 && aindaParado,
+        `${marcados} itens, ${fotos.size} páginas no celular, parado ${aindaParado}`,
+      );
 
       const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check(`${rotulo}: sem sobra lateral`, sobra === 0, `${sobra} px`);

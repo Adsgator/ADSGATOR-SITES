@@ -167,7 +167,7 @@ try {
       check(`${rotulo}: as 4 dúvidas mais comuns`, duvidas === 4, `${duvidas}`);
 
       const cartoes = await page.$$eval("[data-portfolio] [data-cartao]", (e) => e.length);
-      check(`${rotulo}: o portfólio está na página`, cartoes === 4, `${cartoes} páginas`);
+      check(`${rotulo}: o portfólio está na página`, cartoes === 5, `${cartoes} páginas`);
 
       const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check(`${rotulo}: sem sobra lateral`, sobra === 0, `${sobra} px`);
