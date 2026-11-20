@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { MapPinIcon } from "lucide-react";
-import { useMotionValueEvent, useScroll } from "motion/react";
 
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
+import { useParteAtiva } from "@/components/motion/use-parte-ativa";
 import { segmentos } from "@/config/segmentos";
 import { cn } from "@/lib/utils";
 
@@ -43,24 +43,7 @@ const s = segmentos[0];
 export function AnuncioPorDentro() {
   const lista = useRef<HTMLOListElement>(null);
   const anuncio = useRef<HTMLDivElement>(null);
-  const [ativa, setAtiva] = useState(0);
-  const { scrollY } = useScroll();
-  // Pela posição de cada explicação na tela (a fração da rolagem não batia com
-  // ela). Com o anúncio ao lado (768 px ou mais), acende a última que passou de
-  // 60% da altura; no celular, com o anúncio preso em cima, a primeira que está
-  // inteira abaixo dele, para a acesa nunca ficar escondida atrás dele.
-  useMotionValueEvent(scrollY, "change", () => {
-    if (!lista.current || !anuncio.current) return;
-    const itens = [...lista.current.children].map((li) => li.getBoundingClientRect());
-    if (matchMedia("(min-width: 768px)").matches) {
-      const linha = innerHeight * 0.6;
-      setAtiva(Math.max(0, itens.filter((r) => r.top <= linha).length - 1));
-    } else {
-      const fimDoAnuncio = anuncio.current.getBoundingClientRect().bottom;
-      const abaixo = itens.findIndex((r) => r.top >= fimDoAnuncio - 4);
-      setAtiva(abaixo === -1 ? itens.length - 1 : abaixo);
-    }
-  });
+  const ativa = useParteAtiva(lista, anuncio);
   const marca = (i: number) =>
     cn("rounded-lg transition-all duration-300", i === ativa ? "bg-brand/15 ring-2 ring-brand ring-offset-4 ring-offset-card" : "");
 

@@ -13,17 +13,18 @@ import { cn } from "@/lib/utils";
 //
 // `montados` (página de landing page, topo): mostra só as primeiras partes; as
 // outras ficam como contorno tracejado, ocupando o mesmo lugar (a página não
-// muda de altura enquanto se monta). Sem ele, tudo aparece.
+// muda de altura enquanto se monta). Sem ele, tudo aparece. `destaque`
+// (página de landing page, "A página por dentro"): contorna a parte da vez.
 
 /** Quantas partes a página tem, para quem a monta aos poucos. */
 export const PARTES_DA_PAGINA = 5;
 
-export function PaginaCliente({ s, montados }: { s: Segmento; montados?: number }) {
+export function PaginaCliente({ s, montados, destaque }: { s: Segmento; montados?: number; destaque?: number }) {
   const cores = { "--fundo": s.fundo, "--destaque": s.destaque } as React.CSSProperties;
   const titulo = s.serifa ? "font-heading font-normal tracking-tight" : "font-extrabold tracking-[-0.02em] uppercase";
   return (
     <div style={cores} className="relative w-full min-w-[200px] bg-[#F7F6F3] text-[#141414]">
-      <Parte i={0} montados={montados}>
+      <Parte i={0} montados={montados} destaque={destaque}>
       <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 py-2.5 text-white">
         <span className="flex items-center gap-1.5">
           <span
@@ -73,7 +74,7 @@ export function PaginaCliente({ s, montados }: { s: Segmento; montados?: number 
       </div>
       </Parte>
 
-      <Parte i={1} montados={montados}>
+      <Parte i={1} montados={montados} destaque={destaque}>
       <div className="px-3 pt-4 pb-3">
         <p className="text-[7px] font-semibold tracking-[0.18em] text-(--fundo) uppercase">O que fazemos</p>
         <p className={cn("mt-1 text-[13px] leading-tight", s.serifa ? "font-heading" : "font-bold")}>Serviços sob medida para você</p>
@@ -91,7 +92,7 @@ export function PaginaCliente({ s, montados }: { s: Segmento; montados?: number 
       </div>
       </Parte>
 
-      <Parte i={2} montados={montados}>
+      <Parte i={2} montados={montados} destaque={destaque}>
       <div className="mx-3 overflow-hidden rounded-xl bg-(--fundo) text-white">
         <div style={{ backgroundImage: `url(${s.foto})` }} className="h-16 bg-cover bg-center opacity-80" />
         <div className="p-2.5">
@@ -108,7 +109,7 @@ export function PaginaCliente({ s, montados }: { s: Segmento; montados?: number 
       </div>
       </Parte>
 
-      <Parte i={3} montados={montados}>
+      <Parte i={3} montados={montados} destaque={destaque}>
       <div className="m-3 rounded-xl border border-(--fundo)/15 bg-white p-3 text-center">
         <p className={cn("text-[12px] leading-tight", s.serifa ? "font-heading" : "font-bold")}>{s.chamada}</p>
         <span className="mt-2 inline-flex h-6 items-center gap-1 rounded-full bg-[#25D366] px-3 text-[8px] font-semibold text-[#0B2A17]">
@@ -118,7 +119,7 @@ export function PaginaCliente({ s, montados }: { s: Segmento; montados?: number 
       </div>
       </Parte>
 
-      <Parte i={4} montados={montados}>
+      <Parte i={4} montados={montados} destaque={destaque}>
       <div className="flex items-center justify-between bg-(--fundo) px-3 py-2.5 text-[7px] text-white/70">
         <span className="flex items-center gap-1">
           <MapPinIcon className="size-2.5" />
@@ -142,10 +143,23 @@ export function PaginaCliente({ s, montados }: { s: Segmento; montados?: number 
 
 /** Uma parte da página. Ainda não montada, o conteúdo fica invisível no mesmo
  * lugar e um contorno tracejado mostra onde ele vai entrar. */
-function Parte({ i, montados, children }: { i: number; montados?: number; children: React.ReactNode }) {
+function Parte({
+  i,
+  montados,
+  destaque,
+  children,
+}: {
+  i: number;
+  montados?: number;
+  destaque?: number;
+  children: React.ReactNode;
+}) {
   const montada = montados === undefined || i < montados;
   return (
-    <div data-parte={i} className="relative">
+    <div data-parte={i} data-destaque={i === destaque ? "" : undefined} className="relative">
+      {i === destaque && (
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0.5 z-20 rounded-lg ring-2 ring-[#FFB100]" />
+      )}
       <div className={cn("transition-all duration-700 ease-(--ease-out)", !montada && "translate-y-2 opacity-0 blur-[2px]")}>
         {children}
       </div>

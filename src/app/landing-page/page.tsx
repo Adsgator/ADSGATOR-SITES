@@ -4,10 +4,12 @@ import {
   ArrowRightIcon,
   BarChart3Icon,
   CalendarCheckIcon,
+  CheckIcon,
   ClipboardCheckIcon,
   CookieIcon,
   FileTextIcon,
   GlobeIcon,
+  LayoutGridIcon,
   LinkIcon,
   LockIcon,
   MapPinIcon,
@@ -17,6 +19,7 @@ import {
   SearchIcon,
   SendIcon,
   SmartphoneIcon,
+  TargetIcon,
   XIcon,
 } from "lucide-react";
 
@@ -30,7 +33,9 @@ import { LinhaDoTempo } from "@/components/linha-do-tempo";
 import { MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
 import { PaginaMontando } from "@/components/pagina-montando";
+import { PaginaPorDentro } from "@/components/pagina-por-dentro";
 import { PortfolioFaixa } from "@/components/portfolio-faixa";
+import { RoteiroExemplo } from "@/components/roteiro-exemplo";
 import { buttonVariants } from "@/components/ui/button";
 import { linkWhatsApp, mensagemDaPagina } from "@/config/site";
 import { cn } from "@/lib/utils";
@@ -38,7 +43,10 @@ import { cn } from "@/lib/utils";
 // Página de landing page, na ordem do roteiro do site (ADSGATOR-PAINEL,
 // DOCS/ROTEIRO-SITE.md, "Landing page"), aprovado pelo Lucas em 2026-11-20.
 // O que vem nela e o que não inclui são da Base ("Serviços e preços"). Sem
-// preço (decisão de 2026-11-20); o convite é "Quero a minha página".
+// preço (decisão de 2026-11-20); o convite é "Quero a minha página". Rodada de
+// profundidade (Lucas, 2026-11-20): por que uma landing page, a página por
+// dentro, o que você manda e o roteiro de exemplo (Base, "Textos prontos",
+// Entrada da página), as dúvidas mais comuns e a manutenção monitorada 24 horas.
 
 export const metadata: Metadata = {
   title: "Landing page",
@@ -58,6 +66,58 @@ const botaoContorno = cn(
   buttonVariants({ size: "lg", variant: "outline" }),
   "h-12 rounded-full bg-transparent px-7 text-base",
 );
+
+const porQue = [
+  {
+    icone: SmartphoneIcon,
+    onde: "No perfil do Instagram",
+    titulo: "A pessoa precisa procurar.",
+    texto: "Rolar, achar o contato e adivinhar o que você faz. E você não sabe quem veio do anúncio.",
+  },
+  {
+    icone: LayoutGridIcon,
+    onde: "Num site comum",
+    titulo: "A pessoa se perde.",
+    texto: "Várias páginas e menus. Quem chegou pelo anúncio procura o que digitou e, se não acha em segundos, volta para o Google.",
+  },
+  {
+    icone: TargetIcon,
+    onde: "Na landing page",
+    titulo: "A pessoa chama.",
+    texto: "Uma página feita para quem chegou pelo anúncio: fala do serviço que ela procurou e leva a um botão só, o do WhatsApp. E cada toque é medido.",
+  },
+];
+
+// O que o cliente manda (Base, "Textos prontos", Entrada da página).
+const material = [
+  "O briefing: um formulário sobre o seu negócio, os seus clientes e o que você quer",
+  "Logo, cores e fontes, se tiver",
+  "Fotos do seu negócio e do seu trabalho",
+  "Depoimentos de clientes",
+];
+
+const objecoes = [
+  {
+    duvida: "“Já tenho Instagram.”",
+    resposta:
+      "Ótimo, continue com ele. O Instagram é para quem já te segue; a página é para quem acabou de te achar no Google e ainda não te conhece. Um ajuda o outro: a árvore de links da página vai na sua bio.",
+  },
+  {
+    duvida: "“Já tenho site.”",
+    resposta:
+      "Se ele abre bem no celular e leva ao WhatsApp, dá para anunciar com ele. Se estiver atrapalhando, a landing page vira a porta de entrada do anúncio, e o seu site continua no ar.",
+  },
+  {
+    duvida: "“Não tenho fotos profissionais.”",
+    resposta:
+      "Não precisa. Você manda o que tiver: fotos do seu negócio, do seu trabalho, da sua equipe. A página é desenhada em volta do que existe.",
+  },
+  {
+    duvida: "“Não tenho tempo para isso.”",
+    resposta:
+      "A sua parte é responder o briefing, mandar o material e aprovar o roteiro. O resto, do texto à publicação, fica com a gente.",
+  },
+];
 
 const oQueVem = [
   { icone: PenLineIcon, titulo: "Textos escritos para você", texto: "A partir do briefing, com o jeito do seu negócio." },
@@ -202,8 +262,44 @@ export default function Page() {
         </FundoVivo>
       </MotionScope>
 
-      {/* 2. O que vem nela. */}
+      {/* Por que uma landing page. */}
       <section className="mx-auto max-w-6xl px-4 py-24">
+        <Eyebrow>Por que uma landing page</Eyebrow>
+        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+          Quem clica no anúncio <span className="text-muted-foreground">precisa cair no lugar certo.</span>
+        </h2>
+        <ul className="mt-14 grid gap-5 md:grid-cols-3">
+          {porQue.map(({ icone: Icone, onde, titulo: t, texto }, i) => {
+            const nossa = i === porQue.length - 1;
+            return (
+              <li key={onde}>
+                <Reveal
+                  delay={i * 120}
+                  className={cn(
+                    "h-full rounded-3xl border p-8",
+                    nossa ? "dark section-ink bg-background text-foreground" : "bg-card",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex size-11 items-center justify-center rounded-full",
+                      nossa ? "bg-brand text-brand-foreground" : "bg-muted",
+                    )}
+                  >
+                    <Icone className="size-5" />
+                  </span>
+                  <p className={cn("mt-6 font-mono text-xs", nossa ? "text-brand" : "text-muted-foreground")}>{onde}</p>
+                  <h3 className="mt-2 font-heading text-2xl leading-tight">{t}</h3>
+                  <p className="mt-3 leading-7 text-muted-foreground">{texto}</p>
+                </Reveal>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {/* 2. O que vem nela. */}
+      <section className="mx-auto max-w-6xl border-t px-4 py-24">
         <Eyebrow>O que vem nela</Eyebrow>
         <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
           Tudo o que uma página precisa. <span className="text-muted-foreground">Sem você correr atrás de nada.</span>
@@ -223,14 +319,45 @@ export default function Page() {
         </ul>
       </section>
 
-      {/* 3. Como fica pronta. */}
+      {/* A página por dentro. */}
+      <section className="border-t">
+        <div className="mx-auto max-w-6xl px-4 py-24">
+          <Eyebrow>A página por dentro</Eyebrow>
+          <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+            Cada parte leva <span className="text-muted-foreground">ao mesmo lugar: o seu WhatsApp.</span>
+          </h2>
+          <div className="mt-14">
+            <PaginaPorDentro />
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Como fica pronta: o que você manda, o roteiro de exemplo e a linha do tempo. */}
       <section id="como-fica-pronta" className="scroll-mt-24 border-t">
         <div className="mx-auto max-w-6xl px-4 py-24">
           <Eyebrow>Como fica pronta</Eyebrow>
           <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
             Você aprova o roteiro. <span className="text-muted-foreground">O resto fica com a gente.</span>
           </h2>
-          <div className="mt-16">
+          <div className="mt-14 grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+            <div>
+              <h3 className="font-heading text-3xl leading-tight">O que você manda</h3>
+              <ul className="mt-6 divide-y border-y">
+                {material.map((item) => (
+                  <li key={item} className="flex gap-4 py-4 leading-7">
+                    <CheckIcon className="mt-1 size-5 shrink-0 text-brand" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-6 leading-7 text-muted-foreground">
+                Basta o que você tiver. Com isso, a gente monta o roteiro da página, as seções e a mensagem principal, e te
+                manda para aprovar antes de desenhar.
+              </p>
+            </div>
+            <RoteiroExemplo />
+          </div>
+          <div className="mt-20">
             <LinhaDoTempo marcos={comoFicaPronta} />
           </div>
         </div>
@@ -265,7 +392,7 @@ export default function Page() {
               <p className="font-mono text-xs text-brand">Com a manutenção</p>
               <h3 className="mt-3 font-heading text-3xl leading-tight">A Adsgator segue cuidando.</h3>
               <p className="mt-4 leading-7 text-muted-foreground">
-                Hospedagem, domínio renovado, monitoramento, pequenos ajustes e suporte. Você não precisa pensar nisso.
+                Hospedagem, domínio renovado, a página monitorada 24 horas, pequenos ajustes e suporte. Você não precisa pensar nisso.
                 É contratada à parte; para quem tem o Google Ads com a Adsgator, já vem incluída.
               </p>
               <Link href="/manutencao" className="mt-6 inline-flex items-center gap-2 font-medium underline-offset-4 hover:underline">
@@ -286,6 +413,24 @@ export default function Page() {
 
       {/* 5. Portfólio. */}
       <PortfolioFaixa />
+
+      {/* Talvez você esteja pensando. */}
+      <section className="mx-auto max-w-6xl px-4 pt-24">
+        <Eyebrow>Talvez você esteja pensando</Eyebrow>
+        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+          As dúvidas mais comuns. <span className="text-muted-foreground">E as respostas.</span>
+        </h2>
+        <ul className="mt-14 grid gap-5 md:grid-cols-2">
+          {objecoes.map(({ duvida, resposta }, i) => (
+            <li key={duvida}>
+              <Reveal delay={(i % 2) * 120} className="h-full rounded-3xl border bg-card p-8">
+                <p className="font-heading text-2xl leading-tight sm:text-3xl">{duvida}</p>
+                <p className="mt-4 leading-7 text-muted-foreground">{resposta}</p>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {/* 6 e 7. Mais páginas e o que não inclui. */}
       <section className="mx-auto grid max-w-6xl gap-14 px-4 py-24 lg:grid-cols-[1.3fr_1fr]">

@@ -104,7 +104,7 @@ try {
 
       // Como fica pronta: a linha do tempo.
       const linha = await page.evaluate(() => {
-        const r = document.querySelector("#como-fica-pronta ol").getBoundingClientRect();
+        const r = document.querySelector("#como-fica-pronta ol:has(> li[class*='md:text-center'])").getBoundingClientRect();
         return { topo: r.top + window.scrollY, fim: r.bottom + window.scrollY };
       });
       await rolarPara(linha.topo - tela.height * 0.75 - 80);
@@ -112,6 +112,51 @@ try {
       await rolarPara(linha.fim - tela.height * 0.5 + 80);
       const acesos = await page.$$eval("#como-fica-pronta [data-aceso]", (e) => e.length);
       check(`${rotulo}: a linha do tempo acende os marcos`, apagados === 0 && acesos === 5, `${apagados} → ${acesos}`);
+
+      // A página por dentro: as 5 partes acendem, a contornada no celular é a da
+      // explicação, e cada explicação fica à vista enquanto acesa.
+      const lista = await page.evaluate(() => {
+        const r = document.querySelector("ol:has([data-ativa])").getBoundingClientRect();
+        return { topo: r.top + window.scrollY, fim: r.bottom + window.scrollY };
+      });
+      const vistas = [];
+      for (let k = 0; k <= 20; k++) {
+        await rolarPara(lista.topo - tela.height * 0.65 + ((lista.fim - lista.topo) * k) / 20);
+        vistas.push(
+          await page.evaluate(() => {
+            const itens = [...document.querySelectorAll("ol:has([data-ativa]) > li")];
+            const ativa = itens.findIndex((li) => li.hasAttribute("data-ativa"));
+            const destaque = Number(document.querySelector("[data-pagina-por-dentro] [data-destaque]")?.dataset.parte ?? -1);
+            const celular = document.querySelector("[data-pagina-por-dentro]").getBoundingClientRect();
+            const item = itens[ativa].getBoundingClientRect();
+            return { ativa, destaque, aVista: item.top >= celular.bottom - 4 || item.left >= celular.right - 4 };
+          }),
+        );
+      }
+      const acesas = [0, 1, 2, 3, 4].filter((n) => vistas.some((v) => v.ativa === n && v.aVista));
+      check(`${rotulo}: a página por dentro acende as 5 partes, cada uma à vista`, acesas.length === 5, `à vista: ${acesas.join(",")}`);
+      check(`${rotulo}: a parte contornada no celular é a da explicação`, vistas.every((v) => v.ativa === v.destaque), vistas.map((v) => `${v.ativa}/${v.destaque}`).join(" "));
+
+      // O roteiro de exemplo: parado até a pessoa chegar; depois, as seções se
+      // marcam e o "Aprovado" entra (página recarregada: a rolagem anterior já
+      // passou por ele).
+      await page.reload({ waitUntil: "networkidle" });
+      await rolarPara(0);
+      const antesRoteiro = await page.$eval("[data-roteiro]", (r) => r.hasAttribute("data-apareceu"));
+      await page.$eval("[data-roteiro]", (r) => r.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.waitForTimeout(2800);
+      const roteiro = await page.$eval("[data-roteiro]", (r) => ({
+        marcadas: r.querySelectorAll("[data-secao-marcada]").length,
+        aprovado: Number(getComputedStyle(r.querySelector("[data-aprovado]")).opacity),
+      }));
+      check(
+        `${rotulo}: o roteiro se marca e mostra "Aprovado" quando a pessoa chega`,
+        !antesRoteiro && roteiro.marcadas === 6 && roteiro.aprovado > 0.95,
+        `antes ${antesRoteiro}, ${roteiro.marcadas} seções, aprovado ${roteiro.aprovado}`,
+      );
+
+      const duvidas = await page.$$eval("li p.font-heading", (ps) => ps.filter((p) => p.textContent.startsWith("“")).length);
+      check(`${rotulo}: as 4 dúvidas mais comuns`, duvidas === 4, `${duvidas}`);
 
       const cartoes = await page.$$eval("[data-portfolio] [data-cartao]", (e) => e.length);
       check(`${rotulo}: o portfólio está na página`, cartoes === 4, `${cartoes} páginas`);
