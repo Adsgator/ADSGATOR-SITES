@@ -13,16 +13,29 @@ import { cn } from "@/lib/utils";
 // página de um cliente fictício se monta seção por seção dentro do celular,
 // seguindo o roteiro aprovado, que vai sendo marcado ao lado (o cliente aprova
 // o roteiro; o visual é da Adsgator). A tela desce até a parte que acabou de
-// entrar e, pronta, volta ao topo; depois, o próximo cliente. Tamanho fixo: a
+// entrar; pronta, fica no fim, com o rodapé e o botão flutuante entrando
+// (antes voltava direto ao topo e o rodapé nunca aparecia, visto pelo Lucas em
+// 2026-11-20), volta ao topo e passa ao próximo cliente. Tamanho fixo: a
 // montagem não mexe no resto da página. Inclinada, fica de frente com a
 // rolagem; vale também com "reduzir animações" (decisão do Lucas,
 // 2026-11-20). Precisa estar dentro de um MotionScope (botão de pausar).
 
-const roteiro = ["Topo com a mensagem principal", "Serviços", "Como funciona", "Chamada para o WhatsApp", "Rodapé"];
+const roteiro = [
+  "Topo com a mensagem principal",
+  "Serviços",
+  "Quem somos",
+  "Como funciona",
+  "Depoimentos",
+  "Perguntas frequentes",
+  "Onde atendemos",
+  "Chamada para o WhatsApp",
+  "Rodapé",
+];
 
 export function PaginaMontando() {
   const pausado = useMotionPaused();
-  const [{ indice, montados }, setEstado] = useState({ indice: 0, montados: 0 });
+  // `noTopo`: pronta, a tela já voltou ao topo (depois de mostrar o fim).
+  const [{ indice, montados, noTopo }, setEstado] = useState({ indice: 0, montados: 0, noTopo: false });
   const tela = useRef<HTMLDivElement>(null);
   const pagina = useRef<HTMLDivElement>(null);
   const s = segmentos[indice];
@@ -31,27 +44,41 @@ export function PaginaMontando() {
   const giroY = useTransform(scrollY, [0, 420], [16, 0]);
   const giroX = useTransform(scrollY, [0, 420], [8, 0]);
 
-  // Uma parte a cada 1,3 s; pronta, fica 3,5 s e passa ao próximo cliente.
+  // Uma parte a cada 0,9 s; pronta, fica 1,8 s no fim, volta ao topo, fica
+  // 2,5 s e passa ao próximo cliente.
   useEffect(() => {
     if (pausado) return;
     const pronta = montados === PARTES_DA_PAGINA;
     const id = setTimeout(
-      () => setEstado(pronta ? { indice: (indice + 1) % segmentos.length, montados: 0 } : { indice, montados: montados + 1 }),
-      pronta ? 3500 : montados === 0 ? 900 : 1300,
+      () =>
+        setEstado(
+          !pronta
+            ? { indice, montados: montados + 1, noTopo: false }
+            : !noTopo
+              ? { indice, montados, noTopo: true }
+              : { indice: (indice + 1) % segmentos.length, montados: 0, noTopo: false },
+        ),
+      !pronta ? 900 : !noTopo ? 1800 : 2500,
     );
     return () => clearTimeout(id);
-  }, [indice, montados, pausado]);
+  }, [indice, montados, noTopo, pausado]);
 
-  // A tela desce até a última parte montada; pronta, volta ao topo.
+  // A tela desce até a última parte montada; pronta, mostra o fim e depois
+  // volta ao topo.
   useEffect(() => {
     const t = tela.current;
     const p = pagina.current;
     if (!t || !p) return;
     const parte = p.querySelector<HTMLElement>(`[data-parte="${montados - 1}"]`);
     const limite = p.scrollHeight - t.clientHeight;
-    const y = montados === 0 || montados === PARTES_DA_PAGINA || !parte ? 0 : Math.min(limite, Math.max(0, parte.offsetTop - 60));
+    const y =
+      montados === 0 || noTopo || !parte
+        ? 0
+        : montados === PARTES_DA_PAGINA
+          ? limite
+          : Math.min(limite, Math.max(0, parte.offsetTop - 60));
     p.style.transform = `translateY(${-y}px)`;
-  }, [montados, indice]);
+  }, [montados, indice, noTopo]);
 
   return (
     <div className="relative mx-auto h-[34rem] w-full max-w-md [perspective:1400px]">
@@ -75,7 +102,7 @@ export function PaginaMontando() {
 
         <div className="absolute bottom-6 left-0 z-10 w-56 rounded-3xl border bg-card p-5 shadow-2xl shadow-ink/15 sm:w-64">
           <p className="font-mono text-xs text-muted-foreground">Roteiro aprovado</p>
-          <ol className="mt-3 space-y-2.5 text-sm">
+          <ol className="mt-3 space-y-1.5 text-[0.8rem]">
             {roteiro.map((parte, i) => {
               const feita = i < montados;
               return (

@@ -1,4 +1,4 @@
-import { ArrowRightIcon, CheckIcon, MapPinIcon, MenuIcon } from "lucide-react";
+import { ArrowRightIcon, CheckIcon, MapPinIcon, MenuIcon, PlusIcon, StarIcon } from "lucide-react";
 
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
 import type { Segmento } from "@/config/segmentos";
@@ -8,7 +8,9 @@ import { cn } from "@/lib/utils";
 // caber dentro dos celulares do site. Refeita em 2026-11-20 a pedido do Lucas
 // (os exemplos pareciam simples e genéricos): foto de verdade na abertura,
 // logotipo e paleta próprios, títulos com ou sem serifa conforme o segmento e
-// mais seções, como uma página real da Adsgator. Fluida, de 200 a 270 px de
+// mais seções, como uma página real da Adsgator; na rodada de profundidade
+// (2026-11-20, "parece simples demais"), ganhou quem somos, depoimentos,
+// perguntas e a área atendida, as 9 partes de uma página completa. Fluida, de 200 a 270 px de
 // largura; o celular pequeno dos cartões reduz com `scale`.
 //
 // `montados` (página de landing page, topo): mostra só as primeiras partes; as
@@ -17,11 +19,13 @@ import { cn } from "@/lib/utils";
 // (página de landing page, "A página por dentro"): contorna a parte da vez.
 
 /** Quantas partes a página tem, para quem a monta aos poucos. */
-export const PARTES_DA_PAGINA = 5;
+export const PARTES_DA_PAGINA = 9;
 
 export function PaginaCliente({ s, montados, destaque }: { s: Segmento; montados?: number; destaque?: number }) {
   const cores = { "--fundo": s.fundo, "--destaque": s.destaque } as React.CSSProperties;
   const titulo = s.serifa ? "font-heading font-normal tracking-tight" : "font-extrabold tracking-[-0.02em] uppercase";
+  const tituloSecao = cn("mt-1 text-[13px] leading-tight", s.serifa ? "font-heading" : "font-bold");
+  const rotulo = "text-[7px] font-semibold tracking-[0.18em] text-(--fundo) uppercase";
   return (
     <div style={cores} className="relative w-full min-w-[200px] bg-[#F7F6F3] text-[#141414]">
       <Parte i={0} montados={montados} destaque={destaque}>
@@ -76,8 +80,8 @@ export function PaginaCliente({ s, montados, destaque }: { s: Segmento; montados
 
       <Parte i={1} montados={montados} destaque={destaque}>
       <div className="px-3 pt-4 pb-3">
-        <p className="text-[7px] font-semibold tracking-[0.18em] text-(--fundo) uppercase">O que fazemos</p>
-        <p className={cn("mt-1 text-[13px] leading-tight", s.serifa ? "font-heading" : "font-bold")}>Serviços sob medida para você</p>
+        <p className={rotulo}>O que fazemos</p>
+        <p className={tituloSecao}>Serviços sob medida para você</p>
         <div className="mt-2.5 grid grid-cols-2 gap-1.5">
           {s.servicos.map(({ icone: Icone, titulo: nome, texto }) => (
             <div key={nome} className="rounded-xl bg-white p-2 shadow-[0_4px_12px_-6px_rgb(0_0_0/0.25)]">
@@ -93,6 +97,18 @@ export function PaginaCliente({ s, montados, destaque }: { s: Segmento; montados
       </Parte>
 
       <Parte i={2} montados={montados} destaque={destaque}>
+      <div className="px-3 pt-1 pb-3">
+        <div className="flex gap-2.5 rounded-xl bg-white p-2.5 shadow-[0_4px_12px_-6px_rgb(0_0_0/0.25)]">
+          <div style={{ backgroundImage: `url(${s.foto})` }} className="size-12 shrink-0 rounded-lg bg-cover bg-center" />
+          <div>
+            <p className={rotulo}>Quem somos</p>
+            <p className="mt-1 text-[7.5px] leading-[1.45] text-[#141414]/75">{s.sobre}</p>
+          </div>
+        </div>
+      </div>
+      </Parte>
+
+      <Parte i={3} montados={montados} destaque={destaque}>
       <div className="mx-3 overflow-hidden rounded-xl bg-(--fundo) text-white">
         <div style={{ backgroundImage: `url(${s.foto})` }} className="h-16 bg-cover bg-center opacity-80" />
         <div className="p-2.5">
@@ -109,7 +125,57 @@ export function PaginaCliente({ s, montados, destaque }: { s: Segmento; montados
       </div>
       </Parte>
 
-      <Parte i={3} montados={montados} destaque={destaque}>
+      <Parte i={4} montados={montados} destaque={destaque}>
+      <div className="px-3 pt-4 pb-2">
+        <p className={rotulo}>Depoimentos</p>
+        <p className={tituloSecao}>Quem já chamou recomenda</p>
+        <div className="mt-2 space-y-1.5">
+          {s.depoimentos.map(({ nome, texto }) => (
+            <div key={nome} className="rounded-xl bg-white p-2 shadow-[0_4px_12px_-6px_rgb(0_0_0/0.25)]">
+              <span className="flex gap-0.5 text-[#E8A317]">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <StarIcon key={i} className="size-2 fill-current" />
+                ))}
+              </span>
+              <p className="mt-1 text-[7.5px] leading-[1.45]">“{texto}”</p>
+              <p className="mt-0.5 text-[6.5px] text-[#141414]/55">{nome}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      </Parte>
+
+      <Parte i={5} montados={montados} destaque={destaque}>
+      <div className="px-3 pt-2 pb-2">
+        <p className={tituloSecao}>Perguntas frequentes</p>
+        <div className="mt-1.5 divide-y divide-[#141414]/10 border-y border-[#141414]/10">
+          {s.perguntas.map((pergunta) => (
+            <div key={pergunta} className="flex items-center justify-between gap-2 py-1.5 text-[7.5px]">
+              {pergunta}
+              <PlusIcon className="size-2.5 shrink-0 text-(--fundo)" />
+            </div>
+          ))}
+        </div>
+      </div>
+      </Parte>
+
+      <Parte i={6} montados={montados} destaque={destaque}>
+      <div className="mx-3 mt-1 rounded-xl border border-(--fundo)/15 bg-white p-2.5">
+        <p className={cn("flex items-center gap-1 text-[9px]", s.serifa ? "font-heading" : "font-bold")}>
+          <MapPinIcon className="size-2.5 text-(--fundo)" />
+          Onde atendemos
+        </p>
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {s.area.map((lugar) => (
+            <span key={lugar} className="rounded-full bg-(--fundo)/10 px-1.5 py-0.5 text-[7px]">
+              {lugar}
+            </span>
+          ))}
+        </div>
+      </div>
+      </Parte>
+
+      <Parte i={7} montados={montados} destaque={destaque}>
       <div className="m-3 rounded-xl border border-(--fundo)/15 bg-white p-3 text-center">
         <p className={cn("text-[12px] leading-tight", s.serifa ? "font-heading" : "font-bold")}>{s.chamada}</p>
         <span className="mt-2 inline-flex h-6 items-center gap-1 rounded-full bg-[#25D366] px-3 text-[8px] font-semibold text-[#0B2A17]">
@@ -119,7 +185,7 @@ export function PaginaCliente({ s, montados, destaque }: { s: Segmento; montados
       </div>
       </Parte>
 
-      <Parte i={4} montados={montados} destaque={destaque}>
+      <Parte i={8} montados={montados} destaque={destaque}>
       <div className="flex items-center justify-between bg-(--fundo) px-3 py-2.5 text-[7px] text-white/70">
         <span className="flex items-center gap-1">
           <MapPinIcon className="size-2.5" />

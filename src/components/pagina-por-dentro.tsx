@@ -11,20 +11,36 @@ import { cn } from "@/lib/utils";
 // Lucas, 2026-11-20): a página do cliente fictício eletricista num celular
 // preso ao lado (em cima, no celular), com a parte da vez contornada e a tela
 // descendo até ela, enquanto a explicação passa na rolagem. As partes são as
-// cinco da PaginaCliente.
+// nove da PaginaCliente, as de uma página completa.
 
 const partes = [
   {
     titulo: "O topo: a mensagem principal",
-    texto: "Em segundos, a pessoa entende o que você faz, onde atende e o que fazer. O botão do WhatsApp já está ali, com a mensagem pronta.",
+    texto: "Em segundos, a pessoa entende o que você faz, onde atende e o que fazer. O botão do WhatsApp já está ali, com a mensagem pronta, e os diferenciais logo abaixo.",
   },
   {
     titulo: "Os serviços",
     texto: "O que você faz, em cartões curtos, com as palavras que o seu cliente usa para procurar.",
   },
   {
+    titulo: "Quem somos",
+    texto: "Quem está por trás do negócio, com foto. As pessoas chamam com mais confiança quem elas sentem que conhecem.",
+  },
+  {
     titulo: "Como funciona",
-    texto: "Os passos até ser atendido. Quem sabe o que vai acontecer chama com mais confiança.",
+    texto: "Os passos até ser atendido. Quem sabe o que vai acontecer chama sem medo.",
+  },
+  {
+    titulo: "Os depoimentos",
+    texto: "O que outros clientes dizem. Para quem ainda não te conhece, é a prova mais forte.",
+  },
+  {
+    titulo: "As perguntas frequentes",
+    texto: "As dúvidas que você responde todo dia no WhatsApp, já respondidas na página.",
+  },
+  {
+    titulo: "Onde atende",
+    texto: "Os bairros e as cidades que você atende, para a pessoa saber na hora que é com você.",
   },
   {
     titulo: "A chamada final",
@@ -72,7 +88,7 @@ export function PaginaPorDentro() {
         </div>
       </div>
 
-      <ol ref={lista} className="space-y-6 md:space-y-24 md:py-16">
+      <ol ref={lista} className="space-y-6 md:space-y-14 md:py-16">
         {partes.map(({ titulo, texto }, i) => (
           <li
             key={titulo}

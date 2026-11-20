@@ -50,6 +50,12 @@ export type Segmento = {
   passos: string[];
   chamada: string;
   cidade: string;
+  /** As seções a mais de uma página completa (rodada de profundidade, Lucas,
+   * 2026-11-20: a página de exemplo parecia simples demais). */
+  sobre: string;
+  depoimentos: { nome: string; texto: string }[];
+  perguntas: string[];
+  area: string[];
 };
 
 export const segmentos: Segmento[] = [
@@ -83,6 +89,13 @@ export const segmentos: Segmento[] = [
     passos: ["Você chama no WhatsApp", "A gente passa o orçamento", "O técnico vai até você"],
     chamada: "Precisa de um eletricista hoje?",
     cidade: "Campinas · SP",
+    sobre: "Eletricistas com NR-10 atendendo casas e empresas de Campinas, com pontualidade e segurança.",
+    depoimentos: [
+      { nome: "Mariana S.", texto: "Vieram no mesmo dia e resolveram o quadro que vivia desarmando." },
+      { nome: "Paulo R.", texto: "Orçamento rápido pelo WhatsApp e serviço limpo. Recomendo." },
+    ],
+    perguntas: ["Vocês atendem no mesmo dia?", "Dão garantia no serviço?", "Emitem nota fiscal?"],
+    area: ["Campinas", "Valinhos", "Sumaré", "Hortolândia"],
   },
   {
     id: "dentista",
@@ -114,6 +127,13 @@ export const segmentos: Segmento[] = [
     passos: ["Você chama no WhatsApp", "Agendamos a sua avaliação", "Você é atendido no horário"],
     chamada: "Vamos planejar o seu sorriso?",
     cidade: "Cambuí · Campinas",
+    sobre: "Uma clínica no Cambuí com atendimento humanizado, do primeiro exame ao sorriso pronto.",
+    depoimentos: [
+      { nome: "Camila T.", texto: "Perdi o medo de dentista. Atendimento calmo e tudo explicado." },
+      { nome: "Renato M.", texto: "Fiz as lentes e ficou natural. Equipe muito atenciosa." },
+    ],
+    perguntas: ["A avaliação tem custo?", "Vocês parcelam o tratamento?", "Atendem aos sábados?"],
+    area: ["Cambuí", "Centro", "Taquaral", "Guanabara"],
   },
   {
     id: "advogado",
@@ -145,5 +165,12 @@ export const segmentos: Segmento[] = [
     passos: ["Você conta o seu caso", "Analisamos com você", "Seguimos juntos até o fim"],
     chamada: "Ficou com dúvida sobre os seus direitos?",
     cidade: "Campinas · SP",
+    sobre: "Escritório dedicado ao direito do trabalho, com atendimento próximo e linguagem simples.",
+    depoimentos: [
+      { nome: "Juliana P.", texto: "Explicaram os meus direitos sem complicação e me acompanharam até o fim." },
+      { nome: "Carlos A.", texto: "Atendimento rápido pelo WhatsApp e muito transparente." },
+    ],
+    perguntas: ["A primeira conversa tem custo?", "Vocês atendem online?", "Quanto tempo leva um processo?"],
+    area: ["Campinas", "Jundiaí", "Sorocaba", "Todo o estado de SP"],
   },
 ];

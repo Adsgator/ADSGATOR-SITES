@@ -16,10 +16,13 @@ import { cn } from "@/lib/utils";
 const s = segmentos[0];
 
 const secoes = [
-  { nome: "Topo", conteudo: `A mensagem principal, o selo “${s.selo}” e o botão “${s.cta}”` },
-  { nome: "Diferenciais", conteudo: s.diferenciais.join(", ") },
+  { nome: "Topo", conteudo: `A mensagem principal, o selo “${s.selo}”, o botão “${s.cta}” e os diferenciais` },
   { nome: "Serviços", conteudo: s.servicos.map((x) => x.titulo).join(", ") },
+  { nome: "Quem somos", conteudo: "A equipe, com foto, e há quanto tempo atende a região" },
   { nome: "Como funciona", conteudo: s.passos.join(" · ") },
+  { nome: "Depoimentos", conteudo: "Dois clientes contando como foi" },
+  { nome: "Perguntas frequentes", conteudo: s.perguntas.join(" · ") },
+  { nome: "Onde atendemos", conteudo: s.area.join(", ") },
   { nome: "Chamada final", conteudo: `“${s.chamada}” e o botão do WhatsApp` },
   { nome: "Rodapé", conteudo: "A cidade, o horário e os contatos" },
 ];

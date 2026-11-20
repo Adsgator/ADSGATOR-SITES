@@ -324,8 +324,12 @@ export default function Page() {
         <div className="mx-auto max-w-6xl px-4 py-24">
           <Eyebrow>A página por dentro</Eyebrow>
           <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
-            Cada parte leva <span className="text-muted-foreground">ao mesmo lugar: o seu WhatsApp.</span>
+            Uma página completa. <span className="text-muted-foreground">Cada parte leva ao seu WhatsApp.</span>
           </h2>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
+            Cada página tem as seções que o seu negócio precisa. Esta é de um exemplo, com nove: cada uma tem um
+            trabalho, e todas levam ao mesmo botão.
+          </p>
           <div className="mt-14">
             <PaginaPorDentro />
           </div>

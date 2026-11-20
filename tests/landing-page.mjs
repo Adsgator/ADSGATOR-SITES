@@ -61,13 +61,16 @@ try {
       while (Date.now() - inicio < 26_000) {
         const a = await page.evaluate(() => {
           const pagina = document.querySelector("[data-montando] [data-parte]").parentElement.parentElement;
-          const partes = [...pagina.querySelectorAll("[data-parte]")].map((p) => Number(getComputedStyle(p.firstElementChild).opacity));
+          const tela = pagina.parentElement.getBoundingClientRect();
+          const partes = [...pagina.querySelectorAll("[data-parte]")].map((p) => Number(getComputedStyle(p.lastElementChild.previousElementSibling).opacity));
+          const rodape = pagina.querySelector('[data-parte="8"]').getBoundingClientRect();
           return {
             feitos: document.querySelectorAll("[data-roteiro-feito]").length,
             descida: new DOMMatrix(getComputedStyle(pagina).transform).m42,
             site: document.querySelector("[data-montando] p.font-mono").textContent,
             proxima: Math.round(document.querySelector("#como-fica-pronta").getBoundingClientRect().top + window.scrollY),
             partes,
+            rodapeNaTela: rodape.top >= tela.top - 2 && rodape.bottom <= tela.bottom + 2,
           };
         });
         amostras.push(a);
@@ -77,14 +80,16 @@ try {
         await page.waitForTimeout(200);
       }
       const contagens = new Set(amostras.map((a) => a.feitos));
-      check(`${rotulo}: o roteiro se marca de 0 a 5`, [0, 1, 2, 3, 4, 5].every((n) => contagens.has(n)), [...contagens].sort().join(","));
+      check(`${rotulo}: o roteiro se marca de 0 a 9`, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].every((n) => contagens.has(n)), [...contagens].sort((a, b) => a - b).join(","));
+      // O defeito visto pelo Lucas: a animação não chegava ao rodapé.
+      check(`${rotulo}: com tudo montado, o rodapé aparece na tela do celular`, amostras.some((a) => a.feitos === 9 && a.rodapeNaTela));
       check(
         `${rotulo}: o que não entrou fica escondido no lugar`,
         conferidoMeio && conferidoMeio[0] > 0.95 && conferidoMeio[1] > 0.95 && conferidoMeio[4] < 0.05,
         conferidoMeio ? conferidoMeio.map((o) => o.toFixed(2)).join(" ") : "não pegou o meio",
       );
-      const desceu = amostras.some((a) => a.feitos >= 3 && a.feitos < 5 && a.descida < -50);
-      const voltou = amostras.some((a) => a.feitos === 5 && Math.abs(a.descida) < 1);
+      const desceu = amostras.some((a) => a.feitos >= 3 && a.feitos < 9 && a.descida < -50);
+      const voltou = amostras.some((a) => a.feitos === 9 && Math.abs(a.descida) < 1);
       check(`${rotulo}: a tela desce enquanto monta e volta ao topo pronta`, desceu && voltou, `desceu ${desceu}, voltou ${voltou}`);
       const sites = new Set(amostras.map((a) => a.site));
       check(`${rotulo}: depois entra o próximo cliente`, sites.size >= 2, [...sites].join(", "));
@@ -120,8 +125,8 @@ try {
         return { topo: r.top + window.scrollY, fim: r.bottom + window.scrollY };
       });
       const vistas = [];
-      for (let k = 0; k <= 20; k++) {
-        await rolarPara(lista.topo - tela.height * 0.65 + ((lista.fim - lista.topo) * k) / 20);
+      for (let k = 0; k <= 30; k++) {
+        await rolarPara(lista.topo - tela.height * 0.65 + ((lista.fim - lista.topo) * k) / 30);
         vistas.push(
           await page.evaluate(() => {
             const itens = [...document.querySelectorAll("ol:has([data-ativa]) > li")];
@@ -133,8 +138,8 @@ try {
           }),
         );
       }
-      const acesas = [0, 1, 2, 3, 4].filter((n) => vistas.some((v) => v.ativa === n && v.aVista));
-      check(`${rotulo}: a página por dentro acende as 5 partes, cada uma à vista`, acesas.length === 5, `à vista: ${acesas.join(",")}`);
+      const acesas = [0, 1, 2, 3, 4, 5, 6, 7, 8].filter((n) => vistas.some((v) => v.ativa === n && v.aVista));
+      check(`${rotulo}: a página por dentro acende as 9 partes, cada uma à vista`, acesas.length === 9, `à vista: ${acesas.join(",")}`);
       check(`${rotulo}: a parte contornada no celular é a da explicação`, vistas.every((v) => v.ativa === v.destaque), vistas.map((v) => `${v.ativa}/${v.destaque}`).join(" "));
 
       // O roteiro de exemplo: parado até a pessoa chegar; depois, as seções se
@@ -151,7 +156,7 @@ try {
       }));
       check(
         `${rotulo}: o roteiro se marca e mostra "Aprovado" quando a pessoa chega`,
-        !antesRoteiro && roteiro.marcadas === 6 && roteiro.aprovado > 0.95,
+        !antesRoteiro && roteiro.marcadas === 9 && roteiro.aprovado > 0.95,
         `antes ${antesRoteiro}, ${roteiro.marcadas} seções, aprovado ${roteiro.aprovado}`,
       );
 
