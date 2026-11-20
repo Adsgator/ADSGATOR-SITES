@@ -1336,6 +1336,52 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
     falha é a trava de "texto aprovado" da Privacidade (trecho da Adobe
     Fonts esperando o Lucas).
   - Pendente: o mesmo da entrada anterior.
+- 2026-11-04 (branch `forms-briefing-google-ads`): o Lucas pediu o briefing de
+  Google Ads no ar para mandar a uma cliente nova, adiantando só esse pedaço da
+  Parte 4 do plano geral.
+  - Feito: `public/forms/briefing-google-ads.html` (formulário `Slda5k72` do
+    respondi incorporado, sem o cabeçalho e o rodapé do site), aberto em
+    `forms.adsgator.com.br/briefing-google-ads` por regras do `next.config.ts`
+    que só valem nesse domínio. Só essa página libera o respondi na CSP; todo o
+    domínio `forms.` fica fora do Google; a raiz leva ao site.
+  - DNS: nenhum registro muda (o curinga `*` da zona já aponta para a Vercel);
+    falta só ligar o domínio ao projeto `adsgator-sites`.
+  - Verificado no build de produção, no Chrome: `tests/forms.mjs` 17 de 17 (4 de
+    13 antes da mudança, com 404) e `tests/site.mjs` 59 de 59. O teste abre o
+    formulário e chega à primeira pergunta; não envia resposta.
+  - Pendente: publicar na `main`, ligar o domínio, repetir `tests/forms.mjs` em
+    produção. Os outros 6 briefings antigos seguem sem abrir (decisão 10); o
+    Hub ainda envia o link de `/briefing-pro/`.
+- 2026-11-04: briefing de Google Ads publicado, com autorização do Lucas.
+  `forms.adsgator.com.br` ligado ao projeto `adsgator-sites`, sem mudar o DNS.
+  - Verificado em produção, no Chrome: `tests/forms.mjs` 17 de 17 (celular e
+    computador) e `tests/site.mjs` 61 de 61. O endereço com a barra no fim, que
+    é o já enviado a clientes, redireciona (308) e abre.
+  - Pendente: os outros 6 briefings antigos seguem sem abrir (decisão 10); o
+    Hub ainda envia o link de `/briefing-pro/`.
+- 2026-11-11: Privacidade atualizada para a Fase 3 do sistema do painel
+  (mensagens do WhatsApp no painel), aprovada pelo Lucas no texto destacado
+  (branch `privacidade-ycloud`, a partir da `main`, fora do `fase-1b`).
+  - O que mudou: a data; na seção 3, as conversas de WhatsApp no cadastro, como
+    chegam ao painel (API oficial do WhatsApp pela YCloud; fica o texto e a
+    transcrição dos áudios, feita no computador da Adsgator; fotos, áudios e
+    documentos ficam só no WhatsApp; mensagem de quem não é cliente nem contato
+    é apagada) e o item "Assistente de IA" (o Claude, da Anthropic, prepara
+    rascunhos; tudo é lido, aprovado e enviado pela Adsgator); na seção 4, o
+    Supabase com as conversas e os serviços YCloud e Anthropic; na seção 6,
+    Singapura (servidores principais da YCloud, conforme a política dela em
+    vigor desde 2026-04-03, conferida em 2026-11-11).
+  - Decisão do Lucas (2026-11-11): o aviso por e-mail aos clientes (seção 10)
+    fica para quando a agência estiver completa, com todas as mudanças de uma
+    vez. A opção "Ajude a melhorar o Claude" está desligada na conta dele (ele
+    conferiu): a Anthropic não usa as conversas para treinar e guarda por 30 dias.
+  - O teste do aviso de rascunho passou a pegar só a palavra sozinha
+    ("rascunhos de resposta" é do texto aprovado). Verificado no servidor local:
+    `tests/site.mjs` 59 de 59 (numa rodada anterior, um 404 passageiro na Ajuda,
+    que não se repetiu; o site no ar, antes da mudança, passou 61 de 61).
+  - O branch `fase-1b` (parado desde 2026-10-06) tem outra mudança na
+    Privacidade (Adobe Fonts, ainda destacada): ao retomar a Fase 1B, juntar a
+    `main` nele.
 - 2026-11-20: o plano geral foi reescrito (2026-11-19) e pôs o site primeiro:
   esta Fase 1B é a Parte 1 dele, seguida da Fase 3 (Parte 2), da Fase 2
   (Parte 3) e da Fase 4 (Partes 4 e 5). O Lucas aprovou a amostra 2, vista no
@@ -1347,3 +1393,12 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
   movimento) está no plano geral, Parte 1. Mudou o que valia na Fase 3: o
   botão principal leva ao WhatsApp, e o link do checkout vai só quando o
   cliente decide fechar.
+- 2026-11-20: Next 16.4.6 na `main` (`a601e97`, publicado com autorização do
+  Lucas): o 16.3.8 tinha o aviso crítico GHSA-2464-fhr4-w9xw (otimização de
+  imagens com SVG; o site usa o componente de imagem no logo) e o
+  GHSA-p3m5-59mp-jv5r. `npm audit`: de 15 avisos (1 crítico, 6 altos) para 4
+  moderados, todos na ferramenta `shadcn`. Antes de publicar: lint, tipos e
+  build sem erro; no build de produção no computador, `tests/site.mjs` 59 de
+  59 e `tests/forms.mjs` 17 de 17. A `main` foi juntada no `fase-1b` (conflito
+  só neste registro, resolvido em ordem de data). Decisão 1 da Parte 1 do plano
+  geral: o Motion (A). O Lucas aprovou o trecho da Adobe Fonts na Privacidade.
