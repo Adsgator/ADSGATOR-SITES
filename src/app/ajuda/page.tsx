@@ -4,7 +4,7 @@ import { site } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Central de Ajuda",
-  description: "Fale com a Adsgator pelo WhatsApp ou por e-mail.",
+  description: "Central de Ajuda da Adsgator: tire dúvidas sobre o seu anúncio ou a sua página, pelo WhatsApp ou por e-mail.",
   alternates: { canonical: "/ajuda" },
 };
 

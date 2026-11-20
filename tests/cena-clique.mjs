@@ -37,7 +37,7 @@ try {
           return {
             clique: cena.dataset.clique ?? "",
             linhas: linhas ? Number(getComputedStyle(linhas).opacity) : 0,
-            anuncio: getComputedStyle(cena.querySelector("[data-anuncio]") ?? cena).transform,
+            anuncio: getComputedStyle(cena.querySelector("[data-anuncio-cena]") ?? cena).transform,
             whats: getComputedStyle(cena.querySelector("[data-cta-whatsapp]") ?? cena).transform,
           };
         }),

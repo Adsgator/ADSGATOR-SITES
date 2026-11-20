@@ -1,3 +1,4 @@
+import { DadosEstruturados, dadosDoServico } from "@/components/dados-estruturados";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -42,7 +43,7 @@ import { cn } from "@/lib/utils";
 // mês e as objeções reais ("Desconto e objeções", processo comercial da Base).
 
 export const metadata: Metadata = {
-  title: "Gestão de Google Ads",
+  title: "Gestão de Google Ads para negócios locais",
   description:
     "Apareça no Google para quem está procurando o seu serviço agora, com a verba certa para a sua região. Conta no seu nome, sem fidelidade. Diagnóstico grátis pelo WhatsApp.",
   alternates: { canonical: "/google-ads" },
@@ -220,6 +221,7 @@ const perguntas = [
 export default function Page() {
   return (
     <>
+      <DadosEstruturados dados={dadosDoServico({ nome: "Gestão de Google Ads", descricao: metadata.description as string, caminho: "/google-ads" })} />
       {/* 1. Topo: o anúncio se montando na página de resultados. */}
       <MotionScope>
         <FundoVivo className="overflow-x-clip">

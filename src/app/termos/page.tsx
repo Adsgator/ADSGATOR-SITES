@@ -4,7 +4,7 @@ import Termos from "@/content/termos.mdx";
 
 export const metadata: Metadata = {
   title: "Termos de Serviço",
-  description: "Termos de Serviço da Adsgator.",
+  description: "Termos de Serviço da Adsgator: o que cada serviço inclui, prazos, pagamento, cancelamento sem fidelidade e reembolso.",
   alternates: { canonical: "/termos" },
 };
 

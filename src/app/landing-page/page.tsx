@@ -1,3 +1,4 @@
+import { DadosEstruturados, dadosDoServico } from "@/components/dados-estruturados";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -49,7 +50,7 @@ import { cn } from "@/lib/utils";
 // Entrada da página), as dúvidas mais comuns e a manutenção monitorada 24 horas.
 
 export const metadata: Metadata = {
-  title: "Landing page",
+  title: "Landing page para negócios locais",
   description:
     "Uma página sob medida, rápida no celular, feita para transformar o clique em conversa no WhatsApp. Domínio no seu nome, pronta em até 14 dias úteis.",
   alternates: { canonical: "/landing-page" },
@@ -227,6 +228,7 @@ const perguntas = [
 export default function Page() {
   return (
     <>
+      <DadosEstruturados dados={dadosDoServico({ nome: "Criação de landing page", descricao: metadata.description as string, caminho: "/landing-page" })} />
       {/* 1. Topo: a página sendo montada seção por seção. */}
       <MotionScope>
         <FundoVivo className="overflow-x-clip">

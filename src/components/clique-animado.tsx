@@ -119,7 +119,7 @@ function Cena() {
               <SearchIcon className="size-4 text-ink/50" />
               {s.busca}
             </div>
-            <div data-anuncio className="mt-4 rounded-2xl border border-brand/60 bg-white p-4">
+            <div data-anuncio-cena className="mt-4 rounded-2xl border border-brand/60 bg-white p-4">
               <p className="text-[0.7rem] font-semibold">Patrocinado · {s.site}</p>
               <p data-titulo-anuncio className="mt-2 font-heading text-lg leading-snug">{s.anuncio}</p>
               <p className="mt-1 text-xs leading-5 text-ink/60">{s.anuncioTexto}</p>

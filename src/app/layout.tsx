@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { DadosEstruturados, dadosDaEmpresa } from "@/components/dados-estruturados";
 import { ThemeProvider } from "@/components/theme-provider";
 import { site } from "@/config/site";
 import "./globals.css";
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <link rel="stylesheet" href="https://use.typekit.net/eaw0vap.css" />
       </head>
       <body className="flex min-h-full flex-col">
+        <DadosEstruturados dados={dadosDaEmpresa} />
         {/* Claro por padrão (decisão 1 do plano); o visitante pode trocar. */}
         <ThemeProvider
           attribute="class"

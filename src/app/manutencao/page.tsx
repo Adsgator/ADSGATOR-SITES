@@ -1,3 +1,4 @@
+import { DadosEstruturados, dadosDoServico } from "@/components/dados-estruturados";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -47,9 +48,9 @@ import { cn } from "@/lib/utils";
 // meses, o que cabe nos pequenos ajustes e as dúvidas mais comuns.
 
 export const metadata: Metadata = {
-  title: "Manutenção de página",
+  title: "Manutenção e hospedagem de página",
   description:
-    "Sua página sempre no ar: hospedagem, cadeado, domínio renovado, monitoramento, cópias de segurança, pequenos ajustes e suporte. Diagnóstico grátis pelo WhatsApp.",
+    "Sua página sempre no ar: hospedagem, segurança, domínio renovado, monitoramento, cópias de segurança, pequenos ajustes e suporte. Diagnóstico grátis pelo WhatsApp.",
   alternates: { canonical: "/manutencao" },
 };
 
@@ -191,6 +192,7 @@ const perguntas = [
 export default function Page() {
   return (
     <>
+      <DadosEstruturados dados={dadosDoServico({ nome: "Manutenção e hospedagem de página", descricao: metadata.description as string, caminho: "/manutencao" })} />
       {/* 1. Topo: o painel de situação com a conferência do dia. */}
       <MotionScope>
         <FundoVivo className="overflow-x-clip">

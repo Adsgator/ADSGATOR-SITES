@@ -21,9 +21,9 @@ import { cn } from "@/lib/utils";
 // números (decisão 3 A) estão em config/portfolio.ts.
 
 export const metadata: Metadata = {
-  title: "Portfólio",
+  title: "Portfólio de landing pages",
   description:
-    "Landing pages feitas pela Adsgator: adestramento, escritório virtual, nutrição, móveis planejados, recursos de multas, internet e mais. Passe o mouse para ver cada página inteira.",
+    "Landing pages feitas pela Adsgator para negócios de vários segmentos. Passe o mouse para ver cada página inteira, do topo ao rodapé.",
   alternates: { canonical: "/portfolio" },
 };
 

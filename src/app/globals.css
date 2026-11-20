@@ -362,7 +362,7 @@ details[open]::details-content {
     transform-origin: 27% 27%;
   }
   /* A cena da chamada final (clique-animado.tsx): o elemento clicado reage. */
-  .cena-clique [data-anuncio],
+  .cena-clique [data-anuncio-cena],
   .cena-clique [data-cta-whatsapp] {
     transition:
       transform 160ms var(--ease-out),
@@ -370,7 +370,7 @@ details[open]::details-content {
       box-shadow 160ms var(--ease-out),
       background-color 160ms var(--ease-out);
   }
-  .cena-clique[data-clique="anuncio"] [data-anuncio] {
+  .cena-clique[data-clique="anuncio"] [data-anuncio-cena] {
     transform: scale(0.97);
     background-color: #fff8e6;
     box-shadow: 0 0 0 3px rgb(255 177 0 / 0.45);

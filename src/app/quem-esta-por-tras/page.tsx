@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 // que fica com o Lucas) e as dúvidas sobre trabalhar com uma pessoa só.
 
 export const metadata: Metadata = {
-  title: "Quem está por trás",
+  title: { absolute: "Quem está por trás da Adsgator" },
   description:
     "Lucas, da Adsgator: Google Ads desde 2020 e web design há mais de 10 anos. Você fala direto com quem cuida do seu anúncio e da sua página.",
   alternates: { canonical: "/quem-esta-por-tras" },
