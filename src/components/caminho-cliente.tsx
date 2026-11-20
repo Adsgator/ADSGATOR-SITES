@@ -46,8 +46,8 @@ const passos = [
  * No computador, a seção fica presa na tela e troca o passo com a rolagem,
  * como a linha do tempo do Zouti. No celular, os passos ficam um embaixo do
  * outro. A busca digita os segmentos um por vez, e o anúncio, a página e a
- * conversa acompanham o segmento da vez (pedido do Lucas, 2026-11-20). Com
- * "reduzir animações", a troca das telas é só um esmaecimento.
+ * conversa acompanham o segmento da vez (pedido do Lucas, 2026-11-20). Os efeitos valem
+ * mesmo com "reduzir animações" ligado (decisão do Lucas, 2026-11-20).
  */
 export function CaminhoCliente() {
   return (
@@ -109,7 +109,7 @@ function Conteudo() {
                 <div
                   key={passo.rotulo}
                   className={cn(
-                    "absolute inset-0 flex items-center justify-center transition-[opacity,translate,scale] duration-700 ease-out motion-reduce:transition-opacity",
+                    "absolute inset-0 flex items-center justify-center transition-[opacity,translate,scale] duration-700 ease-out",
                     i === ativo
                       ? "opacity-100"
                       : cn("pointer-events-none scale-95 opacity-0", i < ativo ? "-translate-y-12" : "translate-y-12"),

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 /**
  * Faixa que rola sem parar (classes `marquee` e `marquee-track` no
  * globals.css). Pausa com o mouse em cima e pelo botão de pausa do
- * MotionScope; com "reduzir animações", roda na metade da velocidade. A
+ * MotionScope. A
  * segunda cópia fecha o laço e fica fora dos leitores de tela e do teclado
  * (`inert`).
  */

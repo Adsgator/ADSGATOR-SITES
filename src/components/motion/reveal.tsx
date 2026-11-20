@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * Entrada suave quando o conteúdo chega na tela (classe `reveal` no
- * globals.css). `delay` (ms) faz entradas em cascata. Sem JavaScript ou com
- * "reduzir animações", o conteúdo aparece direto.
+ * globals.css). `delay` (ms) faz entradas em cascata. Sem JavaScript, o
+ * conteúdo aparece direto.
  */
 export function Reveal({
   delay = 0,

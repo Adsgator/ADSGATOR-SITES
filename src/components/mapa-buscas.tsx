@@ -6,23 +6,20 @@ import { motion } from "motion/react";
 import { useDigitacao } from "@/components/motion/use-digitacao";
 import { cn } from "@/lib/utils";
 
-// Fundo da hero (pedido do Lucas, 2026-11-20, com o print do Google Maps): um
-// mapa de bairro no estilo do Google Maps, apagado, e buscas aparecendo em
-// pontos da cidade. Em cada ponto, a lupa fica "procurando" (pulsa e mexe de
-// leve), a busca é digitada, fica um instante e some; a próxima aparece em
-// outro lugar. Para no botão de pausar da hero. Mapa com posições fixas
-// (iguais no servidor e no navegador). Com "reduzir animações", a lupa só
-// esmaece, sem pulsar nem mexer.
+// Fundo da hero (pedidos do Lucas, 2026-11-20): um mapa de bairro bem simples,
+// no espírito do Google Maps (ruas orgânicas e poucas casas, só para
+// representar, sem nomes), e buscas aparecendo aos poucos pela cidade, uma ou
+// duas por vez. Em cada ponto, a lupa balança de leve "procurando", a busca é
+// digitada, fica um instante e some; depois de uma pausa, aquele ponto volta
+// em outro lugar. Para no botão de pausar da hero. Posições fixas, iguais no
+// servidor e no navegador. Vale também com "reduzir animações" (decisão do
+// Lucas, 2026-11-20).
 
 const LARGURA = 1400;
 const ALTURA = 800;
-const PASSO_X = 190;
-const PASSO_Y = 150;
-const RUA = 22;
 
-/** Número pseudoaleatório fixo para cada semente (o mapa sai sempre igual).
- * Só contas com inteiros: o `Math.sin` dava casas decimais diferentes no
- * servidor e no Chrome, e o React acusava a diferença. */
+/** Número pseudoaleatório fixo para cada semente, só com contas de inteiros
+ * (o `Math.sin` dava casas decimais diferentes no servidor e no Chrome). */
 const sorte = (n: number) => {
   let t = Math.imul(n | 0, 2654435761) >>> 0;
   t = Math.imul(t ^ (t >>> 15), 2246822519) >>> 0;
@@ -31,104 +28,43 @@ const sorte = (n: number) => {
 };
 const arredondar = (v: number) => Math.round(v * 10) / 10;
 
-const nomesRuas = ["R. das Palmeiras", "Av. Brasil", "R. São José", "R. dos Ipês", "Av. das Américas", "R. Sete de Setembro"];
-const lugares = [
-  { x: 2, y: 1, nome: "Clínica" },
-  { x: 5, y: 3, nome: "Pet shop" },
-  { x: 7, y: 0, nome: "Escritório" },
-  { x: 1, y: 4, nome: "Padaria" },
+const ruas = [
+  "M-40 130 C 260 150 440 90 720 140 S 1160 190 1440 120",
+  "M-40 340 C 300 310 480 380 800 340 S 1200 280 1440 330",
+  "M-40 580 C 230 555 520 620 870 575 S 1240 530 1440 600",
+  "M160 -40 C 185 220 125 480 195 840",
+  "M490 -40 C 465 210 545 440 500 840",
+  "M940 -40 C 975 250 905 490 960 840",
+  "M1230 -40 C 1205 270 1270 540 1215 840",
 ];
+const avenida = "M-60 760 C 300 700 620 520 860 470 S 1260 330 1460 250";
 
-function montarMapa() {
-  const quarteiroes: { x: number; y: number; casas: { x: number; y: number; w: number; h: number }[]; destaque: boolean }[] = [];
-  for (let i = -3; i < 10; i++) {
-    for (let j = -3; j < 8; j++) {
-      const x = i * PASSO_X + RUA / 2;
-      const y = j * PASSO_Y + RUA / 2;
-      const w = PASSO_X - RUA;
-      const h = PASSO_Y - RUA;
-      const casas: { x: number; y: number; w: number; h: number }[] = [];
-      // Duas fileiras de casas, de larguras variadas, como nos lotes do mapa.
-      for (const [linha, topo] of [[0, 6], [1, h / 2 + 3]] as const) {
-        let cx = 6;
-        let k = 0;
-        while (cx < w - 18) {
-          const largura = arredondar(Math.min(w - 6 - cx, 22 + sorte(i * 97 + j * 31 + linha * 7 + k) * 30));
-          const altura = arredondar(h / 2 - 12 - sorte(i * 13 + j * 71 + k + linha) * 14);
-          casas.push({ x: x + cx, y: y + topo + (linha ? 0 : h / 2 - 12 - altura), w: largura, h: altura });
-          cx += largura + 4;
-          k++;
-        }
-      }
-      quarteiroes.push({ x, y, casas, destaque: lugares.some((l) => l.x === i && l.y === j) });
-    }
-  }
-  return quarteiroes;
-}
-
-const quarteiroes = montarMapa();
+// Poucas casas espalhadas: menos é mais, só para o mapa ser reconhecível.
+const casas = Array.from({ length: 200 }, (_, n) => ({
+  x: arredondar((n % 20) * 72 + sorte(n * 7) * 30),
+  y: arredondar(Math.floor(n / 20) * 82 + sorte(n * 13) * 30),
+  w: arredondar(16 + sorte(n * 31) * 22),
+  h: arredondar(12 + sorte(n * 57) * 16),
+  usar: sorte(n * 91) < 0.3,
+})).filter((c) => c.usar);
 
 function MapaCidade() {
-  const ruasV = Array.from({ length: 13 }, (_, n) => (n - 3) * PASSO_X);
-  const ruasH = Array.from({ length: 11 }, (_, n) => (n - 3) * PASSO_Y);
   return (
     <svg
       viewBox={`0 0 ${LARGURA} ${ALTURA}`}
       preserveAspectRatio="xMidYMid slice"
       className="absolute inset-0 size-full text-foreground"
     >
-      <g transform={`rotate(-22 ${LARGURA / 2} ${ALTURA / 2})`}>
-        {quarteiroes.map((q) => (
-          <g key={`${q.x}-${q.y}`}>
-            {q.destaque && (
-              <rect x={q.x + 4} y={q.y + 4} width={PASSO_X - RUA - 8} height={PASSO_Y - RUA - 8} rx="4" className="fill-brand/15" />
-            )}
-            {q.casas.map((c, n) => (
-              <rect
-                key={n}
-                x={c.x}
-                y={c.y}
-                width={c.w}
-                height={c.h}
-                rx="2"
-                className="fill-foreground/[0.06] stroke-foreground/[0.08]"
-                strokeWidth="1"
-              />
-            ))}
-          </g>
+      {casas.map((c, n) => (
+        <rect key={n} x={c.x} y={c.y} width={c.w} height={c.h} rx="2" className="fill-foreground/[0.06] stroke-foreground/[0.07]" />
+      ))}
+      <g fill="none" strokeLinecap="round">
+        {ruas.map((d) => (
+          <path key={d} d={d} className="stroke-foreground/[0.1]" strokeWidth="18" />
         ))}
-        <g className="stroke-foreground/[0.12]" strokeWidth={RUA}>
-          {ruasV.map((x) => (
-            <line key={`v${x}`} x1={x} y1={-500} x2={x} y2={1300} />
-          ))}
-          {ruasH.map((y) => (
-            <line key={`h${y}`} x1={-500} y1={y} x2={1900} y2={y} />
-          ))}
-        </g>
-        <path
-          d="M-300 980 C 200 760 600 820 900 600 S 1500 300 1900 260"
-          fill="none"
-          className="stroke-foreground/[0.14]"
-          strokeWidth={RUA * 1.6}
-        />
-        {nomesRuas.map((nome, n) => (
-          <text
-            key={nome}
-            x={(n % 3) * 420 + 160}
-            y={Math.floor(n / 3) * 3 * PASSO_Y + 4}
-            className="fill-background font-sans text-[13px] font-medium"
-            dominantBaseline="middle"
-          >
-            {nome}
-          </text>
-        ))}
-        {lugares.map((l) => (
-          <g key={l.nome} transform={`translate(${l.x * PASSO_X + PASSO_X / 2} ${l.y * PASSO_Y + PASSO_Y / 2})`}>
-            <circle r="11" className="fill-brand" />
-            <text x="18" className="fill-muted-foreground text-[13px] font-medium" dominantBaseline="middle">
-              {l.nome}
-            </text>
-          </g>
+        <path d={avenida} className="stroke-foreground/[0.12]" strokeWidth="28" />
+        {ruas.map((d) => (
+          <path key={`${d}-meio`} d={d} className="stroke-background" strokeWidth="1.5" strokeDasharray="3 12" />
         ))}
       </g>
     </svg>
@@ -164,45 +100,49 @@ const pontosCelular: Lugar[][] = [
 ];
 
 function Busca({ pontos, n }: { pontos: Lugar[]; n: number }) {
+  // Cada ponto tem o seu ritmo e uma pausa escondida longa: na tela ficam uma
+  // ou duas buscas por vez, aparecendo intercaladas.
   const { texto, indice, fase } = useDigitacao(buscas, {
-    inicio: 500 + n * 1300,
+    inicio: 600 + n * 2600,
     deslocamento: n * 2,
     passo: 2,
-    velocidade: 50,
-    espera: 2200,
-    intervalo: 1600,
+    velocidade: 55,
+    espera: 2300,
+    intervalo: 1500 + (n % 2) * 400,
+    pausa: 5200 + ((n * 1700) % 3500),
   });
   // Em que volta está (a busca anda de 2 em 2 entre 9; 5 desfaz o "vezes 2"
   // em módulo 9), para cada volta aparecer num lugar diferente.
   const volta = (((indice - ((n * 2) % buscas.length) + buscas.length) % buscas.length) * 5) % buscas.length;
   const lugar = pontos[volta % pontos.length];
   const aDireita = lugar.x > 55;
-  const visivel = fase !== "parado" && fase !== "saindo";
+  const visivel = fase === "procurando" || fase === "digitando" || fase === "pronto";
   const procurando = fase === "procurando";
   const escrevendo = fase === "digitando" || fase === "pronto";
 
   return (
     <motion.div
       style={{ left: `${lugar.x}%`, top: `${lugar.y}%` }}
-      animate={{ opacity: visivel ? 1 : 0 }}
-      transition={{ duration: 0.35 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: visivel ? 1 : 0, scale: visivel ? 1 : 0.9 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
       className={cn("absolute flex items-center gap-2", aDireita ? "-translate-x-full flex-row-reverse" : "")}
     >
       <span className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-card shadow-[0_8px_24px_-10px_rgb(31_39_27/0.45)] ring-1 ring-border">
         {procurando && (
           <motion.span
-            className="absolute inset-0 rounded-full bg-brand motion-reduce:hidden"
-            initial={{ scale: 1, opacity: 0.45 }}
-            animate={{ scale: 2.1, opacity: 0 }}
-            transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
+            className="absolute inset-0 rounded-full border-2 border-brand"
+            initial={{ scale: 1, opacity: 0.5 }}
+            animate={{ scale: 1.9, opacity: 0 }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
           />
         )}
         <motion.span
-          animate={procurando ? { x: [0, 2.5, 0, -2.5, 0], y: [0, -2.5, 0, 2.5, 0] } : { x: 0, y: 0 }}
-          transition={procurando ? { duration: 1.1, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
-          className="relative motion-reduce:transform-none!"
+          animate={procurando ? { rotate: [-9, 9, -9], x: [-1, 1, -1] } : { rotate: 0, x: 0 }}
+          transition={procurando ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
+          className="relative"
         >
-          <SearchIcon className={cn("size-4", procurando ? "text-brand" : "text-foreground")} />
+          <SearchIcon className={cn("size-4 transition-colors", procurando ? "text-brand" : "text-foreground")} />
         </motion.span>
       </span>
       <motion.span

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 // "O que acontece hoje" (roteiro do site, Início, seção 4): três cartões que
 // viram, em 3D, de "hoje" para "com a Adsgator" conforme a rolagem, um depois
-// do outro. Com "reduzir animações", a troca é um esmaecimento, sem girar.
+// do outro. Gira também com "reduzir animações" (Lucas, 2026-11-20).
 
 const cartoes = [
   {
@@ -50,8 +50,8 @@ export function HojeComAdsgator() {
               key={hoje.titulo}
               data-virado={virado ? "" : undefined}
               className={cn(
-                "relative h-64 transition-transform duration-700 ease-(--ease-out) transform-3d motion-reduce:transition-none",
-                virado && "rotate-y-180 motion-reduce:rotate-y-0",
+                "relative h-64 transition-transform duration-700 ease-(--ease-out) transform-3d",
+                virado && "rotate-y-180",
               )}
             >
               <Face lado="hoje" visivel={!virado} {...hoje} />
@@ -81,9 +81,7 @@ function Face({
       aria-hidden={!visivel}
       className={cn(
         "absolute inset-0 flex flex-col justify-between rounded-3xl border p-7 backface-hidden",
-        "motion-reduce:transition-opacity motion-reduce:duration-500",
-        visivel ? "motion-reduce:opacity-100" : "motion-reduce:opacity-0",
-        depois ? "dark section-ink rotate-y-180 bg-background text-foreground motion-reduce:rotate-y-0" : "bg-card",
+        depois ? "dark section-ink rotate-y-180 bg-background text-foreground" : "bg-card",
       )}
     >
       <span

@@ -363,21 +363,6 @@ details[open]::details-content {
   }
 }
 
-/* "Reduzir animações": a animação continua, trocada (Apple): as letras e os
-   blocos só esmaecem, e a faixa roda na metade da velocidade. */
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    transform: none;
-    transition: opacity 500ms var(--ease-out);
-    transition-delay: var(--reveal-delay, 0ms);
-  }
-  .char-in {
-    animation-name: fade-in;
-  }
-  .marquee-track {
-    animation-duration: calc(var(--marquee-duration, 40s) * 2);
-  }
-  .reveal[data-visible] .click-on-reveal {
-    animation-name: click-soft;
-  }
-}
+/* "Reduzir animações" do sistema não muda mais o movimento do site: decisão do
+   Lucas (2026-11-20), "tem que funcionar independente disso". O que roda
+   sozinho continua com o botão de pausar (MotionScope). */

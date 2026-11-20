@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 
 // Fundo vivo das seções (pedido do Lucas, 2026-11-20, a partir do Zouti):
 // manchas de luz da marca, desfocadas, passeando devagar atrás do conteúdo,
-// no lugar do fundo sólido. Decorativo. Com "reduzir animações", o CSS anula o
-// passeio e as manchas ficam paradas.
+// no lugar do fundo sólido. Decorativo; vale também com "reduzir
+// animações" (decisão do Lucas, 2026-11-20).
 
 const manchas = [
   { classe: "top-[10%] -left-[10%] size-[32rem] bg-brand/20", x: [0, 120, 0], y: [0, 60, 0], duracao: 26 },
@@ -24,7 +24,7 @@ export function FundoVivo({ className, children, ...resto }: React.ComponentProp
             key={classe}
             animate={{ x, y }}
             transition={{ duration: duracao, repeat: Infinity, ease: "easeInOut" }}
-            className={cn("absolute rounded-full blur-3xl motion-reduce:transform-none!", classe)}
+            className={cn("absolute rounded-full blur-3xl", classe)}
           />
         ))}
       </div>

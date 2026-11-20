@@ -15,8 +15,8 @@ import { segmentos, type Segmento } from "@/config/segmentos";
  * as telas do produto na referência do Zouti (plano geral, Parte 1). Os
  * segmentos se revezam (eletricista, dentista, advogado, pet shop), para a
  * página geral não parecer de um segmento só. Desenhadas em código, sem dado
- * de cliente nem número que pareça resultado. Com "reduzir animações", o CSS
- * anula o 3D e o deslocamento; a troca de segmento só esmaece.
+ * de cliente nem número que pareça resultado. O 3D vale também com
+ * "reduzir animações" ligado (decisão do Lucas, 2026-11-20).
  */
 export function TelasServico() {
   const palco = useRef<HTMLDivElement>(null);
@@ -25,8 +25,10 @@ export function TelasServico() {
     target: palco,
     offset: ["start end", "center center"],
   });
-  const inclinacao = useTransform(scrollYProgress, [0, 1], [30, 0]);
-  const escala = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
+  // Ao abrir a página, o palco já está um quarto do caminho: começa a contar dali,
+  // para as telas estarem bem inclinadas no topo e ficarem de frente ao descer.
+  const inclinacao = useTransform(scrollYProgress, [0.25, 1], [34, 0]);
+  const escala = useTransform(scrollYProgress, [0.25, 1], [0.88, 1]);
   const subida = useTransform(scrollYProgress, [0, 1], [90, 0]);
   const opacidade = useTransform(scrollYProgress, [0, 0.5], [0.35, 1]);
 
@@ -40,11 +42,11 @@ export function TelasServico() {
         aria-hidden="true"
         data-palco
         style={{ rotateX: inclinacao, scale: escala, opacity: opacidade, transformOrigin: "50% 100%" }}
-        className="relative h-[38rem] motion-reduce:transform-none! sm:h-[36rem]"
+        className="relative h-[38rem] sm:h-[36rem]"
       >
         <motion.div
           style={{ y: subida }}
-          className="absolute top-0 left-0 z-10 w-[78%] origin-top-left scale-[0.8] motion-reduce:transform-none! sm:top-4 sm:w-[22rem] sm:scale-100 lg:top-16"
+          className="absolute top-0 left-0 z-10 w-[78%] origin-top-left scale-[0.8] sm:top-4 sm:w-[22rem] sm:scale-100 lg:top-16"
         >
           <BuscaGoogle s={s} />
         </motion.div>
@@ -53,7 +55,7 @@ export function TelasServico() {
         </div>
         <motion.div
           style={{ y: subida }}
-          className="absolute right-0 bottom-0 z-10 w-[80%] origin-bottom-right scale-[0.8] motion-reduce:transform-none! sm:bottom-2 sm:w-[21rem] sm:scale-100 lg:bottom-16"
+          className="absolute right-0 bottom-0 z-10 w-[80%] origin-bottom-right scale-[0.8] sm:bottom-2 sm:w-[21rem] sm:scale-100 lg:bottom-16"
         >
           <ConversaWhatsApp s={s} />
         </motion.div>

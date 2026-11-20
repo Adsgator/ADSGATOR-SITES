@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRef } from "react";
 import { ArrowUpRightIcon, CheckIcon, LockIcon, SearchIcon } from "lucide-react";
-import { AnimatePresence, motion, MotionConfig, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { AnimatePresence, motion, MotionConfig, useScroll, useTransform } from "motion/react";
 
 import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 // vivos, como os do Zouti (imagens que o Lucas mandou em 2026-11-20). Cada
 // cartão mostra o serviço funcionando, sem número que pareça resultado. As
 // colunas sobem e descem em ritmos diferentes com a rolagem. O que roda
-// sozinho para no botão de pausar; com "reduzir animações", sem deslocamento.
+// sozinho para no botão de pausar (vale também com "reduzir animações"; Lucas, 2026-11-20).
 
 export function ServicosVivos() {
   const area = useRef<HTMLDivElement>(null);
@@ -46,7 +46,7 @@ export function ServicosVivos() {
   ];
 
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion="never">
       <MotionScope>
         <FundoVivo className="py-28">
           <div className="mx-auto max-w-6xl px-4">
@@ -63,7 +63,7 @@ export function ServicosVivos() {
             </div>
             <div ref={area} className="mt-16 grid grid-cols-1 gap-5 md:grid-cols-3">
               {cartoes.map((coluna, i) => (
-                <motion.div key={i} style={{ y: colunas[i] }} className="space-y-5 motion-reduce:transform-none!">
+                <motion.div key={i} style={{ y: colunas[i] }} className="space-y-5">
                   {coluna.map((cartao) => (
                     <Cartao key={cartao.titulo} {...cartao} />
                   ))}
@@ -252,9 +252,6 @@ function NoArVivo() {
 
 function ResumoVivo() {
   const pausado = useMotionPaused();
-  // Com "reduzir animações", a altura não se mexe (o Motion bloqueia): as
-  // barras ficam cheias e a onda vira brilho (visto no computador do Lucas).
-  const reduzido = useReducedMotion();
   return (
     <div className="flex h-full flex-col justify-center p-4">
       <div className="rounded-2xl rounded-tl-sm border bg-card p-3">
@@ -266,13 +263,7 @@ function ResumoVivo() {
             <motion.span
               key={i}
               initial={{ height: `${altura * 45}%` }}
-              animate={
-                pausado
-                  ? undefined
-                  : reduzido
-                    ? { height: `${altura * 100}%`, opacity: [0.35, 1, 0.35] }
-                    : { height: [`${altura * 45}%`, `${altura * 100}%`, `${altura * 45}%`] }
-              }
+              animate={pausado ? undefined : { height: [`${altura * 45}%`, `${altura * 100}%`, `${altura * 45}%`] }}
               transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.22 }}
               className="flex-1 rounded-t-md bg-brand/80"
             />

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { useMotionPaused } from "@/components/motion/motion-scope";
 
-type Fase = "parado" | "procurando" | "digitando" | "pronto" | "saindo";
+type Fase = "parado" | "procurando" | "digitando" | "pronto" | "saindo" | "escondido";
 
 /**
  * Texto sendo digitado, letra por letra, que fica um tempo pronto, some e dá
@@ -14,7 +14,7 @@ type Fase = "parado" | "procurando" | "digitando" | "pronto" | "saindo";
  */
 export function useDigitacao(
   textos: readonly string[],
-  { inicio = 0, deslocamento = 0, passo = 1, velocidade = 55, espera = 1800, intervalo = 700 } = {},
+  { inicio = 0, deslocamento = 0, passo = 1, velocidade = 55, espera = 1800, intervalo = 700, pausa = 0 } = {},
 ) {
   const pausado = useMotionPaused();
   const [estado, setEstado] = useState({ indice: deslocamento % textos.length, letras: 0, fase: "parado" as Fase });
@@ -36,9 +36,11 @@ export function useDigitacao(
               : depois(0, { indice, letras, fase: "pronto" })
             : fase === "pronto"
               ? depois(espera, { indice, letras, fase: "saindo" })
-              : depois(400, { indice: (indice + passo) % textos.length, letras: 0, fase: "procurando" });
+              : fase === "saindo"
+                ? depois(400, { indice: (indice + passo) % textos.length, letras: 0, fase: pausa ? "escondido" : "procurando" })
+                : depois(pausa, { indice, letras: 0, fase: "procurando" });
     return () => clearTimeout(id);
-  }, [estado, pausado, textos, inicio, passo, velocidade, espera, intervalo]);
+  }, [estado, pausado, textos, inicio, passo, velocidade, espera, intervalo, pausa]);
 
   return {
     texto: textos[estado.indice].slice(0, estado.letras),

@@ -6,8 +6,7 @@ import { useMotionPaused } from "@/components/motion/motion-scope";
 
 /**
  * Palavra que troca de tempos em tempos, com as letras surgindo do desfoque
- * (classe `char-in` no globals.css; com "reduzir animações", as letras só
- * esmaecem). Leitores de tela ouvem só a primeira palavra. Para com o mouse
+ * (classe `char-in` no globals.css). Leitores de tela ouvem só a primeira palavra. Para com o mouse
  * em cima, com a aba escondida e pelo botão de pausa do MotionScope.
  */
 export function RotatingWord({
