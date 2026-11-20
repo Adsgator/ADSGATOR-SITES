@@ -55,7 +55,7 @@ export function TelasServico() {
   );
 }
 
-function BuscaGoogle() {
+export function BuscaGoogle() {
   return (
     <div className="rounded-3xl border bg-card p-5 shadow-2xl shadow-ink/10">
       <div className="flex items-center gap-3 rounded-full border bg-background px-4 py-2.5 text-sm">
@@ -80,7 +80,7 @@ function BuscaGoogle() {
   );
 }
 
-function Celular() {
+export function Celular() {
   return (
     <div className="rounded-[2.6rem] bg-ink p-2 shadow-2xl shadow-ink/25">
       <div className="flex aspect-[9/18.5] flex-col overflow-hidden rounded-[2.1rem] bg-paper text-ink">
@@ -115,7 +115,7 @@ function Celular() {
   );
 }
 
-function ConversaWhatsApp() {
+export function ConversaWhatsApp() {
   return (
     <div className="rounded-3xl border bg-card p-5 shadow-2xl shadow-ink/10">
       <div className="flex items-center gap-3 border-b pb-3">

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { BumerangueFrame } from "@/components/bumerangue";
+import { CaminhoCliente } from "@/components/caminho-cliente";
 import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";
 import { Marquee } from "@/components/motion/marquee";
@@ -212,6 +213,9 @@ export default function Page() {
           </div>
         </section>
       </MotionScope>
+
+      {/* O caminho do cliente: seção presa na tela no computador. */}
+      <CaminhoCliente />
 
       {/* Serviços, entrando em cascata. */}
       <section className="mx-auto max-w-6xl px-4 py-24">
