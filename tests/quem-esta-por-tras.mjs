@@ -53,13 +53,10 @@ try {
       });
       check(`${rotulo}: "Oi, eu sou o Lucas." com a foto carregada`, topo.h1.includes("Lucas") && topo.foto, topo.h1);
 
-      // Fundo: a trajetória sobe e para no botão.
+      // Fundo: a trajetória sobe.
       const coluna = page.locator(".subir").first();
       const subindo = await coluna.evaluate((el) => getComputedStyle(el).animationName + " " + getComputedStyle(el).animationPlayState);
-      await page.getByRole("button", { name: "Pausar as animações" }).first().click();
-      const parada = await coluna.evaluate((el) => getComputedStyle(el).animationPlayState);
-      await page.getByRole("button", { name: "Continuar as animações" }).first().click();
-      check(`${rotulo}: o fundo sobe e para no botão`, subindo === "subir running" && parada === "paused", `${subindo} → ${parada}`);
+      check(`${rotulo}: o fundo sobe`, subindo === "subir running", `${subindo}`);
 
       // De onde eu venho: a lista que se marca.
       const lista = await page.evaluate(() => {
@@ -106,14 +103,10 @@ try {
         await page.waitForTimeout(1000);
         registros.add(await topoDoRegistro());
       }
-      await page.locator("[data-eu-e-o-sistema]").getByRole("button", { name: "Pausar as animações" }).click();
-      const parado = await topoDoRegistro();
-      await page.waitForTimeout(2500);
-      const aindaParado = (await topoDoRegistro()) === parado;
       check(
-        `${rotulo}: uma pessoa e um sistema: o que é comigo se marca, o registro anda e para no botão`,
-        marcadosAntes === 0 && marcados === 4 && registros.size >= 2 && aindaParado,
-        `marcados ${marcadosAntes} → ${marcados}, ${registros.size} registros no topo, parado ${aindaParado}`,
+        `${rotulo}: uma pessoa e um sistema: o que é comigo se marca, o registro anda`,
+        marcadosAntes === 0 && marcados === 4 && registros.size >= 2,
+        `marcados ${marcadosAntes} → ${marcados}, ${registros.size} registros no topo`,
       );
 
       const duvidas = await page.$$eval("li p.font-heading", (ps) => ps.filter((p) => p.textContent.startsWith("“")).length);

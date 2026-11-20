@@ -15,7 +15,7 @@ import {
   WrenchIcon,
 } from "lucide-react";
 
-import { MotionPauseButton, useMotionPaused } from "@/components/motion/motion-scope";
+import { useMotionPaused } from "@/components/motion/motion-scope";
 import { useApareceu } from "@/components/motion/numero-que-sobe";
 import { cn } from "@/lib/utils";
 
@@ -89,7 +89,6 @@ export function EuEOSistema() {
             );
           })}
         </ul>
-        <MotionPauseButton className="absolute right-4 -bottom-4" />
       </div>
       <div className="rounded-3xl border bg-card p-8">
         <p className="font-mono text-xs text-muted-foreground">Eu, no que precisa de gente</p>

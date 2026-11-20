@@ -41,17 +41,14 @@ try {
       );
       check(`${rotulo}: só o contato do rodapé sem mensagem`, links.length - convites.length === 1, `${links.length - convites.length}`);
 
-      // Fundo: as páginas no celular carregam, sobem e param no botão.
+      // Fundo: as páginas no celular carregam sobem.
       const fotosFundo = await page.$$eval(".subir img", (imgs) => imgs.filter((i) => i.complete && i.naturalWidth > 0).length);
       const coluna = page.locator(".subir").first();
       const subindo = await coluna.evaluate((el) => getComputedStyle(el).animationName + " " + getComputedStyle(el).animationPlayState);
-      await page.getByRole("button", { name: "Pausar as animações" }).first().click();
-      const parada = await coluna.evaluate((el) => getComputedStyle(el).animationPlayState);
-      await page.getByRole("button", { name: "Continuar as animações" }).first().click();
       check(
-        `${rotulo}: o fundo mostra as páginas, sobe e para no botão`,
-        fotosFundo >= 4 && subindo === "subir running" && parada === "paused",
-        `${fotosFundo} fotos visíveis, ${subindo} → ${parada}`,
+        `${rotulo}: o fundo mostra as páginas, sobe`,
+        fotosFundo >= 4 && subindo === "subir running",
+        `${fotosFundo} fotos visíveis, ${subindo}`,
       );
 
       // As 8 páginas numa grade só, cada uma completa, com o endereço na janela e
@@ -131,7 +128,7 @@ try {
       await page.locator('[data-cartao="nutricionista"]').blur();
 
       // Em toda página: os 8 itens se marcam quando a pessoa chega, o celular
-      // passa pelas páginas e para no botão de pausar.
+      // passa pelas páginas.
       await page.$eval("[data-toda-pagina]", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
       await page.waitForTimeout(2200);
       const marcados = await page.$$eval("[data-item-marcado]", (els) => els.length);
@@ -141,14 +138,10 @@ try {
         await page.waitForTimeout(1000);
         fotos.add(await celular());
       }
-      await page.locator("[data-toda-pagina]").getByRole("button", { name: "Pausar as animações" }).click();
-      const parado = await celular();
-      await page.waitForTimeout(3000);
-      const aindaParado = (await celular()) === parado;
       check(
-        `${rotulo}: em toda página, os 8 itens se marcam e o celular passa pelas páginas e para no botão`,
-        marcados === 8 && fotos.size >= 2 && aindaParado,
-        `${marcados} itens, ${fotos.size} páginas no celular, parado ${aindaParado}`,
+        `${rotulo}: em toda página, os 8 itens se marcam e o celular passa pelas páginas`,
+        marcados === 8 && fotos.size >= 2,
+        `${marcados} itens, ${fotos.size} páginas no celular`,
       );
 
       const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

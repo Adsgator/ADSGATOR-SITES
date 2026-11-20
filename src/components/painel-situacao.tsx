@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { CheckIcon, LoaderCircleIcon } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 
-import { MotionPauseButton, useMotionPaused } from "@/components/motion/motion-scope";
+import { useMotionPaused } from "@/components/motion/motion-scope";
 import { segmentos } from "@/config/segmentos";
 import { cn } from "@/lib/utils";
 
@@ -125,7 +125,6 @@ export function PainelSituacao() {
           </p>
         </div>
       </motion.div>
-      <MotionPauseButton className="absolute -bottom-4 right-4" />
     </div>
   );
 }

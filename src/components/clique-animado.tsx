@@ -5,7 +5,7 @@ import { SearchIcon } from "lucide-react";
 import { AnimatePresence, motion, useInView } from "motion/react";
 
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
-import { MotionPauseButton, MotionScope, useMotionPaused } from "@/components/motion/motion-scope";
+import { MotionScope, useMotionPaused } from "@/components/motion/motion-scope";
 import { PaginaCliente } from "@/components/pagina-cliente";
 import { segmentos } from "@/config/segmentos";
 
@@ -38,7 +38,6 @@ export function CliqueAnimado() {
   return (
     <MotionScope className="relative">
       <Cena />
-      <MotionPauseButton className="absolute -top-3 -right-3" />
     </MotionScope>
   );
 }

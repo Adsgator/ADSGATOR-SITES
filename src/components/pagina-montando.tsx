@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { CheckIcon } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 
-import { MotionPauseButton, useMotionPaused } from "@/components/motion/motion-scope";
+import { useMotionPaused } from "@/components/motion/motion-scope";
 import { PARTES_DA_PAGINA, PaginaCliente } from "@/components/pagina-cliente";
 import { segmentos } from "@/config/segmentos";
 import { cn } from "@/lib/utils";
@@ -122,7 +122,6 @@ export function PaginaMontando() {
           </ol>
         </div>
       </motion.div>
-      <MotionPauseButton className="absolute right-0 -bottom-2" />
     </div>
   );
 }

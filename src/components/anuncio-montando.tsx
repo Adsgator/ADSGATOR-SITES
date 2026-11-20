@@ -3,7 +3,6 @@
 import { SearchIcon } from "lucide-react";
 import { AnimatePresence, motion, useScroll, useTransform, type Variants } from "motion/react";
 
-import { MotionPauseButton } from "@/components/motion/motion-scope";
 import { useDigitacao } from "@/components/motion/use-digitacao";
 import { segmentos } from "@/config/segmentos";
 
@@ -131,7 +130,6 @@ export function AnuncioMontando() {
           </div>
         </div>
       </motion.div>
-      <MotionPauseButton className="absolute -bottom-4 right-4" />
     </div>
   );
 }

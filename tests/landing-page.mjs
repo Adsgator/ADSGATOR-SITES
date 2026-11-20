@@ -45,14 +45,11 @@ try {
       );
       check(`${rotulo}: só o contato do rodapé sem mensagem`, links.length - convites.length === 1, `${links.length - convites.length}`);
 
-      // Fundo da hero: as peças sobem e param no botão de pausar da hero.
+      // Fundo da hero: as peças sobem.
       const coluna = page.locator(".subir").first();
       const subindo = await coluna.evaluate((el) => getComputedStyle(el).animationName + " " + getComputedStyle(el).animationPlayState);
-      await page.getByRole("button", { name: "Pausar as animações" }).first().click();
-      const parada = await coluna.evaluate((el) => getComputedStyle(el).animationPlayState);
-      await page.getByRole("button", { name: "Continuar as animações" }).first().click();
       await rolarPara(0);
-      check(`${rotulo}: o fundo da hero sobe e para no botão`, subindo === "subir running" && parada === "paused", `${subindo} → ${parada}`);
+      check(`${rotulo}: o fundo da hero sobe`, subindo === "subir running", `${subindo}`);
 
       // Topo: um ciclo inteiro da montagem, olhando também o resto da página.
       const amostras = [];

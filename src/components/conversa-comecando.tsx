@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from "motion/react";
 
 import { BrandMark } from "@/components/brand";
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
-import { MotionPauseButton, useMotionPaused } from "@/components/motion/motion-scope";
+import { useMotionPaused } from "@/components/motion/motion-scope";
 import { cn } from "@/lib/utils";
 
 // Topo de "Como funciona": o primeiro passo, a conversa no WhatsApp começando.
@@ -99,7 +99,6 @@ export function ConversaComecando() {
           )}
         </div>
       </motion.div>
-      <MotionPauseButton className="absolute right-4 -bottom-4" />
     </div>
   );
 }

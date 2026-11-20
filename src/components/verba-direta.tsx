@@ -2,7 +2,7 @@ import { UserIcon } from "lucide-react";
 
 import { BrandMark } from "@/components/brand";
 import { IconeGoogle } from "@/components/icones-redes";
-import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
+import { MotionScope } from "@/components/motion/motion-scope";
 
 // "Tudo no seu nome" na página de Google Ads (roteiro do site, Google Ads,
 // seção 5): a verba corre de você direto ao Google, e a Adsgator fica ao lado,
@@ -44,7 +44,6 @@ export function VerbaDireta() {
           </div>
         </div>
       </div>
-      <MotionPauseButton className="absolute top-4 right-4" />
     </MotionScope>
   );
 }

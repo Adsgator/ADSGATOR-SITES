@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 
 import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
-import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
+import { MotionScope } from "@/components/motion/motion-scope";
 import { useDigitacao } from "@/components/motion/use-digitacao";
 import { cn } from "@/lib/utils";
 
@@ -97,7 +97,6 @@ export function BuscasCidade() {
             Se ele não encontra você, encontra o concorrente. A Adsgator faz o seu
             negócio aparecer nessa hora.
           </p>
-          <MotionPauseButton className="shrink-0" />
         </div>
       </FundoVivo>
     </MotionScope>

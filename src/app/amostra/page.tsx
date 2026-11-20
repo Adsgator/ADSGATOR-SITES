@@ -14,7 +14,7 @@ import { ServicosVivos } from "@/components/servicos-vivos";
 import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";
 import { Marquee } from "@/components/motion/marquee";
-import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
+import { MotionScope } from "@/components/motion/motion-scope";
 import { TelasServico } from "@/components/telas-servico";
 import { buttonVariants } from "@/components/ui/button";
 import { linkWhatsApp, mensagemDiagnostico } from "@/config/site";
@@ -135,7 +135,6 @@ export default function Page() {
                 </span>
               ))}
             </Marquee>
-            <MotionPauseButton className="absolute top-1/2 right-4 -translate-y-1/2" />
           </div>
         </section>
       </MotionScope>

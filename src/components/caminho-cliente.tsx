@@ -5,7 +5,7 @@ import { SearchIcon } from "lucide-react";
 import { motion, useMotionValueEvent, useScroll } from "motion/react";
 
 import { Eyebrow } from "@/components/eyebrow";
-import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
+import { MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
 import { useDigitacao } from "@/components/motion/use-digitacao";
 import { BuscaGoogle, Celular, ConversaWhatsApp } from "@/components/telas-servico";
@@ -100,7 +100,6 @@ function Conteudo() {
                 <div className="h-1 flex-1 overflow-hidden rounded-full bg-border">
                   <motion.div style={{ scaleX: scrollYProgress }} className="h-full origin-left bg-brand" />
                 </div>
-                <MotionPauseButton />
               </div>
             </div>
             <div aria-hidden="true" className="relative h-[34rem]">
@@ -126,7 +125,6 @@ function Conteudo() {
       <div className="mx-auto max-w-xl px-4 py-24 lg:hidden">
         <div className="flex items-center justify-between gap-4">
           <Eyebrow>O caminho do seu cliente</Eyebrow>
-          <MotionPauseButton />
         </div>
         <ol className="mt-10 space-y-20">
           {passos.map((passo, i) => (

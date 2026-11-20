@@ -1,9 +1,6 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import { PauseIcon, PlayIcon } from "lucide-react";
-
-import { cn } from "@/lib/utils";
 
 const PausaContext = createContext<{
   pausado: boolean;
@@ -12,9 +9,12 @@ const PausaContext = createContext<{
 
 /**
  * Área com animações que rodam sozinhas (palavra que troca, faixa, passos).
- * O MotionPauseButton dentro dela pausa tudo de uma vez, como nos vídeos do
- * site da Apple: o que se move sozinho precisa poder parar (WCAG 2.2.2). O
- * CSS pausa pelo atributo `data-paused` (globals.css).
+ * Guarda o estado de pausa da área, que os componentes leem com
+ * `useMotionPaused` e o CSS pelo atributo `data-paused` (globals.css).
+ *
+ * O site não tem mais botões de pausar (decisão do Lucas, 2026-11-20, avisado
+ * de que a WCAG 2.2.2 pede um jeito de parar o que se move sozinho por mais de
+ * 5 s). A área ficou para a pausa voltar com um botão só, se ele decidir.
  */
 export function MotionScope({
   className,
@@ -33,29 +33,7 @@ export function MotionScope({
   );
 }
 
-/** Se as animações da área foram pausadas pelo botão. */
+/** Se as animações da área estão pausadas. */
 export function useMotionPaused() {
   return useContext(PausaContext)?.pausado ?? false;
-}
-
-/** Botão redondo de pausar e continuar as animações da área. */
-export function MotionPauseButton({ className }: { className?: string }) {
-  const contexto = useContext(PausaContext);
-  if (!contexto) return null;
-  const { pausado, alternar } = contexto;
-  return (
-    <button
-      type="button"
-      onClick={alternar}
-      className={cn(
-        "inline-flex size-9 items-center justify-center rounded-full border bg-background/80 text-foreground backdrop-blur transition-colors hover:bg-background focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
-        className,
-      )}
-    >
-      {pausado ? <PlayIcon className="size-3.5" /> : <PauseIcon className="size-3.5" />}
-      <span className="sr-only">
-        {pausado ? "Continuar as animações" : "Pausar as animações"}
-      </span>
-    </button>
-  );
 }

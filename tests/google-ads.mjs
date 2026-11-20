@@ -1,5 +1,5 @@
 // Página de Google Ads: o anúncio se montando no topo, a lista que se marca, a
-// linha do tempo, a verba correndo (com pausa) e a mensagem pronta do WhatsApp.
+// linha do tempo, a verba correndo e a mensagem pronta do WhatsApp.
 // Roda nos dois modos de animação (o Windows do Lucas está com "Mostrar
 // animações" desligado).
 // Uso: node tests/google-ads.mjs [endereço]   (padrão: http://localhost:3005/google-ads)
@@ -75,13 +75,10 @@ try {
       }
       check(`${rotulo}: o resto da página fica parado enquanto o anúncio troca`, posicoes.size === 1, [...posicoes].join(", "));
 
-      // Fundo da hero: as buscas sobem e param no botão de pausar da hero.
+      // Fundo da hero: as buscas sobem.
       const coluna = page.locator(".subir").first();
       const subindo = await coluna.evaluate((el) => getComputedStyle(el).animationName + " " + getComputedStyle(el).animationPlayState);
-      await page.getByRole("button", { name: "Pausar as animações" }).first().click();
-      const parada = await coluna.evaluate((el) => getComputedStyle(el).animationPlayState);
-      await page.getByRole("button", { name: "Continuar as animações" }).first().click();
-      check(`${rotulo}: o fundo da hero sobe e para no botão`, subindo === "subir running" && parada === "paused", `${subindo} → ${parada}`);
+      check(`${rotulo}: o fundo da hero sobe`, subindo === "subir running", `${subindo}`);
 
       const giro = () =>
         page.$eval("[data-resultados]", (el) => {
@@ -183,13 +180,11 @@ try {
       }));
       check(`${rotulo}: o diagnóstico de exemplo, o resumo do mês e as 4 objeções`, blocos.diagnostico && blocos.resumo && blocos.objecoes === 4, JSON.stringify(blocos));
 
-      // A verba correndo e a pausa.
+      // A verba correndo.
       const verba = page.locator(".fluxo").first();
       await verba.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
       const correndo = await verba.evaluate((el) => getComputedStyle(el).animationName + " " + getComputedStyle(el).animationPlayState);
-      await page.locator("section.dark button:has(.sr-only)").click();
-      const pausada = await verba.evaluate((el) => getComputedStyle(el).animationPlayState);
-      check(`${rotulo}: a verba corre e o botão pausa`, correndo === "fluxo running" && pausada === "paused", `${correndo} → ${pausada}`);
+      check(`${rotulo}: a verba corre`, correndo === "fluxo running", correndo);
 
       const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check(`${rotulo}: sem sobra lateral`, sobra === 0, `${sobra} px`);

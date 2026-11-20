@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
-import { MotionPauseButton, useMotionPaused } from "@/components/motion/motion-scope";
+import { useMotionPaused } from "@/components/motion/motion-scope";
 import { useApareceu } from "@/components/motion/numero-que-sobe";
 import { portfolio } from "@/config/portfolio";
 import { cn } from "@/lib/utils";
@@ -70,7 +70,6 @@ export function TodaPaginaTem() {
           ))}
         </div>
         <p className="mt-4 text-center font-mono text-xs text-muted-foreground">{portfolio[atual].segmento}</p>
-        <MotionPauseButton className="absolute -right-3 bottom-10" />
       </div>
       <ul className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
         {itens.map(({ titulo, texto, icone }, i) => (

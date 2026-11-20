@@ -8,7 +8,7 @@ import { AnimatePresence, motion, MotionConfig, useScroll, useTransform } from "
 import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
-import { MotionPauseButton, MotionScope, useMotionPaused } from "@/components/motion/motion-scope";
+import { MotionScope, useMotionPaused } from "@/components/motion/motion-scope";
 import { useCiclo } from "@/components/motion/use-ciclo";
 import { useDigitacao } from "@/components/motion/use-digitacao";
 import { PaginaCliente } from "@/components/pagina-cliente";
@@ -59,7 +59,6 @@ export function ServicosVivos() {
                   <span className="text-muted-foreground">Cuidado de ponta a ponta.</span>
                 </h2>
               </div>
-              <MotionPauseButton />
             </div>
             <div ref={area} className="mt-16 grid grid-cols-1 gap-5 md:grid-cols-3">
               {cartoes.map((coluna, i) => (

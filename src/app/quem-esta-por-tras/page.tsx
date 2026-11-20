@@ -9,7 +9,7 @@ import { EuEOSistema } from "@/components/eu-e-o-sistema";
 import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
 import { ListaQueSeMarca } from "@/components/lista-que-se-marca";
-import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
+import { MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
 import { NumerosEmFaixa } from "@/components/numeros-em-faixa";
 import { buttonVariants } from "@/components/ui/button";
@@ -41,18 +41,21 @@ const botaoMarca = cn(
   "h-12 rounded-full bg-brand px-7 text-base text-brand-foreground hover:bg-brand/90",
 );
 
+// A trajetória fala do que dá confiança no trabalho, sem falar de formação
+// (decisão 1 A do Lucas, 2026-11-20): a oficina numa linha só, ligada ao jeito
+// de trabalhar, e o resto o que ele sabe fazer.
 const trajetoria = [
-  { titulo: "Aos 15 anos, ajudante de serralheiro", texto: "O primeiro trabalho: aprender fazendo, com as mãos." },
   {
-    titulo: "Mecânico de manutenção e torneiro",
-    texto: "Sete anos na indústria, numa fábrica de implementos agrícolas e depois numa empresa de alimentos.",
+    titulo: "Antes da tecnologia, oficina e indústria",
+    texto: "Serralheria, torno e manutenção industrial. Foi lá que aprendi a fazer bem feito.",
   },
+  { titulo: "2010, os primeiros sites", texto: "Web design desde a época do Flash. De lá para cá, sites, páginas e sistemas." },
   {
-    titulo: "Apaixonado por tecnologia",
-    texto: "Manutenção de computadores, programação e estudo, desde sempre.",
+    titulo: "Programação e sistemas",
+    texto: "Saber construir, e não só montar: do código da página ao sistema que acompanha cada cliente.",
   },
-  { titulo: "2010, o primeiro curso de web design", texto: "Na época em que os sites ainda eram feitos em Flash." },
   { titulo: "2020, nasce a Adsgator", texto: "Google Ads e landing pages para negócios locais." },
+  { titulo: "Medição e dados", texto: "Cada contato medido, para decidir pelo número, e não no achismo." },
 ];
 
 // Os números: negócios atendidos, do Lucas (2026-11-20); os anos, da trajetória
@@ -129,7 +132,6 @@ export default function Page() {
                   Quero um diagnóstico grátis
                   <ArrowRightIcon />
                 </a>
-                <MotionPauseButton />
               </div>
             </div>
             <Reveal className="relative mx-auto w-full max-w-sm">
@@ -161,8 +163,8 @@ export default function Page() {
             <Eyebrow>De onde eu venho</Eyebrow>
             <h2 className={cn(titulo, "mt-6")}>Da oficina para o digital.</h2>
             <p className="mt-6 max-w-md text-lg leading-8 text-muted-foreground">
-              Antes da agência, foram anos de oficina e de indústria. A tecnologia sempre esteve junto, e virou o meu
-              trabalho.
+              Da oficina ficou o jeito de trabalhar: com cuidado em cada detalhe. Do digital, anos aprendendo a fazer
+              sites, anúncios e sistemas que funcionam.
             </p>
           </div>
           <ListaQueSeMarca
@@ -253,15 +255,17 @@ export default function Page() {
             começa com uma conversa, sem compromisso.
           </p>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            Me conta do seu negócio. Eu olho com calma e te digo com sinceridade o que dá para fazer.
+            <span className="sm:block">Me conta do seu negócio.</span>{" "}
+            <span className="sm:block">Eu olho com calma e te digo com sinceridade o que dá para fazer.</span>
           </p>
-          <div className="mt-8 flex items-center gap-4">
-            <span className="relative size-14 shrink-0 overflow-hidden rounded-full border-2 border-brand">
-              <Image src="/sobre/lucas.jpg" alt="" fill sizes="3.5rem" className="object-cover" />
+          {/* A assinatura: o nome completo com o grifo amarelo, como o "Lucas" do topo. */}
+          <div data-assinatura className="mt-10 flex items-center gap-4 border-t pt-8">
+            <span className="relative size-16 shrink-0 overflow-hidden rounded-full border-2 border-brand">
+              <Image src="/sobre/lucas.jpg" alt="" fill sizes="4rem" className="object-cover" />
             </span>
             <span className="leading-tight">
-              <span className="block font-heading text-xl">Lucas</span>
-              <span className="text-sm text-muted-foreground">Adsgator</span>
+              <span className="highlight font-heading text-2xl">Lucas Simões</span>
+              <span className="mt-2 block text-sm text-muted-foreground">Fundador da Adsgator, desde 2020</span>
             </span>
           </div>
         </Reveal>

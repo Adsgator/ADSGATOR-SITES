@@ -6,7 +6,7 @@ import { ChamadaFinal } from "@/components/chamada-final";
 import { PaginasNoAr } from "@/components/colunas-subindo";
 import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
-import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
+import { MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
 import { PortfolioCaso } from "@/components/portfolio-caso";
 import { TodaPaginaTem } from "@/components/toda-pagina-tem";
@@ -73,7 +73,6 @@ export default function Page() {
                   Quero um diagnóstico grátis
                   <ArrowRightIcon />
                 </a>
-                <MotionPauseButton />
               </div>
             </div>
           </div>
