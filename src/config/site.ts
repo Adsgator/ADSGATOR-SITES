@@ -28,6 +28,8 @@ const mensagensPorPagina: Record<string, string> = {
     "Olá! Vim pelo site da Adsgator, pela página de Google Ads, e queria um diagnóstico grátis para o meu negócio.",
   // Na de landing page, o convite é "Quero a minha página" (roteiro, decisão 4).
   "/landing-page": "Olá! Vim pelo site da Adsgator, pela página de landing page, e quero a minha página.",
+  "/manutencao":
+    "Olá! Vim pelo site da Adsgator, pela página de manutenção, e queria um diagnóstico grátis para o meu negócio.",
 };
 
 export function mensagemDaPagina(caminho: string) {

@@ -1,4 +1,4 @@
-import { SearchIcon, StarIcon } from "lucide-react";
+import { CheckIcon, SearchIcon, StarIcon } from "lucide-react";
 
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
 import { cn } from "@/lib/utils";
@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
 // ficam bem apagadas atrás do texto, para não atrapalhar a leitura. Só CSS
 // (classe `subir` no globals.css): para no botão de pausar da área
 // (MotionScope). Decorativo. Cada página escolhe as peças: as buscas
-// acontecendo (Google Ads) ou as partes de uma página (landing page).
+// acontecendo (Google Ads), as partes de uma página (landing page) ou as
+// conferências feitas (manutenção).
 
 // Duração da volta e o ponto em que cada coluna começa, para não andarem juntas.
 const colunas = [
@@ -166,4 +167,34 @@ export function PartesNoAr() {
   ];
   // Duas vezes, para as 6 colunas terem peças diferentes em ordens diferentes.
   return <ColunasSubindo pecas={[...partes, ...partes.slice(3), ...partes.slice(0, 3)]} espaco="gap-6" />;
+}
+
+const conferencias = [
+  "Página no ar",
+  "Cadeado em dia",
+  "Domínio renovado",
+  "Cópia de segurança feita",
+  "WhatsApp funcionando",
+  "Medição ativa",
+];
+const sites = ["ampereeletrica.com.br", "lumiereodonto.com.br", "valentemoraes.adv.br"];
+
+/** Manutenção: as conferências feitas, uma página de cada vez. */
+export function ConferenciasNoAr() {
+  return (
+    <ColunasSubindo
+      espaco="gap-6"
+      pecas={Array.from({ length: 18 }, (_, i) => (
+        <span key={i} className="flex flex-col gap-1 rounded-2xl border bg-card/60 px-3.5 py-2.5 text-xs text-muted-foreground/80">
+          <span className="flex items-center gap-2">
+            <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-success/60 text-white">
+              <CheckIcon className="size-2.5" />
+            </span>
+            {conferencias[i % conferencias.length]}
+          </span>
+          <span className="pl-6 font-mono text-[0.65rem] opacity-80">{sites[Math.floor(i / conferencias.length) % sites.length]}</span>
+        </span>
+      ))}
+    />
+  );
 }
