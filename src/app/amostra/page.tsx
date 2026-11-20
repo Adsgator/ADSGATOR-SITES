@@ -9,23 +9,22 @@ import {
   UploadIcon,
 } from "lucide-react";
 
-import { AnuncioClique } from "@/components/anuncio-clique";
 import { BumerangueFrame } from "@/components/bumerangue";
 import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";
 import { Marquee } from "@/components/motion/marquee";
 import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
-import { RotatingWord } from "@/components/motion/rotating-word";
 import { Steps } from "@/components/steps";
+import { TelasServico } from "@/components/telas-servico";
 import { buttonVariants } from "@/components/ui/button";
 import { site } from "@/config/site";
 import { cn } from "@/lib/utils";
 
-// Amostra 2 da Fase 1B, só no branch: o sistema visual com a marca na frente
-// (Servus Slab, verde, amarelo e #F1F1F1), as peças da Adsgator (cursor de
-// clique, cantos bumerangue, padrão) e as seções que a página inicial vai ter.
-// Sai antes de juntar na main; os textos usam só fatos dos Termos.
+// Amostra 3 da Fase 1B, só no branch: a amostra 2 (aprovada em 2026-11-20)
+// com mais movimento e efeitos de rolagem, seguindo o Zouti, a Vercel e o
+// Framer (plano geral, Parte 1). Começa pelo topo com as telas do serviço em
+// 3D; as outras peças entram uma por vez. Sai antes de juntar na main.
 export const metadata: Metadata = {
   title: "Amostra do visual",
   robots: { index: false, follow: false },
@@ -169,40 +168,38 @@ export default function Page() {
   return (
     <>
       <p className="border-b py-2 text-center font-mono text-xs text-muted-foreground">
-        Amostra 2 do visual · só no preview, fora do Google
+        Amostra 3 do visual · fora do Google · os textos abaixo do topo ainda
+        são da amostra 2 e mudam na Parte 2
       </p>
 
-      {/* Topo: título na Servus Slab, ilustração do clique e faixa. */}
+      {/* Topo: frase de posição da Base e as telas do serviço em 3D. */}
       <MotionScope>
-        <section className="bg-grid">
-          <div className="mx-auto grid max-w-6xl items-center gap-16 px-4 pt-20 pb-16 lg:grid-cols-[1.15fr_1fr]">
-            <div>
-              <Eyebrow>Ads &amp; Web Design</Eyebrow>
-              <h1 className="mt-6 font-heading text-5xl leading-[1.02] tracking-tight text-balance sm:text-7xl">
-                Google Ads e landing pages para{" "}
-                <span className="highlight">
-                  <RotatingWord words={["negócios locais", "clínicas", "lojas", "escritórios"]} />
-                </span>
-              </h1>
-              <p className="mt-7 max-w-lg text-lg leading-8 text-muted-foreground">
-                A Adsgator coloca o seu negócio no Google e cria a página que
-                transforma o clique em conversa no WhatsApp.
-              </p>
-              <div className="mt-10 flex flex-wrap gap-3">
-                <a href={site.whatsapp.link} className={botaoMarca}>
-                  Falar pelo WhatsApp
-                  <ArrowRightIcon />
-                </a>
-                <a href="#planos" className={botaoContorno}>
-                  Ver os planos
-                </a>
-              </div>
+        <section className="overflow-x-clip bg-grid">
+          <div className="mx-auto max-w-4xl px-4 pt-20 text-center">
+            <p className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 font-mono text-xs text-muted-foreground backdrop-blur">
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-brand" />
+              Google Ads e landing pages
+            </p>
+            <h1 className="mt-7 font-heading text-5xl leading-[1.02] tracking-tight text-balance sm:text-7xl">
+              Quem procura o seu serviço no Google chega ao seu{" "}
+              <span className="highlight">WhatsApp</span>.
+            </h1>
+            <p className="mx-auto mt-7 max-w-xl text-lg leading-8 text-muted-foreground">
+              A Adsgator faz essa conexão com anúncio e página sob medida, tudo no
+              seu nome.
+            </p>
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
+              <a href={site.whatsapp.link} className={botaoMarca}>
+                Falar pelo WhatsApp
+                <ArrowRightIcon />
+              </a>
+              <a href="#como-funciona" className={botaoContorno}>
+                Como funciona
+              </a>
             </div>
-            <BumerangueFrame className="mx-auto w-full max-w-md lg:max-w-none">
-              <AnuncioClique />
-            </BumerangueFrame>
           </div>
-          <div className="relative border-t bg-background/60 backdrop-blur-sm">
+          <TelasServico />
+          <div className="relative mt-16 border-t bg-background/60 backdrop-blur-sm">
             <Marquee className="py-5 pr-16">
               {fatos.map((fato) => (
                 <span key={fato} className="flex items-center gap-6 px-6 text-lg whitespace-nowrap">
@@ -247,7 +244,10 @@ export default function Page() {
 
       {/* Como funciona: seção no verde da marca, com o padrão e os passos. */}
       <MotionScope>
-        <section className="dark section-ink bg-background bg-pattern-dark text-foreground">
+        <section
+          id="como-funciona"
+          className="dark section-ink scroll-mt-24 bg-background bg-pattern-dark text-foreground"
+        >
           <div className="mx-auto max-w-6xl px-4 py-24">
             <div className="flex items-end justify-between gap-6">
               <div>
