@@ -25,7 +25,13 @@ const colunas = [
   { duracao: 58, atraso: -20 },
 ];
 
-function ColunasSubindo({ pecas, espaco = "gap-7" }: { pecas: React.ReactNode[]; espaco?: string }) {
+/**
+ * `minimo`: quantas peças cada metade da coluna precisa ter. A volta só não tem
+ * buraco se a metade for mais alta que a área do topo (no celular, ~1.450 px);
+ * com peças baixas (textos), a lista da coluna se repete até chegar lá
+ * (`tests/fundos.mjs` mede). Peças altas (os celulares do portfólio) pedem menos.
+ */
+function ColunasSubindo({ pecas, espaco = "gap-7", minimo = 28 }: { pecas: React.ReactNode[]; espaco?: string; minimo?: number }) {
   return (
     <div
       aria-hidden="true"
@@ -37,14 +43,17 @@ function ColunasSubindo({ pecas, espaco = "gap-7" }: { pecas: React.ReactNode[];
           const daColuna = pecas
             .filter((_, i) => i % colunas.length === c)
             .concat(pecas.filter((_, i) => i % colunas.length === (c + 3) % colunas.length));
+          const vezes = Math.max(1, Math.ceil(minimo / daColuna.length));
+          const metade = Array.from({ length: vezes }, () => daColuna).flat();
+          // Mais repetições, volta mais longa: a velocidade fica a mesma.
           return (
             <div key={c} className={cn("w-52 shrink-0", c >= 3 && "max-sm:hidden", c >= 4 && "max-lg:hidden")}>
               <div
-                style={{ "--subir-duracao": `${duracao}s`, animationDelay: `${atraso}s` } as React.CSSProperties}
+                style={{ "--subir-duracao": `${duracao * vezes}s`, animationDelay: `${atraso * vezes}s` } as React.CSSProperties}
                 className={cn("motion-loop subir flex flex-col", espaco)}
               >
-                {/* A lista duas vezes, para a volta não ter emenda. */}
-                {[...daColuna, ...daColuna].map((peca, i) => (
+                {/* A metade duas vezes, para a volta não ter emenda. */}
+                {[...metade, ...metade].map((peca, i) => (
                   <div key={i}>{peca}</div>
                 ))}
               </div>
@@ -242,7 +251,7 @@ export function PaginasNoAr() {
       <Image src={`/portfolio/${id}-cel.jpg`} alt="" width={390} height={844} sizes="13rem" className="block h-auto w-full rounded-[1.2rem]" />
     </div>
   ));
-  return <ColunasSubindo pecas={[...celulares, ...celulares.slice(2), ...celulares.slice(0, 2)]} espaco="gap-6" />;
+  return <ColunasSubindo pecas={[...celulares, ...celulares.slice(2), ...celulares.slice(0, 2)]} espaco="gap-6" minimo={1} />;
 }
 
 const trajetoria = [
