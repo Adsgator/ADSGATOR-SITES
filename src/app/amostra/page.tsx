@@ -1,22 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRightIcon,
-  CheckIcon,
-  UploadIcon,
-} from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 
 import { BumerangueFrame } from "@/components/bumerangue";
 import { BuscasCidade } from "@/components/buscas-cidade";
 import { CaminhoCliente } from "@/components/caminho-cliente";
 import { SinaisBusca } from "@/components/sinais-busca";
+import { HojeComAdsgator } from "@/components/hoje-com-adsgator";
+import { PorQueAdsgator } from "@/components/por-que-adsgator";
+import { QuemEstaPorTras } from "@/components/quem-esta-por-tras";
 import { ServicosVivos } from "@/components/servicos-vivos";
 import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";
 import { Marquee } from "@/components/motion/marquee";
 import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
-import { Steps } from "@/components/steps";
 import { TelasServico } from "@/components/telas-servico";
 import { buttonVariants } from "@/components/ui/button";
 import { linkWhatsApp, mensagemDiagnostico, site } from "@/config/site";
@@ -31,52 +29,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// A faixa de confiança do roteiro do site (Início, seção 2).
 const fatos = [
+  "Tudo no seu nome",
   "Sem fidelidade",
-  "Landing page em até 14 dias úteis",
-  "Domínio por 3 anos incluso",
-  "A landing page é sua",
-  "Atendimento de segunda a sexta",
-  "Desistência em até 7 dias",
-];
-
-const planos = [
-  {
-    nome: "Landing page",
-    cobranca: "Preço único",
-    destaque: false,
-    itens: [
-      "Página feita para o seu negócio",
-      "Domínio em seu nome, por 3 anos",
-      "Entrega em até 14 dias úteis",
-      "Até 2 rodadas de ajustes",
-      "Os arquivos são seus",
-    ],
-  },
-  {
-    nome: "Hospedagem, suporte e manutenção",
-    cobranca: "Por mês · oferecido na entrega",
-    destaque: true,
-    itens: [
-      "Hospedagem da landing page",
-      "Renovação do domínio",
-      "Atualização de textos e imagens",
-      "Correções e segurança",
-      "Suporte de segunda a sexta",
-    ],
-  },
-  {
-    nome: "Google Ads",
-    cobranca: "Por mês · sem fidelidade",
-    destaque: false,
-    itens: [
-      "Campanhas criadas e otimizadas",
-      "Conversões e remarketing",
-      "Imagens para os anúncios",
-      "Relatórios dos resultados",
-      "A conta e a verba são suas",
-    ],
-  },
+  "Sem taxa de criação",
+  "Você fala direto com quem faz",
+  "Resumo todo mês",
+  "Página pronta em até 14 dias úteis",
 ];
 
 const perguntas = [
@@ -127,29 +87,11 @@ const botaoContorno = cn(
 const titulo = "font-heading text-4xl leading-[1.05] tracking-tight sm:text-6xl";
 
 export default function Page() {
-  const passos = [
-    {
-      titulo: "Você contrata",
-      texto: "Escolhe o serviço e faz o pagamento. A confirmação chega na hora.",
-      visual: <VisualPedido />,
-    },
-    {
-      titulo: "Envia o material",
-      texto: "Responde o briefing e manda textos, imagens e acessos.",
-      visual: <VisualBriefing />,
-    },
-    {
-      titulo: "Vai ao ar",
-      texto: "A landing page é publicada no seu domínio em até 14 dias úteis.",
-      visual: <VisualNoAr />,
-    },
-  ];
-
   return (
     <>
       <p className="border-b py-2 text-center font-mono text-xs text-muted-foreground">
-        Amostra 3 do visual · fora do Google · os textos abaixo do topo ainda
-        são da amostra 2 e mudam na Parte 2
+        Amostra 3 do visual · fora do Google · as perguntas e a chamada final
+        ainda são da amostra 2 e mudam na Parte 2
       </p>
 
       {/* Topo: frase de posição da Base e as telas do serviço em 3D. */}
@@ -198,84 +140,16 @@ export default function Page() {
         </section>
       </MotionScope>
 
-      {/* Você já é procurado: buscas que vão e voltam com a rolagem. */}
+      {/* A ordem do roteiro do site (Início, seções 3 a 9); o portfólio entra
+          depois da escolha das páginas. */}
       <BuscasCidade />
-
-      {/* O caminho do cliente: seção presa na tela no computador. */}
-      <CaminhoCliente />
-
-      {/* O que a Adsgator faz: cartões vivos. */}
+      <HojeComAdsgator />
+      <div id="como-funciona" className="scroll-mt-24">
+        <CaminhoCliente />
+      </div>
       <ServicosVivos />
-
-      {/* Como funciona: seção no verde da marca, com o padrão e os passos. */}
-      <MotionScope>
-        <section
-          id="como-funciona"
-          className="dark section-ink scroll-mt-24 bg-background bg-pattern-dark text-foreground"
-        >
-          <div className="mx-auto max-w-6xl px-4 py-24">
-            <div className="flex items-end justify-between gap-6">
-              <div>
-                <Eyebrow>Como funciona</Eyebrow>
-                <h2 className={cn(titulo, "mt-6")}>
-                  Três passos.
-                  <br />
-                  <span className="text-muted-foreground">Do pedido ao ar.</span>
-                </h2>
-              </div>
-              <MotionPauseButton />
-            </div>
-            <div className="mt-14">
-              <Steps passos={passos} />
-            </div>
-          </div>
-        </section>
-      </MotionScope>
-
-      {/* Planos (preços ainda a definir). */}
-      <section id="planos" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-24">
-        <Eyebrow>Planos</Eyebrow>
-        <h2 className={cn(titulo, "mt-6")}>
-          Simples e transparente.
-          <br />
-          <span className="text-muted-foreground">Sem fidelidade.</span>
-        </h2>
-        <div className="mt-14 grid gap-6 lg:grid-cols-3">
-          {planos.map((plano, i) => (
-            <Reveal
-              key={plano.nome}
-              delay={i * 120}
-              className={cn(
-                "flex flex-col rounded-3xl border p-8",
-                plano.destaque
-                  ? "dark section-ink bg-background text-foreground lg:-translate-y-4"
-                  : "bg-card",
-              )}
-            >
-              <p className="font-mono text-xs text-muted-foreground">{plano.cobranca}</p>
-              <h3 className="mt-4 min-h-16 font-heading text-2xl">{plano.nome}</h3>
-              <p className="mt-6 font-heading text-5xl">R$ —</p>
-              <p className="mt-1 text-xs text-muted-foreground">valor a definir</p>
-              <ul className="mt-8 space-y-3 text-sm">
-                {plano.itens.map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <CheckIcon className="mt-0.5 size-4 shrink-0 text-brand" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-auto pt-10">
-                <a
-                  href={site.whatsapp.link}
-                  className={cn(plano.destaque ? botaoMarca : botaoContorno, "w-full")}
-                >
-                  Quero este
-                </a>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
+      <PorQueAdsgator />
+      <QuemEstaPorTras />
 
       {/* Perguntas frequentes. */}
       <section className="mx-auto max-w-4xl px-4 pb-24">
@@ -363,70 +237,5 @@ export default function Page() {
         </div>
       </section>
     </>
-  );
-}
-
-/** Passo 1: pedido confirmado. */
-function VisualPedido() {
-  return (
-    <div className="rounded-3xl border bg-card p-8">
-      <p className="font-mono text-xs text-muted-foreground">Pedido confirmado</p>
-      <p className="mt-3 font-heading text-3xl">Landing page</p>
-      <ul className="mt-8 space-y-4">
-        {["Domínio por 3 anos", "Entrega em até 14 dias úteis", "Pagamento aprovado"].map((item) => (
-          <li key={item} className="flex items-center gap-3">
-            <span className="flex size-6 items-center justify-center rounded-full bg-brand text-brand-foreground">
-              <CheckIcon className="size-3.5" />
-            </span>
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-/** Passo 2: briefing respondido. */
-function VisualBriefing() {
-  return (
-    <div className="rounded-3xl border bg-card p-8">
-      <p className="font-mono text-xs text-muted-foreground">Briefing</p>
-      <div className="mt-6 space-y-5">
-        {["Nome do negócio", "Serviços", "Como o cliente chega até você"].map((campo) => (
-          <div key={campo}>
-            <p className="text-sm text-muted-foreground">{campo}</p>
-            <div className="mt-2 h-10 rounded-xl border bg-background/40" />
-          </div>
-        ))}
-      </div>
-      <p className="mt-6 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm">
-        <UploadIcon className="size-4 text-brand" />
-        fotos.zip enviado
-      </p>
-    </div>
-  );
-}
-
-/** Passo 3: a página no ar, no domínio do cliente. */
-function VisualNoAr() {
-  return (
-    <div className="overflow-hidden rounded-3xl border bg-card">
-      <div className="flex items-center gap-2 border-b px-5 py-3">
-        <span className="size-2.5 rounded-full bg-muted" />
-        <span className="size-2.5 rounded-full bg-muted" />
-        <span className="size-2.5 rounded-full bg-muted" />
-        <span className="ml-3 font-mono text-xs text-muted-foreground">seunegocio.com.br</span>
-        <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand px-2.5 py-0.5 text-xs font-medium text-brand-foreground">
-          <span className="size-1.5 rounded-full bg-brand-foreground" />
-          No ar
-        </span>
-      </div>
-      <div className="space-y-4 p-8">
-        <div className="h-6 w-2/3 rounded-full bg-muted" />
-        <div className="h-3 w-full rounded-full bg-muted/70" />
-        <div className="h-3 w-5/6 rounded-full bg-muted/70" />
-        <div className="mt-6 h-11 w-44 rounded-full bg-brand" />
-      </div>
-    </div>
   );
 }
