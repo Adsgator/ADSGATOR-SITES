@@ -35,7 +35,7 @@ export function PaginaCliente({ s }: { s: Segmento }) {
           {s.titulo} <span className="text-(--destaque)">{s.tituloDestaque}</span>
         </p>
         <p className="relative mt-1.5 text-[9px] leading-[1.45] text-white/70">{s.sub}</p>
-        <span className="relative mt-3 flex h-7 items-center justify-center gap-1.5 rounded-full bg-[#25D366] text-[9px] font-semibold text-[#0B1F3A]">
+        <span data-cta-whatsapp className="relative mt-3 flex h-7 items-center justify-center gap-1.5 rounded-full bg-[#25D366] text-[9px] font-semibold text-[#0B1F3A]">
           <IconeWhatsApp className="size-3" />
           {s.cta}
         </span>

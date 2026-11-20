@@ -5,6 +5,7 @@ import { ArrowRightIcon } from "lucide-react";
 import { BumerangueFrame } from "@/components/bumerangue";
 import { BuscasCidade } from "@/components/buscas-cidade";
 import { CaminhoCliente } from "@/components/caminho-cliente";
+import { CliqueAnimado } from "@/components/clique-animado";
 import { FioCondutor } from "@/components/fio-condutor";
 import { MapaBuscas } from "@/components/mapa-buscas";
 import { HojeComAdsgator } from "@/components/hoje-com-adsgator";
@@ -15,7 +16,6 @@ import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";
 import { Marquee } from "@/components/motion/marquee";
 import { MotionPauseButton, MotionScope } from "@/components/motion/motion-scope";
-import { Reveal } from "@/components/motion/reveal";
 import { TelasServico } from "@/components/telas-servico";
 import { buttonVariants } from "@/components/ui/button";
 import { linkWhatsApp, mensagemDiagnostico, site } from "@/config/site";
@@ -195,10 +195,11 @@ export default function Page() {
                 <ArrowRightIcon />
               </a>
             </div>
-            {/* O cursor da marca, em verde, clica duas vezes quando aparece. */}
-            <Reveal className="hidden lg:block">
-              <span aria-hidden="true" className="brand-cursor click-on-reveal w-40 text-ink" />
-            </Reveal>
+            {/* O cursor da marca clica no anúncio, a página abre e o clique no
+                WhatsApp vira conversa (pedido do Lucas, 2026-11-20). */}
+            <div className="mx-auto lg:mx-0">
+              <CliqueAnimado />
+            </div>
           </BumerangueFrame>
         </div>
       </section>
