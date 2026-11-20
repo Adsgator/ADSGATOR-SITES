@@ -5,7 +5,8 @@ import { ArrowRightIcon } from "lucide-react";
 import { BumerangueFrame } from "@/components/bumerangue";
 import { BuscasCidade } from "@/components/buscas-cidade";
 import { CaminhoCliente } from "@/components/caminho-cliente";
-import { SinaisBusca } from "@/components/sinais-busca";
+import { FioCondutor } from "@/components/fio-condutor";
+import { MapaBuscas } from "@/components/mapa-buscas";
 import { HojeComAdsgator } from "@/components/hoje-com-adsgator";
 import { PorQueAdsgator } from "@/components/por-que-adsgator";
 import { QuemEstaPorTras } from "@/components/quem-esta-por-tras";
@@ -100,7 +101,7 @@ export default function Page() {
           {/* A caixa do mapa termina no topo do celular da hero (TelasServico:
               mt-14 + top-20 no celular; mt-20 + top-0 a partir de sm). */}
           <div className="relative">
-          <SinaisBusca className="inset-x-0 top-0 -bottom-[8.5rem] -z-10 sm:-bottom-[5rem]" />
+          <MapaBuscas className="inset-x-0 top-0 -bottom-[8.5rem] -z-10 sm:-bottom-[5rem]" />
           <div className="mx-auto max-w-4xl px-4 pt-20 text-center">
             <p className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 font-mono text-xs text-muted-foreground backdrop-blur">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-brand" />
@@ -142,23 +143,29 @@ export default function Page() {
 
       {/* A ordem do roteiro do site (Início, seções 3 a 9); o portfólio entra
           depois da escolha das páginas. */}
-      <BuscasCidade />
-      <HojeComAdsgator />
-      <div id="como-funciona" className="scroll-mt-24">
-        <CaminhoCliente />
-      </div>
-      <ServicosVivos />
-      <PorQueAdsgator />
-      <QuemEstaPorTras />
-
-      {/* Perguntas frequentes. */}
-      <section className="mx-auto max-w-4xl px-4 pb-24">
-        <Eyebrow>Perguntas frequentes</Eyebrow>
-        <h2 className={cn(titulo, "mt-6")}>Antes de contratar.</h2>
-        <div className="mt-12">
-          <Faq itens={perguntas} />
+      <FioCondutor>
+        <BuscasCidade />
+        <HojeComAdsgator />
+        <div id="como-funciona" className="scroll-mt-24">
+          <CaminhoCliente />
         </div>
-      </section>
+        <ServicosVivos />
+        <PorQueAdsgator />
+        <QuemEstaPorTras />
+
+        {/* Perguntas frequentes. */}
+        <section className="mx-auto max-w-4xl px-4 pb-24">
+          <Eyebrow>Perguntas frequentes</Eyebrow>
+          <h2 className={cn(titulo, "mt-6")}>Antes de contratar.</h2>
+          <div className="mt-12">
+            <Faq itens={perguntas} />
+          </div>
+        </section>
+      </FioCondutor>
+
+      {/* Ponte para a chamada final: o fundo passa para o amarelo aos poucos,
+          sem corte seco entre as seções. */}
+      <div aria-hidden="true" className="h-40 bg-[linear-gradient(to_bottom,transparent,var(--brand))]" />
 
       {/* Chamada final no amarelo da marca, com os cantos em verde. */}
       <section className="bg-brand text-brand-foreground">

@@ -1,4 +1,6 @@
-import { MenuIcon, MessageCircleIcon } from "lucide-react";
+import { MenuIcon } from "lucide-react";
+
+import { IconeWhatsApp } from "@/components/icone-whatsapp";
 
 import type { Segmento } from "@/config/segmentos";
 
@@ -34,7 +36,7 @@ export function PaginaCliente({ s }: { s: Segmento }) {
         </p>
         <p className="relative mt-1.5 text-[9px] leading-[1.45] text-white/70">{s.sub}</p>
         <span className="relative mt-3 flex h-7 items-center justify-center gap-1.5 rounded-full bg-[#25D366] text-[9px] font-semibold text-[#0B1F3A]">
-          <MessageCircleIcon className="size-3" />
+          <IconeWhatsApp className="size-3" />
           {s.cta}
         </span>
         <div className="relative mt-3 h-24 overflow-hidden rounded-xl bg-[linear-gradient(135deg,rgb(255_255_255/0.14),transparent_70%)]">
@@ -82,7 +84,7 @@ export function PaginaCliente({ s }: { s: Segmento }) {
       <div className="m-3 rounded-xl bg-(--fundo) p-3 text-center text-white">
         <p className="text-[11px] font-bold">{s.chamada}</p>
         <span className="mt-2 inline-flex h-6 items-center gap-1 rounded-full bg-[#25D366] px-3 text-[8.5px] font-semibold text-[#0B1F3A]">
-          <MessageCircleIcon className="size-2.5" />
+          <IconeWhatsApp className="size-2.5" />
           Chamar no WhatsApp
         </span>
       </div>
@@ -90,7 +92,7 @@ export function PaginaCliente({ s }: { s: Segmento }) {
       <p className="px-3 pb-4 text-center text-[7px] text-[#0B1F3A]/50">{s.nome} · {s.site}</p>
 
       <span className="absolute right-2 bottom-10 flex size-8 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg">
-        <MessageCircleIcon className="size-4" />
+        <IconeWhatsApp className="size-4" />
       </span>
     </div>
   );

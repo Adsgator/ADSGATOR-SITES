@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import { ArrowUpRightIcon, CheckIcon, LockIcon, MessageCircleIcon, SearchIcon } from "lucide-react";
+import { ArrowUpRightIcon, CheckIcon, LockIcon, SearchIcon } from "lucide-react";
 import { AnimatePresence, motion, MotionConfig, useReducedMotion, useScroll, useTransform } from "motion/react";
 
 import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
+import { IconeWhatsApp } from "@/components/icone-whatsapp";
 import { MotionPauseButton, MotionScope, useMotionPaused } from "@/components/motion/motion-scope";
 import { useCiclo } from "@/components/motion/use-ciclo";
 import { useDigitacao } from "@/components/motion/use-digitacao";
@@ -175,7 +176,7 @@ function ContatosVivos() {
             className="flex items-center gap-3 rounded-xl border bg-card p-2.5"
           >
             <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-success text-white">
-              <MessageCircleIcon className="size-3.5" />
+              <IconeWhatsApp className="size-3.5" />
             </span>
             <div className="min-w-0">
               <p className="text-[0.65rem] font-medium">Novo contato · veio do anúncio</p>

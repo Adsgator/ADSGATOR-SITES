@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { useMotionPaused } from "@/components/motion/motion-scope";
 
-type Fase = "parado" | "digitando" | "pronto" | "saindo";
+type Fase = "parado" | "procurando" | "digitando" | "pronto" | "saindo";
 
 /**
  * Texto sendo digitado, letra por letra, que fica um tempo pronto, some e dá
@@ -24,22 +24,26 @@ export function useDigitacao(
     const { indice, letras, fase } = estado;
     const alvo = textos[indice];
     const depois = (ms: number, proximo: typeof estado) => setTimeout(() => setEstado(proximo), ms);
+    // "procurando" é a espera antes de digitar (a lupa do mapa pulsa nela).
     const id =
       fase === "parado"
-        ? depois(inicio, { indice, letras: 0, fase: "digitando" })
-        : fase === "digitando"
-          ? letras < alvo.length
-            ? depois(velocidade, { indice, letras: letras + 1, fase })
-            : depois(0, { indice, letras, fase: "pronto" })
-          : fase === "pronto"
-            ? depois(espera, { indice, letras, fase: "saindo" })
-            : depois(400 + intervalo, { indice: (indice + passo) % textos.length, letras: 0, fase: "digitando" });
+        ? depois(inicio, { indice, letras: 0, fase: "procurando" })
+        : fase === "procurando"
+          ? depois(intervalo, { indice, letras: 0, fase: "digitando" })
+          : fase === "digitando"
+            ? letras < alvo.length
+              ? depois(velocidade, { indice, letras: letras + 1, fase })
+              : depois(0, { indice, letras, fase: "pronto" })
+            : fase === "pronto"
+              ? depois(espera, { indice, letras, fase: "saindo" })
+              : depois(400, { indice: (indice + passo) % textos.length, letras: 0, fase: "procurando" });
     return () => clearTimeout(id);
   }, [estado, pausado, textos, inicio, passo, velocidade, espera, intervalo]);
 
   return {
     texto: textos[estado.indice].slice(0, estado.letras),
     indice: estado.indice,
+    fase: estado.fase,
     pronto: estado.fase === "pronto",
     visivel: estado.fase === "digitando" || estado.fase === "pronto",
   };

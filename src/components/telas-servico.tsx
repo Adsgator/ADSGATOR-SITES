@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef } from "react";
-import { MessageCircleIcon, SearchIcon } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
 
+import { IconeWhatsApp } from "@/components/icone-whatsapp";
 import { useCiclo } from "@/components/motion/use-ciclo";
 import { PaginaCliente } from "@/components/pagina-cliente";
 import { segmentos, type Segmento } from "@/config/segmentos";
@@ -126,7 +127,7 @@ export function ConversaWhatsApp({ s }: { s: Segmento }) {
     <div className="rounded-3xl border bg-card p-5 shadow-2xl shadow-ink/10">
       <div className="flex items-center gap-3 border-b pb-3">
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-success text-white">
-          <MessageCircleIcon className="size-4" />
+          <IconeWhatsApp className="size-4" />
         </span>
         <div className="min-w-0 leading-tight">
           <p className="truncate text-sm font-medium">{s.nome}</p>
