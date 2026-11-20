@@ -77,7 +77,7 @@ const passos: Passo[] = [
   },
   {
     titulo: "Todo mês",
-    texto: "Revisão toda semana, o resumo do mês no WhatsApp e por e-mail, e uma conversa a cada 3 meses.",
+    texto: "A conta monitorada 24 horas, uma revisão completa toda semana, o resumo do mês no WhatsApp e por e-mail, e uma conversa a cada 3 meses.",
     quem: "Juntos",
     tempo: "Enquanto você quiser",
   },
@@ -97,7 +97,7 @@ const comAdsgator = [
   "Criar ou conferir a conta e o perfil no Google",
   "Fazer a página e a campanha",
   "Medir os contatos que chegam",
-  "Revisar toda semana e mandar o resumo do mês",
+  "Acompanhar a conta todo dia e mandar o resumo do mês",
   "Cuidar da página no ar, com a manutenção",
 ];
 

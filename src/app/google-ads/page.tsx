@@ -130,7 +130,7 @@ const objecoes = [
   {
     duvida: "“E se não der resultado?”",
     resposta:
-      "Ninguém sério pode prometer resultado, e a gente não promete. O que você tem é a conta cuidada toda semana e tudo à vista: já no primeiro mês os números chegam no resumo. Os primeiros meses são de ajuste, e você não fica preso, porque é sem fidelidade.",
+      "Ninguém sério pode prometer resultado, e a gente não promete. O que você tem é a conta acompanhada por um especialista, monitorada 24 horas, e tudo à vista: já no primeiro mês os números chegam no resumo. Os primeiros meses são de ajuste, e você não fica preso, porque é sem fidelidade.",
   },
   {
     duvida: "“Deve ser caro.”",
@@ -144,18 +144,22 @@ const objecoes = [
   },
 ];
 
+// A conta é acompanhada o tempo todo, não só na revisão (Lucas, 2026-11-20): o
+// painel lê os números do Google Ads o dia inteiro e avisa quando algo sai do
+// normal (anúncio reprovado, gasto parado, saldo acabando, mudança feita por
+// fora); a revisão completa é toda semana.
 const todoMes = [
   {
-    quando: "Toda semana",
-    titulo: "Revisão com ajustes",
-    texto: "A verba vai para as buscas que trazem contato e sai das que não trazem.",
-    icone: <RefreshCwIcon className="size-4.5" />,
+    quando: "24 horas por dia",
+    titulo: "Conta monitorada",
+    texto: "Se algo sai do normal, como um anúncio reprovado, o gasto parado ou o saldo acabando, a gente fica sabendo na hora.",
+    icone: <BellRingIcon className="size-4.5" />,
   },
   {
-    quando: "Quando precisar",
-    titulo: "Aviso de saldo",
-    texto: "Antes de o saldo acabar, você fica sabendo, para o anúncio não parar.",
-    icone: <BellRingIcon className="size-4.5" />,
+    quando: "Toda semana",
+    titulo: "Revisão completa",
+    texto: "Um especialista revisa a conta e ajusta: a verba vai para as buscas que trazem contato e sai das que não trazem.",
+    icone: <RefreshCwIcon className="size-4.5" />,
   },
   {
     quando: "Todo mês",
@@ -231,7 +235,7 @@ export default function Page() {
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-8 text-muted-foreground">
                 Quando alguém na sua cidade digita o que você faz, o seu anúncio aparece, e a conversa começa no seu
-                WhatsApp. Com a verba certa para a sua região e alguém cuidando da conta toda semana.
+                WhatsApp. Com a verba certa para a sua região e a conta acompanhada por um especialista.
               </p>
               <div className="mt-10 flex flex-wrap gap-3">
                 <a href={whatsapp} className={botaoMarca}>
@@ -364,14 +368,14 @@ export default function Page() {
         <div className="mx-auto max-w-6xl px-4 py-24">
           <Eyebrow>Depois, todo mês</Eyebrow>
           <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
-            A conta não fica largada. <span className="text-muted-foreground">Toda semana tem alguém olhando.</span>
+            A conta nunca fica sozinha. <span className="text-muted-foreground">Monitorada 24 horas e acompanhada por um especialista.</span>
           </h2>
           <div className="mt-16">
             <LinhaDoTempo marcos={todoMes} />
           </div>
           <div className="mt-20 grid items-start gap-10 lg:grid-cols-2">
             <div>
-              <h3 className="font-heading text-3xl leading-tight">O que a revisão de toda semana olha</h3>
+              <h3 className="font-heading text-3xl leading-tight">Além do monitoramento, a revisão completa de toda semana olha</h3>
               <ul className="mt-6 divide-y border-y">
                 {revisao.map((item) => (
                   <li key={item} className="flex gap-4 py-4 leading-7">
