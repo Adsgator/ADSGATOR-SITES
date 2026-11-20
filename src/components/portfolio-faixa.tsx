@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ArrowRightIcon, ArrowUpRightIcon } from "lucide-react";
-import { motion, useMotionValue, useScroll, useTransform } from "motion/react";
+import { motion } from "motion/react";
 
 import { Eyebrow } from "@/components/eyebrow";
+import { margemDaFila, useFilaNaRolagem } from "@/components/motion/use-fila-na-rolagem";
+import { cn } from "@/lib/utils";
 
 // O portfólio no Início (roteiro do site, Início, seção 8): páginas feitas
 // pela Adsgator, que já estão no ar. As quatro escolhidas em 2026-11-20 (o
@@ -22,42 +24,16 @@ const paginas = [
   { id: "planejados", segmento: "Móveis planejados", site: "oficinadosplanejadosofc.com.br", alturaInteira: 3980 },
 ];
 
-// Parte da rolagem parada no começo e no fim, com a primeira e a última página
-// inteiras no lugar.
-const PAUSA = 0.1;
-
 /**
  * A seção fica presa no topo enquanto a rolagem leva a fila de lado (pedido
  * do Lucas, 2026-11-20). A distância é medida: a fila começa com a primeira
  * página alinhada ao título e termina com a última inteira na borda direita.
  */
 export function PortfolioFaixa() {
-  const area = useRef<HTMLElement>(null);
-  const palco = useRef<HTMLDivElement>(null);
-  const fila = useRef<HTMLUListElement>(null);
-  const distancia = useMotionValue(0);
-  const [alturaExtra, setAlturaExtra] = useState(0);
-
-  useEffect(() => {
-    const medir = () => {
-      if (!fila.current || !palco.current) return;
-      const d = Math.max(0, fila.current.scrollWidth - palco.current.clientWidth);
-      distancia.set(d);
-      setAlturaExtra(Math.round(d / (1 - 2 * PAUSA)));
-    };
-    medir();
-    const observador = new ResizeObserver(medir);
-    if (fila.current) observador.observe(fila.current);
-    if (palco.current) observador.observe(palco.current);
-    return () => observador.disconnect();
-  }, [distancia]);
-
-  const { scrollYProgress } = useScroll({ target: area, offset: ["start start", "end end"] });
-  const andado = useTransform(scrollYProgress, [PAUSA, 1 - PAUSA], [0, 1], { clamp: true });
-  const x = useTransform(() => -andado.get() * distancia.get());
+  const { area, palco, fila, x, andado, alturaDaArea } = useFilaNaRolagem();
 
   return (
-    <section ref={area} data-portfolio style={{ height: `calc(100svh + ${alturaExtra}px)` }} className="relative">
+    <section ref={area} data-portfolio style={{ height: alturaDaArea }} className="relative">
       <div ref={palco} className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden pt-16">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-end justify-between gap-x-6 gap-y-3 px-4">
           <div>
@@ -78,7 +54,7 @@ export function PortfolioFaixa() {
         <motion.ul
           ref={fila}
           style={{ x }}
-          className="mt-10 flex w-max gap-8 px-[max(1rem,calc((100%-72rem)/2+1rem))]"
+          className={cn("mt-10 flex w-max gap-8", margemDaFila)}
         >
           {paginas.map((pagina) => (
             <Cartao key={pagina.id} {...pagina} />
