@@ -5,10 +5,13 @@ import { ChamadaFinal } from "@/components/chamada-final";
 import { EtapasNoAr } from "@/components/colunas-subindo";
 import { ConversaComecando } from "@/components/conversa-comecando";
 import { Eyebrow } from "@/components/eyebrow";
+import { Faq } from "@/components/faq";
 import { FundoVivo } from "@/components/fundo-vivo";
 import { MotionScope } from "@/components/motion/motion-scope";
 import { Reveal } from "@/components/motion/reveal";
 import { PassosNaRolagem, type Passo } from "@/components/passos-na-rolagem";
+import { PrazoNaConversa } from "@/components/prazo-na-conversa";
+import { PrimeiroMes } from "@/components/primeiro-mes";
 import { buttonVariants } from "@/components/ui/button";
 import { linkWhatsApp, mensagemDaPagina } from "@/config/site";
 import { cn } from "@/lib/utils";
@@ -16,7 +19,10 @@ import { cn } from "@/lib/utils";
 // Página "Como funciona", na ordem do roteiro do site (ADSGATOR-PAINEL,
 // DOCS/ROTEIRO-SITE.md, "Como funciona"), aprovado pelo Lucas em 2026-11-20:
 // tirar o medo do desconhecido, com cada passo, quem faz o quê e quanto tempo
-// leva. Prazos da Base ("Serviços e preços").
+// leva. Prazos da Base ("Serviços e preços"). Rodada de profundidade (Lucas,
+// 2026-11-20), com os processos da Base ("Entrada do cliente", "Landing page" e
+// "Google Ads"): o que a gente vai te pedir em cada serviço, o prazo com data
+// quando chega tudo, o primeiro mês da campanha, as dúvidas e as perguntas.
 
 export const metadata: Metadata = {
   title: "Como funciona",
@@ -101,6 +107,82 @@ const comAdsgator = [
   "Cuidar da página no ar, com a manutenção",
 ];
 
+const titulo = "font-heading text-4xl leading-[1.05] tracking-tight text-balance sm:text-6xl";
+
+const pedidos = [
+  {
+    servico: "Para a página",
+    itens: [
+      "O formulário com as perguntas sobre o seu negócio",
+      "O logo e as fotos que você tiver",
+      "Tudo numa pasta do Drive criada para você",
+    ],
+  },
+  {
+    servico: "Para o Google Ads",
+    itens: [
+      "O formulário da campanha",
+      "O acesso à conta do Google Ads. Não tem? A gente cria, no seu nome",
+      "O acesso ao seu perfil no Google. Não tem? A gente cria e passa para você",
+    ],
+  },
+];
+
+const objecoes = [
+  {
+    duvida: "“Não entendo nada de internet.”",
+    resposta:
+      "Não precisa. Você conta do seu negócio do seu jeito, e cada coisa que a gente pedir vem com um guia passo a passo. O que é técnico fica com a gente.",
+  },
+  {
+    duvida: "“Não tenho tempo para acompanhar.”",
+    resposta:
+      "A sua parte fica quase toda no começo: a conversa, o material e a aprovação. Depois, a conta é acompanhada por um especialista, e o resumo do mês chega no seu WhatsApp.",
+  },
+  {
+    duvida: "“E se eu chamar e não quiser contratar?”",
+    resposta:
+      "Tudo bem. O diagnóstico é grátis e sem compromisso: você recebe a proposta por escrito e decide com calma.",
+  },
+  {
+    duvida: "“Vou ter que ficar mandando coisa toda hora?”",
+    resposta:
+      "Não. O material vai uma vez só, no começo, e o prazo começa quando chega tudo. Depois, só se você quiser mudar algo.",
+  },
+];
+
+const perguntas = [
+  {
+    pergunta: "Quanto tempo leva, do primeiro oi ao anúncio no ar?",
+    resposta:
+      "O Google Ads entra no ar em até 3 dias úteis depois que chegam os acessos e o formulário, sem contar a análise do próprio Google. A página fica pronta em até 14 dias úteis depois que chega o material. Com os dois, a campanha entra logo depois que a página é publicada.",
+  },
+  {
+    pergunta: "Preciso ter CNPJ?",
+    resposta:
+      "Não. Dá para anunciar como pessoa física. Às vezes o Google pede a verificação do anunciante, com um documento, e a gente te diz exatamente o que mandar.",
+  },
+  {
+    pergunta: "Preciso já ter conta no Google Ads ou perfil no Google?",
+    resposta: "Não. Se você não tiver, a gente cria, e os dois ficam no seu nome.",
+  },
+  {
+    pergunta: "E se eu demorar para mandar o material?",
+    resposta:
+      "Sem problema: o prazo só começa quando chega tudo, e a gente te lembra do que falta. Só um projeto parado há mais de 60 dias pode ser encerrado, como dizem os Termos.",
+  },
+  {
+    pergunta: "Eu aprovo a página antes de ir ao ar?",
+    resposta:
+      "Sim, em duas vezes: primeiro o roteiro, com as partes e a mensagem principal, e depois a página pronta, com os ajustes que você pedir.",
+  },
+  {
+    pergunta: "Tem fidelidade?",
+    resposta:
+      "Não. Os planos mensais podem ser cancelados quando você quiser, sem multa, avisando 48 horas antes do próximo vencimento.",
+  },
+];
+
 export default function Page() {
   return (
     <>
@@ -147,10 +229,64 @@ export default function Page() {
         />
       </div>
 
+      {/* O que a gente vai te pedir, e o prazo com data quando chega tudo. */}
+      <section id="o-que-pedimos" className="mx-auto max-w-6xl px-4 py-24">
+        <Eyebrow>O que a gente vai te pedir</Eyebrow>
+        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+          Você manda tudo uma vez só. <span className="text-muted-foreground">O prazo começa quando chega.</span>
+        </h2>
+        <div className="mt-14 grid items-start gap-10 lg:grid-cols-2">
+          <div className="space-y-5">
+            {pedidos.map(({ servico, itens }, i) => (
+              <Reveal key={servico} delay={i * 120} className="rounded-3xl border bg-card p-8">
+                <p className="font-mono text-xs text-muted-foreground">{servico}</p>
+                <ul className="mt-5 space-y-3">
+                  {itens.map((item) => (
+                    <li key={item} className="flex gap-3 leading-7">
+                      <span className="mt-1 flex size-5 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground">
+                        <CheckIcon className="size-3" />
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
+            ))}
+            <p className="leading-7 text-muted-foreground">
+              Cada pedido vem com um guia passo a passo da Central de Ajuda. Com os dois serviços, primeiro vem só o
+              da página, e o do Google Ads depois, sem pedir tudo de uma vez.
+            </p>
+          </div>
+          <div>
+            <PrazoNaConversa />
+            <p className="mt-5 leading-7 text-muted-foreground">
+              Quando chega tudo, você recebe o prazo com a data escrita. Se faltar alguma coisa, a gente te lembra.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* O primeiro mês depois que a campanha entra no ar. */}
+      <section className="border-y bg-muted/30">
+        <div className="mx-auto max-w-6xl px-4 py-24">
+          <Eyebrow>Depois que entra no ar</Eyebrow>
+          <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+            A campanha nova é acompanhada de perto. <span className="text-muted-foreground">Desde o primeiro dia.</span>
+          </h2>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
+            A conta fica monitorada 24 horas e acompanhada por um especialista. Veja como é o primeiro mês do Google
+            Ads.
+          </p>
+          <div className="mt-14">
+            <PrimeiroMes />
+          </div>
+        </div>
+      </section>
+
       {/* O que é com você e o que é com a Adsgator. */}
       <section className="mx-auto max-w-6xl px-4 py-24">
         <Eyebrow>Quem faz o quê</Eyebrow>
-        <h2 className="mt-6 max-w-3xl font-heading text-4xl leading-[1.05] tracking-tight text-balance sm:text-6xl">
+        <h2 className={cn(titulo, "mt-6 max-w-3xl")}>
           A sua parte é pequena. <span className="text-muted-foreground">O resto fica com a gente.</span>
         </h2>
         <div className="mt-14 grid gap-5 md:grid-cols-2">
@@ -180,6 +316,33 @@ export default function Page() {
               ))}
             </ul>
           </Reveal>
+        </div>
+      </section>
+
+      {/* Talvez você esteja pensando. */}
+      <section className="mx-auto max-w-6xl px-4 pb-24">
+        <Eyebrow>Talvez você esteja pensando</Eyebrow>
+        <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
+          As dúvidas mais comuns. <span className="text-muted-foreground">E as respostas.</span>
+        </h2>
+        <ul className="mt-14 grid gap-5 md:grid-cols-2">
+          {objecoes.map(({ duvida, resposta }, i) => (
+            <li key={duvida}>
+              <Reveal delay={(i % 2) * 120} className="h-full rounded-3xl border bg-card p-8">
+                <p className="font-heading text-2xl leading-tight">{duvida}</p>
+                <p className="mt-4 leading-7 text-muted-foreground">{resposta}</p>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Perguntas e o convite. */}
+      <section className="mx-auto max-w-4xl px-4 pb-24">
+        <Eyebrow>Perguntas frequentes</Eyebrow>
+        <h2 className={cn(titulo, "mt-6")}>Antes de chamar.</h2>
+        <div className="mt-12">
+          <Faq itens={perguntas} />
         </div>
       </section>
 

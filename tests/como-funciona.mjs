@@ -1,6 +1,7 @@
 // Página "Como funciona": a conversa começando no topo (com o resto da página
 // parado), a fila dos 8 passos presa no topo (começando e terminando no lugar),
-// o fundo e a mensagem pronta do WhatsApp. Roda nos dois modos de animação (o
+// o fundo, a mensagem pronta do WhatsApp, a conversa do prazo, o primeiro mês,
+// as dúvidas e as perguntas. Roda nos dois modos de animação (o
 // Windows do Lucas está com "Mostrar animações" desligado).
 // Uso: node tests/como-funciona.mjs [endereço]   (padrão: http://localhost:3005/como-funciona)
 
@@ -123,6 +124,44 @@ try {
       await rolarPara(fim + 400);
       const depois = await medir();
       check(`${rotulo}: depois do fim, a seção solta`, depois.palcoTopo < -300, `${depois.palcoTopo.toFixed(0)}`);
+
+      // A conversa do prazo e o primeiro mês: parados até a pessoa chegar.
+      // Volta ao topo antes de recarregar: o Chrome devolve a rolagem de antes, e
+      // a animação já começaria ao carregar.
+      await rolarPara(0);
+      await page.reload({ waitUntil: "networkidle" });
+      await rolarPara(0);
+      const antes = await page.evaluate(() => ({
+        mensagens: document.querySelectorAll("[data-mensagem-vista]").length,
+        dias: document.querySelectorAll("[data-aceso-dia]").length,
+      }));
+      await page.$eval("[data-prazo-conversa]", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.waitForTimeout(3200);
+      const mensagens = await page.$$eval("[data-prazo-conversa] p[data-mensagem-vista]", (ps) => ps.filter((p) => Number(getComputedStyle(p).opacity) > 0.95).length);
+      const comData = await page.$eval("[data-prazo-conversa]", (el) => el.textContent.includes("Até quinta, 10/12"));
+      await page.$eval("[data-primeiro-mes]", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.waitForTimeout(2800);
+      const mes = await page.evaluate(() => ({
+        dias: document.querySelectorAll("[data-primeiro-mes] [data-aceso-dia]").length,
+        marcos: document.querySelectorAll("[data-primeiro-mes] li[data-dia] svg").length,
+        legenda: [...document.querySelectorAll("[data-primeiro-mes] [data-marco-visivel]")].filter((li) => Number(getComputedStyle(li).opacity) > 0.95).length,
+      }));
+      check(
+        `${rotulo}: a conversa do prazo e o primeiro mês entram quando a pessoa chega`,
+        antes.mensagens === 0 && antes.dias === 0 && mensagens === 4 && comData && mes.dias === 30 && mes.marcos === 7 && mes.legenda === 4,
+        `antes ${antes.mensagens} mensagens e ${antes.dias} dias; depois ${mensagens} mensagens (data ${comData}), ${mes.dias} dias, ${mes.marcos} marcos, ${mes.legenda} na legenda`,
+      );
+
+      const blocos = await page.evaluate(() => ({
+        pedidos: document.querySelectorAll("#o-que-pedimos li").length,
+        duvidas: [...document.querySelectorAll("li p.font-heading")].filter((p) => p.textContent.startsWith("“")).length,
+        perguntas: document.querySelectorAll("details").length,
+      }));
+      check(
+        `${rotulo}: o que a gente pede (6 itens), as 4 dúvidas e as 6 perguntas`,
+        blocos.pedidos === 6 && blocos.duvidas === 4 && blocos.perguntas === 6,
+        JSON.stringify(blocos),
+      );
 
       const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check(`${rotulo}: sem sobra lateral`, sobra === 0, `${sobra} px`);
