@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 // ficam bem apagadas atrás do texto, para não atrapalhar a leitura. Só CSS
 // (classe `subir` no globals.css): para no botão de pausar da área
 // (MotionScope). Decorativo. Cada página escolhe as peças: as buscas
-// acontecendo (Google Ads), as partes de uma página (landing page) ou as
-// conferências feitas (manutenção).
+// acontecendo (Google Ads), as partes de uma página (landing page), as
+// conferências feitas (manutenção) ou as etapas andando (como funciona).
 
 // Duração da volta e o ponto em que cada coluna começa, para não andarem juntas.
 const colunas = [
@@ -193,6 +193,38 @@ export function ConferenciasNoAr() {
             {conferencias[i % conferencias.length]}
           </span>
           <span className="pl-6 font-mono text-[0.65rem] opacity-80">{sites[Math.floor(i / conferencias.length) % sites.length]}</span>
+        </span>
+      ))}
+    />
+  );
+}
+
+const etapas = [
+  "Diagnóstico feito",
+  "Proposta enviada",
+  "Contrato aceito",
+  "Briefing recebido",
+  "Campanha no ar",
+  "Página entregue",
+  "Revisão da semana",
+  "Resumo do mês enviado",
+];
+const negocios = ["Ampère Elétrica", "Lumière Odontologia", "Valente & Moraes"];
+
+/** Como funciona: as etapas andando, um negócio de cada vez. */
+export function EtapasNoAr() {
+  return (
+    <ColunasSubindo
+      espaco="gap-6"
+      pecas={Array.from({ length: etapas.length * negocios.length }, (_, i) => (
+        <span key={i} className="flex flex-col gap-1 rounded-2xl border bg-card/60 px-3.5 py-2.5 text-xs text-muted-foreground/80">
+          <span className="flex items-center gap-2">
+            <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-brand/60 text-brand-foreground">
+              <CheckIcon className="size-2.5" />
+            </span>
+            {etapas[i % etapas.length]}
+          </span>
+          <span className="pl-6 text-[0.65rem] opacity-80">{negocios[Math.floor(i / etapas.length) % negocios.length]}</span>
         </span>
       ))}
     />
