@@ -142,6 +142,37 @@ try {
       const lidas = [0, 1, 2, 3, 4].filter((n) => vistas.some((v) => v.ativa === n && v.aVista));
       check(`${rotulo}: cada explicação fica acesa e à vista, fora de trás do anúncio`, lidas.length === 5, `à vista: ${lidas.join(",")}`);
 
+      // O resumo do mês e o diagnóstico: parados até a pessoa chegar; depois, os
+      // números sobem até o valor e as barras enchem.
+      const lerResumo = () =>
+        page.$eval("[data-resumo]", (r) => ({
+          numeros: [...r.querySelectorAll(".tabular-nums")].map((n) => n.textContent),
+          barras: [...r.querySelectorAll("[data-barra]")].map((b) => new DOMMatrix(getComputedStyle(b).transform).a.toFixed(2)),
+        }));
+      // Página recarregada: a rolagem das verificações anteriores já passou pelo
+      // resumo, e ele anima uma vez só.
+      await page.reload({ waitUntil: "networkidle" });
+      await rolarPara(0);
+      const resumoAntes = await lerResumo();
+      await page.$eval("[data-resumo]", (r) => r.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.waitForTimeout(2600);
+      const resumoDepois = await lerResumo();
+      check(
+        `${rotulo}: o resumo parado antes e, ao chegar, números até o valor e barras cheias`,
+        resumoAntes.numeros.every((n) => n === "0") &&
+          resumoAntes.barras.every((b) => b === "0.00") &&
+          resumoDepois.numeros.join(" ") === "4.812 386 41" &&
+          resumoDepois.barras.join(" ") === "0.88 0.56 0.30",
+        `${resumoAntes.numeros.join("/")} → ${resumoDepois.numeros.join("/")}, barras ${resumoDepois.barras.join("/")}`,
+      );
+      await page.$eval("[data-diagnostico]", (d) => d.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.waitForTimeout(2600);
+      const diag = await page.$eval("[data-diagnostico]", (d) => ({
+        primeiro: d.querySelector(".tabular-nums").textContent,
+        indicada: d.querySelector("[data-verba-indicada]").className.includes("bg-brand"),
+      }));
+      check(`${rotulo}: o diagnóstico conta a procura e escolhe a verba indicada`, diag.primeiro === "1.300" && diag.indicada, JSON.stringify(diag));
+
       const blocos = await page.evaluate(() => ({
         diagnostico: document.body.innerText.includes("Diagnóstico · exemplo"),
         resumo: document.body.innerText.includes("Resumo do mês · Ampère Elétrica"),

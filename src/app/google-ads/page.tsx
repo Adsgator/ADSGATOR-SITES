@@ -120,27 +120,27 @@ const revisao = [
 ];
 
 // "Desconto e objeções" (processo comercial da Base): o caminho de cada
-// resposta, em texto de site.
+// resposta, escrito como resposta a quem tem a dúvida (Lucas, 2026-11-20).
 const objecoes = [
   {
     duvida: "“Já tentei e não deu certo.”",
     resposta:
-      "Mostre o que foi feito: a conta, a página, quanto foi gasto. Quase sempre dá para achar o motivo, e a gente explica em palavras simples o que muda, sem falar mal de quem fez antes.",
+      "Isso é mais comum do que parece, e quase sempre tem um motivo que dá para achar: a página, as palavras escolhidas, a região ou a medição. No diagnóstico, a gente olha o que foi feito e te explica, em palavras simples, o que muda.",
   },
   {
     duvida: "“E se não der resultado?”",
     resposta:
-      "Ninguém sério promete resultado. Os primeiros meses são de ajuste, mas já no primeiro mês você vê os números no resumo. E é sem fidelidade.",
+      "Ninguém sério pode prometer resultado, e a gente não promete. O que você tem é a conta cuidada toda semana e tudo à vista: já no primeiro mês os números chegam no resumo. Os primeiros meses são de ajuste, e você não fica preso, porque é sem fidelidade.",
   },
   {
-    duvida: "“Está caro.”",
+    duvida: "“Deve ser caro.”",
     resposta:
-      "Vale entender o que pesa: a gestão, a verba ou a página. Dá para começar com uma verba menor, numa região menor, ou só com o Google Ads usando o site que você já tem.",
+      "Dá para começar do tamanho do seu bolso: com uma verba menor, numa região menor, ou só com o Google Ads usando o site que você já tem. No diagnóstico você vê o que cada caminho compra antes de decidir.",
   },
   {
-    duvida: "“Eu mesmo faço.”",
+    duvida: "“Eu mesmo posso fazer.”",
     resposta:
-      "Ótimo, tem quem faça bem. Se precisar de ajuda numa parte, como a medição dos contatos, dá para conversar. A porta fica aberta.",
+      "Pode, e tem quem faça bem. Se um dia faltar tempo, ou se você quiser ajuda só numa parte, como medir os contatos que chegam, é só chamar.",
   },
 ];
 
@@ -231,7 +231,7 @@ export default function Page() {
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-8 text-muted-foreground">
                 Quando alguém na sua cidade digita o que você faz, o seu anúncio aparece, e a conversa começa no seu
-                WhatsApp. A conta é sua e a verba vai direto ao Google.
+                WhatsApp. Com a verba certa para a sua região e alguém cuidando da conta toda semana.
               </p>
               <div className="mt-10 flex flex-wrap gap-3">
                 <a href={whatsapp} className={botaoMarca}>
