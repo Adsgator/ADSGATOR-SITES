@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SearchIcon } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useInView } from "motion/react";
 
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
 import { MotionPauseButton, MotionScope, useMotionPaused } from "@/components/motion/motion-scope";
@@ -18,15 +18,18 @@ import { segmentos } from "@/config/segmentos";
 
 type Etapa = "entrando" | "clicaAnuncio" | "pagina" | "indoWhats" | "clicaWhats" | "conversa" | "saindo";
 
+// Tempos de cada etapa, mais lentos a pedido do Lucas (2026-11-20).
 const roteiro: { etapa: Etapa; ms: number }[] = [
-  { etapa: "entrando", ms: 1500 },
-  { etapa: "clicaAnuncio", ms: 450 },
-  { etapa: "pagina", ms: 700 },
-  { etapa: "indoWhats", ms: 1000 },
-  { etapa: "clicaWhats", ms: 450 },
-  { etapa: "conversa", ms: 2800 },
-  { etapa: "saindo", ms: 600 },
+  { etapa: "entrando", ms: 2200 },
+  { etapa: "clicaAnuncio", ms: 650 },
+  { etapa: "pagina", ms: 1300 },
+  { etapa: "indoWhats", ms: 1700 },
+  { etapa: "clicaWhats", ms: 650 },
+  { etapa: "conversa", ms: 4200 },
+  { etapa: "saindo", ms: 900 },
 ];
+/** Quanto o cursor leva para andar até o alvo (segundos). */
+const PASSADA = 1.3;
 
 // A ponta da seta fica a 27% da largura e da altura do desenho (globals.css).
 const CURSOR = { largura: 34, ponta: 0.27, proporcao: 779 / 517 };
@@ -50,14 +53,18 @@ function Cena() {
   const s = segmentos[volta % segmentos.length];
   const naPagina = etapa === "pagina" || etapa === "indoWhats" || etapa === "clicaWhats";
 
+  // Só começa quando a pessoa chega até a seção (metade da cena na tela), e
+  // para enquanto ela estiver fora da tela (pedido do Lucas, 2026-11-20).
+  const naTela = useInView(cena, { amount: 0.5 });
+
   useEffect(() => {
-    if (pausado) return;
+    if (pausado || !naTela) return;
     const id = setTimeout(() => {
       if (passo === roteiro.length - 1) setVolta((v) => v + 1);
       setPasso((p) => (p + 1) % roteiro.length);
     }, roteiro[passo].ms);
     return () => clearTimeout(id);
-  }, [passo, pausado]);
+  }, [passo, pausado, naTela]);
 
   // Onde o cursor vai em cada etapa: medido na cena. Quando a tela troca, o
   // conteúdo novo só entra depois de o antigo sair (0,35 s); então tenta de
@@ -74,14 +81,15 @@ function Cena() {
         return r ? { x: r.left - caixa.left + r.width * 0.55, y: r.top - caixa.top + r.height * 0.55 } : null;
       };
       const fora = { x: caixa.width + 60, y: caixa.height * 0.8 };
-      const seletor =
-        etapa === "entrando" || etapa === "clicaAnuncio"
+      const seletor = !naTela
+        ? null
+        : etapa === "entrando" || etapa === "clicaAnuncio"
           ? "[data-titulo-anuncio]"
           : etapa === "indoWhats" || etapa === "clicaWhats"
             ? "[data-cta-whatsapp]"
             : null;
       if (!seletor) {
-        setAlvo(etapa === "pagina" ? { x: caixa.width * 0.75, y: caixa.height * 0.3 } : fora);
+        setAlvo(naTela && etapa === "pagina" ? { x: caixa.width * 0.75, y: caixa.height * 0.3 } : fora);
         return;
       }
       const destino = centroDe(seletor);
@@ -90,7 +98,7 @@ function Cena() {
     };
     medir();
     return () => cancelAnimationFrame(quadro);
-  }, [etapa, volta]);
+  }, [etapa, volta, naTela]);
 
   const clicando = etapa === "clicaAnuncio" || etapa === "clicaWhats";
   const altura = CURSOR.largura * CURSOR.proporcao;
@@ -150,7 +158,7 @@ function Cena() {
         className="pointer-events-none absolute top-0 left-0 z-10"
         initial={false}
         animate={{ x: alvo.x - CURSOR.largura * CURSOR.ponta, y: alvo.y - altura * CURSOR.ponta }}
-        transition={{ duration: etapa === "saindo" ? 0.01 : 0.85, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: etapa === "saindo" ? 0.01 : PASSADA, ease: [0.22, 1, 0.36, 1] }}
       >
         {clicando && (
           <motion.span

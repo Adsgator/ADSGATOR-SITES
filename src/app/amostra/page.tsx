@@ -9,6 +9,7 @@ import { CliqueAnimado } from "@/components/clique-animado";
 import { MapaBuscas } from "@/components/mapa-buscas";
 import { HojeComAdsgator } from "@/components/hoje-com-adsgator";
 import { PorQueAdsgator } from "@/components/por-que-adsgator";
+import { PortfolioFaixa } from "@/components/portfolio-faixa";
 import { QuemEstaPorTras } from "@/components/quem-esta-por-tras";
 import { ServicosVivos } from "@/components/servicos-vivos";
 import { Eyebrow } from "@/components/eyebrow";
@@ -150,6 +151,7 @@ export default function Page() {
         </div>
         <ServicosVivos />
         <PorQueAdsgator />
+        <PortfolioFaixa />
         <QuemEstaPorTras />
 
         {/* Perguntas frequentes. */}
