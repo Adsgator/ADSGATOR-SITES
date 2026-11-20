@@ -1,6 +1,8 @@
+import Image from "next/image";
 import { CheckIcon, SearchIcon, StarIcon } from "lucide-react";
 
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
+import { portfolio } from "@/config/portfolio";
 import { cn } from "@/lib/utils";
 
 // Fundo das heros das páginas de serviço (pedido do Lucas, 2026-11-20): peças
@@ -9,7 +11,8 @@ import { cn } from "@/lib/utils";
 // (classe `subir` no globals.css): para no botão de pausar da área
 // (MotionScope). Decorativo. Cada página escolhe as peças: as buscas
 // acontecendo (Google Ads), as partes de uma página (landing page), as
-// conferências feitas (manutenção) ou as etapas andando (como funciona).
+// conferências feitas (manutenção), as etapas andando (como funciona) ou as
+// páginas do portfólio no celular (portfólio).
 
 // Duração da volta e o ponto em que cada coluna começa, para não andarem juntas.
 const colunas = [
@@ -229,4 +232,14 @@ export function EtapasNoAr() {
       ))}
     />
   );
+}
+
+/** Portfólio: as páginas dos clientes no celular, o trabalho de verdade. */
+export function PaginasNoAr() {
+  const celulares = portfolio.map(({ id }) => (
+    <div key={id} className="overflow-hidden rounded-[1.6rem] border-4 border-ink bg-ink shadow-lg">
+      <Image src={`/portfolio/${id}-cel.jpg`} alt="" width={390} height={844} sizes="13rem" className="block h-auto w-full rounded-[1.2rem]" />
+    </div>
+  ));
+  return <ColunasSubindo pecas={[...celulares, ...celulares.slice(2), ...celulares.slice(0, 2)]} espaco="gap-6" />;
 }

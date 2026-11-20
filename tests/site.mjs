@@ -55,7 +55,7 @@ const antigos = [
   ["/politicas-de-reembolso/", "/termos#reembolso"],
   ["/landing-page-pro/", "/landing-page"],
   ["/google-ads/", "/google-ads"],
-  ["/portfolios/?utm_source=prospection", "/?utm_source=prospection"],
+  ["/portfolios/?utm_source=prospection", "/portfolio?utm_source=prospection"],
   ["/links/", "/"],
   ["/home/", "/"],
   ["/erro-404/", "/"],
