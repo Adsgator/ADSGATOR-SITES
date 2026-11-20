@@ -55,10 +55,10 @@ const trajetoria = [
   { titulo: "2020, nasce a Adsgator", texto: "Google Ads e landing pages para negócios locais." },
 ];
 
-// Os números são do painel (22 clientes em 2026-11-20, um deles com 4 negócios)
-// e da trajetória (web design desde 2010; a Adsgator desde 2020).
+// Os números: negócios atendidos, do Lucas (2026-11-20); os anos, da trajetória
+// (web design desde 2010; a Adsgator desde 2020).
 const numeros = [
-  { valor: 20, antes: "+", rotulo: "negócios atendidos desde 2020" },
+  { valor: 30, antes: "+", rotulo: "negócios atendidos desde 2020" },
   { valor: 10, antes: "+", rotulo: "anos criando sites" },
   { valor: new Date().getFullYear() - 2020, rotulo: "anos de Google Ads com a Adsgator" },
 ];
@@ -68,11 +68,6 @@ const objecoes = [
     duvida: "“Uma pessoa só dá conta?”",
     resposta:
       "Dá, porque eu não fico olhando tudo sozinho: o sistema acompanha cada conta e cada página o dia inteiro e me avisa na hora. Eu cuido do que precisa de gente.",
-  },
-  {
-    duvida: "“E se você ficar doente ou sair de férias?”",
-    resposta:
-      "A conta e a página continuam no ar e monitoradas, e tudo está no seu nome: nada depende de mim para continuar funcionando. Férias e recessos são avisados com antecedência.",
   },
   {
     duvida: "“Uma agência grande não seria melhor?”",
@@ -97,7 +92,7 @@ const pontos = [
   },
   {
     titulo: "Direto comigo",
-    texto: "Quem responde o seu WhatsApp sou eu, que mexo na sua conta e na sua página. Sem atendente no meio do caminho.",
+    texto: "Quem responde você no WhatsApp, quem mexe na sua conta e na sua página, sou eu. Sem atendente no meio do caminho.",
   },
   {
     titulo: "Resumo todo mês",
@@ -164,7 +159,7 @@ export default function Page() {
         <div className="mx-auto grid max-w-6xl gap-14 px-4 py-24 md:grid-cols-[1fr_1.1fr]">
           <div className="md:sticky md:top-28 md:self-start">
             <Eyebrow>De onde eu venho</Eyebrow>
-            <h2 className={cn(titulo, "mt-6")}>Comecei trabalhando com as mãos.</h2>
+            <h2 className={cn(titulo, "mt-6")}>Da oficina para o digital.</h2>
             <p className="mt-6 max-w-md text-lg leading-8 text-muted-foreground">
               Antes da agência, foram anos de oficina e de indústria. A tecnologia sempre esteve junto, e virou o meu
               trabalho.
@@ -237,7 +232,7 @@ export default function Page() {
         <h2 className={cn(titulo, "mt-6 max-w-4xl")}>
           As dúvidas sobre trabalhar comigo. <span className="text-muted-foreground">E as respostas.</span>
         </h2>
-        <ul className="mt-14 grid gap-5 md:grid-cols-3">
+        <ul className="mt-14 grid gap-5 md:grid-cols-2">
           {objecoes.map(({ duvida, resposta }, i) => (
             <li key={duvida}>
               <Reveal delay={i * 120} className="h-full rounded-3xl border bg-card p-8">
@@ -247,6 +242,29 @@ export default function Page() {
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* Fechamento: um recado do Lucas, antes do convite. */}
+      <section data-recado className="mx-auto max-w-3xl px-4 pb-28">
+        <Reveal className="relative rounded-3xl border bg-card p-8 sm:p-12">
+          <p className="font-mono text-xs text-muted-foreground">Um recado meu</p>
+          <p className="mt-6 font-heading text-2xl leading-snug text-balance sm:text-3xl">
+            Obrigado por ler até aqui. Escolher quem vai cuidar do seu anúncio é uma decisão importante, e por isso tudo
+            começa com uma conversa, sem compromisso.
+          </p>
+          <p className="mt-6 text-lg leading-8 text-muted-foreground">
+            Me conta do seu negócio. Eu olho com calma e te digo com sinceridade o que dá para fazer.
+          </p>
+          <div className="mt-8 flex items-center gap-4">
+            <span className="relative size-14 shrink-0 overflow-hidden rounded-full border-2 border-brand">
+              <Image src="/sobre/lucas.jpg" alt="" fill sizes="3.5rem" className="object-cover" />
+            </span>
+            <span className="leading-tight">
+              <span className="block font-heading text-xl">Lucas</span>
+              <span className="text-sm text-muted-foreground">Adsgator</span>
+            </span>
+          </div>
+        </Reveal>
       </section>
 
       <ChamadaFinal

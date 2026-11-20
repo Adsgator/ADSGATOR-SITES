@@ -93,7 +93,7 @@ try {
       const anos = new Date().getFullYear() - 2020;
       check(
         `${rotulo}: os números sobem quando a pessoa chega`,
-        numerosAntes === "+0 +0 0" && numerosDepois === `+20 +10 ${anos}`,
+        numerosAntes === "+0 +0 0" && numerosDepois === `+30 +10 ${anos}`,
         `${numerosAntes} → ${numerosDepois}`,
       );
 
@@ -117,7 +117,9 @@ try {
       );
 
       const duvidas = await page.$$eval("li p.font-heading", (ps) => ps.filter((p) => p.textContent.startsWith("“")).length);
-      check(`${rotulo}: as 3 dúvidas`, duvidas === 3, `${duvidas}`);
+      const recado = await page.$eval("[data-recado]", (s) => s.textContent.includes("Obrigado por ler até aqui") && !!s.querySelector("img")).catch(() => false);
+      const titulo = await page.evaluate(() => document.body.innerText.includes("Da oficina para o digital."));
+      check(`${rotulo}: as 2 dúvidas, o recado do Lucas no fechamento e o título "Da oficina para o digital."`, duvidas === 2 && recado && titulo, `${duvidas} dúvidas, recado ${recado}, título ${titulo}`);
 
       const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check(`${rotulo}: sem sobra lateral`, sobra === 0, `${sobra} px`);
