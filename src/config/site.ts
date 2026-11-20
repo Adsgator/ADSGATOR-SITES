@@ -34,6 +34,8 @@ const mensagensPorPagina: Record<string, string> = {
     "Olá! Vim pelo site da Adsgator, pela página Como funciona, e queria um diagnóstico grátis para o meu negócio.",
   "/portfolio":
     "Olá! Vim pelo site da Adsgator, pela página do Portfólio, e queria um diagnóstico grátis para o meu negócio.",
+  "/quem-esta-por-tras":
+    "Olá, Lucas! Vim pelo site da Adsgator, pela página Quem está por trás, e queria um diagnóstico grátis para o meu negócio.",
 };
 
 export function mensagemDaPagina(caminho: string) {

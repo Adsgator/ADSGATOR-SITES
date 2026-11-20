@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 // (MotionScope). Decorativo. Cada página escolhe as peças: as buscas
 // acontecendo (Google Ads), as partes de uma página (landing page), as
 // conferências feitas (manutenção), as etapas andando (como funciona) ou as
-// páginas do portfólio no celular (portfólio).
+// páginas do portfólio no celular (portfólio) ou a trajetória do Lucas (quem
+// está por trás).
 
 // Duração da volta e o ponto em que cada coluna começa, para não andarem juntas.
 const colunas = [
@@ -242,4 +243,36 @@ export function PaginasNoAr() {
     </div>
   ));
   return <ColunasSubindo pecas={[...celulares, ...celulares.slice(2), ...celulares.slice(0, 2)]} espaco="gap-6" />;
+}
+
+const trajetoria = [
+  "Serralheria",
+  "Torno",
+  "Manutenção industrial",
+  "Manutenção de computadores",
+  "Flash, em 2010",
+  "Web design",
+  "Programação",
+  "Google Ads",
+  "Landing pages",
+  "Medição de contatos",
+  "Inteligência artificial",
+  "Design",
+];
+
+/** Quem está por trás: o que o Lucas aprendeu pelo caminho. */
+export function TrajetoriaNoAr() {
+  return (
+    <ColunasSubindo
+      pecas={trajetoria.map((item, i) => (
+        <span
+          key={item}
+          className="flex items-center gap-2 rounded-full border bg-card/60 px-3.5 py-2 text-xs whitespace-nowrap text-muted-foreground/80"
+        >
+          <span className={i % 4 === 1 ? "size-1.5 shrink-0 rounded-full bg-brand" : "size-1.5 shrink-0 rounded-full bg-muted-foreground/40"} />
+          {item}
+        </span>
+      ))}
+    />
+  );
 }
