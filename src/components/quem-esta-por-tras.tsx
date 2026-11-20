@@ -33,7 +33,7 @@ export function QuemEstaPorTras() {
       <div>
         <Reveal>
           <Eyebrow>Quem está por trás</Eyebrow>
-          <h2 className="mt-6 font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">Oi, eu sou o Lucas.</h2>
+          <h2 className="mt-6 font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">Eu sou o Lucas.</h2>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
             Na Adsgator, você fala direto comigo, que cuido da sua conta e da sua página. Faço isso porque gosto de
             criar coisas digitais que funcionam de verdade para quem trabalha. Este é o caminho até aqui:

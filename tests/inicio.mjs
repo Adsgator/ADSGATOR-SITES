@@ -60,9 +60,70 @@ try {
       const esperados = ["/google-ads", "/landing-page", "/manutencao", "/como-funciona", "/portfolio", "/quem-esta-por-tras"];
       check(`${rotulo}: leva às páginas de cada assunto`, esperados.every((d) => destinos.includes(d)), destinos.join(" "));
 
+      // O que a Adsgator faz: a página no celular desce até o rodapé, sem
+      // passar dele (o Lucas viu passando, 2026-11-20). Mede o ponto mais baixo.
+      await page.$eval("[data-tela-celular]", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      let maisBaixo = Infinity;
+      for (let i = 0; i < 40; i++) {
+        const sobra = await page.evaluate(() => {
+          const t = document.querySelector("[data-tela-celular]").getBoundingClientRect();
+          const pg = document.querySelector("[data-pagina-celular] > div").getBoundingClientRect();
+          return pg.bottom - t.bottom;
+        });
+        maisBaixo = Math.min(maisBaixo, sobra);
+        await page.waitForTimeout(200);
+      }
+      check(`${rotulo}: a página no celular desce até o rodapé e não passa dele`, maisBaixo > -2 && maisBaixo < 40, `fim da página a ${maisBaixo.toFixed(1)} px do fim da tela`);
+
+      // Por que a Adsgator: os visuais dos cartões parados até a pessoa chegar,
+      // e se animando quando ela chega. Volta ao topo antes de recarregar.
+      await rolarPara(0);
+      await page.reload({ waitUntil: "networkidle" });
+      await rolarPara(0);
+      const visuaisAntes = await page.evaluate(() => ({
+        marcados: document.querySelectorAll('[data-visual="nome"] [data-marcado]').length,
+        ligado: !!document.querySelector('[data-visual="fidelidade"] [data-ligado]'),
+        resposta: !!document.querySelector('[data-visual="direto"] [data-resposta]'),
+      }));
+      const verVisual = async (nome, espera) => {
+        await page.$eval(`[data-visual="${nome}"]`, (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+        await page.waitForTimeout(espera);
+      };
+      await verVisual("nome", 1500);
+      await verVisual("fidelidade", 1700);
+      await verVisual("medida", 300);
+      const medida1 = await page.$$eval("[data-pagina-medida]", (imgs) => imgs.map((i) => i.getAttribute("src")).join());
+      await page.waitForTimeout(3200);
+      const medida2 = await page.$$eval("[data-pagina-medida]", (imgs) => imgs.map((i) => i.getAttribute("src")).join());
+      await verVisual("direto", 3600);
+      await verVisual("resumo", 1800);
+      const visuais = await page.evaluate(() => ({
+        marcados: document.querySelectorAll('[data-visual="nome"] [data-marcado]').length,
+        ligado: !!document.querySelector('[data-visual="fidelidade"] [data-ligado]'),
+        paginasReais: document.querySelectorAll("[data-pagina-medida]").length,
+        resposta: !!document.querySelector('[data-visual="direto"] [data-resposta]'),
+        contatos: document.querySelector('[data-visual="resumo"] .tabular-nums')?.textContent,
+      }));
+      check(
+        `${rotulo}: por que a Adsgator: os cartões parados antes e se animando ao chegar, com páginas reais trocando no "Sob medida"`,
+        visuaisAntes.marcados === 0 && !visuaisAntes.ligado && !visuaisAntes.resposta &&
+          visuais.marcados === 3 && visuais.ligado && visuais.paginasReais === 3 && medida1 !== medida2 && visuais.resposta && visuais.contatos === "41",
+        `antes ${JSON.stringify(visuaisAntes)}; depois ${JSON.stringify(visuais)}; trocou ${medida1 !== medida2}`,
+      );
+
+      // Nada passa da borda dos cartões (o cartão esconde o que sobra, então o
+      // "sem sobra lateral" não pega: no celular, o texto do "Sob medida" foi cortado).
+      const cortados = await page.$eval("article", (as) =>
+        as
+          .filter((a) => a.querySelector("[data-visual]"))
+          .filter((a) => [...a.children].some((c) => c.getBoundingClientRect().right > a.getBoundingClientRect().right + 1))
+          .map((a) => a.querySelector("h3")?.textContent),
+      );
+      check(`${rotulo}: o conteúdo dos cartões cabe neles`, cortados.length === 0, cortados.join(", "));
+
       // Quem está por trás: a trajetória se marca com a rolagem.
       const lista = await page.evaluate(() => {
-        const ol = [...document.querySelectorAll("ol")].find((o) => o.querySelector("[data-feito], li") && o.textContent.includes("nasce a Adsgator"));
+        const ol = [...document.querySelectorAll("ol")].find((o) => o.querySelector("[data-feito], li") && o.textContent.includes("nasceu a Adsgator"));
         const r = ol.getBoundingClientRect();
         return { topo: r.top + window.scrollY, fim: r.bottom + window.scrollY };
       });

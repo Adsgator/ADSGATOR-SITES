@@ -51,7 +51,7 @@ try {
         const foto = document.querySelector('img[alt="Lucas, da Adsgator"]');
         return { h1: document.querySelector("h1").textContent, foto: !!foto && foto.complete && foto.naturalWidth > 0 };
       });
-      check(`${rotulo}: "Oi, eu sou o Lucas." com a foto carregada`, topo.h1.includes("Lucas") && topo.foto, topo.h1);
+      check(`${rotulo}: "Eu sou o Lucas." com a foto carregada`, topo.h1.trim() === "Eu sou o Lucas." && topo.foto, topo.h1);
 
       // Fundo: a trajetória sobe.
       const coluna = page.locator(".subir").first();

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRightIcon, CheckIcon, LockIcon, SearchIcon } from "lucide-react";
 import { AnimatePresence, motion, MotionConfig, useScroll, useTransform } from "motion/react";
 
@@ -126,22 +126,44 @@ function AnuncioVivo() {
   );
 }
 
+// A página é desenhada com 240 px e reduzida para caber no celular.
+const ESCALA_PAGINA = 0.615;
+
 function PaginaViva() {
   const pausado = useMotionPaused();
   // Uma página de cada segmento: troca a cada volta da rolagem (12 s).
   const s = segmentos[useCiclo(segmentos.length, 12000)];
+  // Quanto a página desce: a altura dela já reduzida menos a tela do celular,
+  // medida, para parar no rodapé. A redução (transform) não muda a altura da
+  // caixa, então um valor em % passava do fim (o Lucas viu, 2026-11-20).
+  const tela = useRef<HTMLDivElement>(null);
+  const pagina = useRef<HTMLDivElement>(null);
+  const [distancia, setDistancia] = useState(0);
+  useEffect(() => {
+    const medir = () => {
+      if (!tela.current || !pagina.current) return;
+      setDistancia(Math.max(0, pagina.current.offsetHeight * ESCALA_PAGINA - tela.current.clientHeight));
+    };
+    medir();
+    const observador = new ResizeObserver(medir);
+    if (tela.current) observador.observe(tela.current);
+    if (pagina.current) observador.observe(pagina.current);
+    return () => observador.disconnect();
+  }, [s.id]);
+
   return (
     <div className="mx-auto mt-4 h-full w-40 rounded-t-[1.6rem] bg-ink p-1.5 pb-0">
-      <div className="h-full overflow-hidden rounded-t-[1.2rem] bg-paper">
+      <div ref={tela} data-tela-celular className="h-full overflow-hidden rounded-t-[1.2rem] bg-paper">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={s.id}
+            data-pagina-celular
             initial={{ opacity: 0 }}
-            animate={pausado ? { opacity: 1 } : { opacity: 1, y: ["0%", "-62%", "0%"] }}
+            animate={pausado || !distancia ? { opacity: 1 } : { opacity: 1, y: [0, -distancia, 0] }}
             exit={{ opacity: 0 }}
             transition={{ opacity: { duration: 0.4 }, y: { duration: 12, repeat: Infinity, ease: "easeInOut" } }}
           >
-            <div className="w-[240px] origin-top-left scale-[0.615]">
+            <div ref={pagina} style={{ scale: ESCALA_PAGINA }} className="w-[240px] origin-top-left">
               <PaginaCliente s={s} />
             </div>
           </motion.div>

@@ -6,14 +6,14 @@
 export const trajetoria = [
   {
     titulo: "Antes da tecnologia, oficina e indústria",
-    texto: "Serralheria, torno e manutenção industrial. Foi lá que aprendi a fazer bem feito.",
+    texto: "Serralheria, tornearia e manutenção industrial. Foi lá que aprendi a fazer bem feito.",
   },
   { titulo: "2010, os primeiros sites", texto: "Web design desde a época do Flash. De lá para cá, sites, páginas e sistemas." },
   {
     titulo: "Programação e sistemas",
     texto: "Saber construir, e não só montar: do código da página ao sistema que acompanha cada cliente.",
   },
-  { titulo: "2020, nasce a Adsgator", texto: "Google Ads e landing pages para negócios locais." },
+  { titulo: "2020, nasceu a Adsgator", texto: "Google Ads e landing pages para negócios locais." },
   { titulo: "Medição e dados", texto: "Cada contato medido, para decidir pelo número, e não no achismo." },
 ];
 

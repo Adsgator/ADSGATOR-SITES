@@ -102,7 +102,7 @@ export default function Page() {
                 Quem está por trás
               </p>
               <h1 className="mt-7 font-heading text-5xl leading-[1.02] tracking-tight text-balance sm:text-6xl">
-                Oi, eu sou o <span className="highlight">Lucas</span>.
+                Eu sou o <span className="highlight">Lucas</span>.
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-8 text-muted-foreground">
                 Faço Google Ads desde 2020, quando nasceu a Adsgator, e web design há mais de 10 anos. Junto as duas
