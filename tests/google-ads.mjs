@@ -66,11 +66,29 @@ try {
       );
       check(`${rotulo}: o anúncio troca de cliente`, true);
 
+      // O anúncio aparecendo e sumindo não pode empurrar a página (o Lucas viu
+      // as seções descendo e voltando enquanto lia).
+      const posicoes = new Set();
+      for (let i = 0; i < 50; i++) {
+        posicoes.add(Math.round(await page.evaluate(() => document.querySelector("#comeco").getBoundingClientRect().top + window.scrollY)));
+        await page.waitForTimeout(250);
+      }
+      check(`${rotulo}: o resto da página fica parado enquanto o anúncio troca`, posicoes.size === 1, [...posicoes].join(", "));
+
+      // Fundo da hero: as buscas sobem e param no botão de pausar da hero.
+      const coluna = page.locator(".subir").first();
+      const subindo = await coluna.evaluate((el) => getComputedStyle(el).animationName + " " + getComputedStyle(el).animationPlayState);
+      await page.getByRole("button", { name: "Pausar as animações" }).first().click();
+      const parada = await coluna.evaluate((el) => getComputedStyle(el).animationPlayState);
+      await page.getByRole("button", { name: "Continuar as animações" }).first().click();
+      check(`${rotulo}: o fundo da hero sobe e para no botão`, subindo === "subir running" && parada === "paused", `${subindo} → ${parada}`);
+
       const giro = () =>
         page.$eval("[data-resultados]", (el) => {
           const m = new DOMMatrix(getComputedStyle(el).transform);
           return Math.round(Math.asin(Math.max(-1, Math.min(1, m.m13))) * (180 / Math.PI));
         });
+      await rolarPara(0);
       const giroTopo = Math.abs(await giro());
       await rolarPara(600);
       const giroRolado = Math.abs(await giro());

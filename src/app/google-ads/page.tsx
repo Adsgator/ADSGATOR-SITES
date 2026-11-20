@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { AnuncioMontando } from "@/components/anuncio-montando";
+import { BuscasNoAr } from "@/components/buscas-no-ar";
 import { ChamadaFinal } from "@/components/chamada-final";
 import { Eyebrow } from "@/components/eyebrow";
 import { Faq } from "@/components/faq";
@@ -145,6 +146,7 @@ export default function Page() {
       {/* 1. Topo: o anúncio se montando na página de resultados. */}
       <MotionScope>
         <FundoVivo className="overflow-x-clip">
+          <BuscasNoAr />
           <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 pt-28 pb-20 lg:grid-cols-[1.05fr_1fr] lg:pt-36">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 font-mono text-xs text-muted-foreground backdrop-blur">

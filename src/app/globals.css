@@ -247,6 +247,14 @@
   }
 }
 
+/* Coluna que sobe sem parar (as buscas no fundo da hero de Google Ads): a
+   lista vem duas vezes, então subir metade volta ao mesmo desenho. */
+@keyframes subir {
+  to {
+    transform: translateY(-50%);
+  }
+}
+
 /* Perguntas frequentes (<details>): abrem e fecham suavemente nos navegadores
    que já animam a altura automática; nos outros, abrem na hora. */
 :root {
@@ -288,6 +296,9 @@ details[open]::details-content {
   }
   .fluxo {
     animation: fluxo 2.4s linear infinite;
+  }
+  .subir {
+    animation: subir var(--subir-duracao, 60s) linear infinite;
   }
   .marquee:hover .marquee-track,
   [data-paused] .marquee-track,
