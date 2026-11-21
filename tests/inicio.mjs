@@ -140,6 +140,13 @@ try {
       }));
       check(`${rotulo}: a faixa do portfólio, as 8 perguntas e a chamada final`, fim.faixa === 5 && fim.perguntas === 8 && fim.chamada, JSON.stringify(fim));
 
+      // O botão flutuante do WhatsApp: na tela, no canto, com a mensagem pronta.
+      const flutuante = await page.$eval("[data-whatsapp-flutuante]", (a) => {
+        const r = a.getBoundingClientRect();
+        return { texto: decodeURIComponent(a.href).includes("?text="), dentro: r.right <= innerWidth && r.bottom <= innerHeight && r.left > innerWidth / 2, fixo: getComputedStyle(a).position === "fixed" };
+      }).catch(() => null);
+      check(`${rotulo}: o botão flutuante do WhatsApp, fixo no canto, com a mensagem pronta`, !!flutuante && flutuante.texto && flutuante.dentro && flutuante.fixo, JSON.stringify(flutuante));
+
       const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check(`${rotulo}: sem sobra lateral`, sobra === 0, `${sobra} px`);
       check(`${rotulo}: console sem erros`, erros.length === 0, erros.join(" | ").slice(0, 400));

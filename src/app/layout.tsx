@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { DadosEstruturados, dadosDaEmpresa } from "@/components/dados-estruturados";
 import { AvisoDeCookies, RastreamentoDoWhatsApp } from "@/components/medicao";
 import { ThemeProvider } from "@/components/theme-provider";
+import { WhatsAppFlutuante } from "@/components/whatsapp-flutuante";
 import { site } from "@/config/site";
 import { scriptDaMedicao } from "@/lib/medicao";
 import "./globals.css";
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {/* O cabeçalho é fixo (flutua ao rolar): o conteúdo começa abaixo dele. */}
           <main className="flex-1 pt-16">{children}</main>
           <SiteFooter />
+          <WhatsAppFlutuante />
           <AvisoDeCookies />
           <RastreamentoDoWhatsApp />
         </ThemeProvider>

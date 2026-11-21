@@ -249,6 +249,18 @@
 
 /* Coluna que sobe sem parar (as buscas no fundo da hero de Google Ads): a
    lista vem duas vezes, então subir metade volta ao mesmo desenho. */
+@keyframes pulso-whatsapp {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
 @keyframes subir {
   to {
     transform: translateY(-50%);
@@ -378,6 +390,10 @@ details[open]::details-content {
     height: 0.5rem;
     border-radius: 9999px;
     background-color: var(--brand);
+  }
+  /* O botão flutuante do WhatsApp (whatsapp-flutuante.tsx): o anel que pulsa. */
+  .pulso-whatsapp {
+    animation: pulso-whatsapp 2.4s var(--ease-out) infinite;
   }
   /* A cena da chamada final (clique-animado.tsx): o elemento clicado reage. */
   .cena-clique [data-anuncio-cena],
