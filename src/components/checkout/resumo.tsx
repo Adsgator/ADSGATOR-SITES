@@ -25,7 +25,7 @@ export function inicioDaMensalidade(m: Mensalidade, pedido: Pedido) {
   }
 }
 
-/** Como fica o pagamento de hoje: "no Pix" ou "em 12x de R$ 104,17". */
+/** Como fica o pagamento de hoje: "no Pix" ou "em 12x de R$ 104,16". */
 export function comoPaga(pedido: Pedido, forma: Forma, parcelas: number) {
   if (forma === "pix") return "no Pix";
   if (parcelas > 1) return `no cartão, em ${parcelas}x de ${reais(valorDaParcela(pedido.totalHoje, parcelas))} sem juros`;
@@ -50,7 +50,8 @@ function LinhaDoResumo({
 }) {
   return (
     <li data-servico={slug}>
-      <div className="flex items-start justify-between gap-4">
+      {/* Alinhados por baixo: a última linha do preço com a do nome (Lucas, 2026-11-21). */}
+      <div className="flex items-end justify-between gap-4">
         <div className="min-w-0">
           <p className="font-medium">{nome}</p>
           {nota && <p className="mt-0.5 text-sm text-muted-foreground">{nota}</p>}
@@ -163,7 +164,9 @@ export function ResumoDoPedido({
               <IconePix className="size-5 shrink-0" />
               No Pix sai por {reais(pedido.totalHoje - economiaNoPix)}
             </p>
-            <p className="mt-1 text-sm leading-5">Você economiza {reais(economiaNoPix)} pagando à vista no Pix.</p>
+            <p className="mt-1 text-sm leading-5">
+              Você economiza {reais(economiaNoPix)} pagando <span className="whitespace-nowrap">à vista no Pix.</span>
+            </p>
             <button
               type="button"
               onClick={aoEscolherPix}

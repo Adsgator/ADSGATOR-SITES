@@ -215,6 +215,8 @@ const nextConfig: NextConfig = {
         ...guiasPublicados.map((guia) => ({ source: `/${guia}`, has: naAjuda, destination: `/ajuda/${guia}` })),
         { source: "/", has: noCheckout, destination: "/checkout" },
         { source: "/consulta/:resto*", has: noCheckout, destination: "/checkout/consulta/:resto*" },
+        { source: "/contratar", has: noCheckout, destination: "/checkout/contratar" },
+        { source: "/situacao/:cobranca", has: noCheckout, destination: "/checkout/situacao/:cobranca" },
       ],
       afterFiles: [
         {

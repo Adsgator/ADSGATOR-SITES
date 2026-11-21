@@ -128,7 +128,9 @@ export function dataCurta(data: Data) {
   return `${String(data.dia).padStart(2, "0")}/${String(data.mes).padStart(2, "0")}`;
 }
 
-/** Valor aproximado de cada parcela, em centavos, para mostrar na tela. */
+/** Valor de cada parcela, em centavos, como o Asaas calcula: arredondado para
+ * baixo, com a diferença na última (conferido no sandbox, 2026-11-21: R$ 1.250
+ * em 12x dá parcelas de R$ 104,16). */
 export function valorDaParcela(total: number, parcelas: number) {
-  return Math.round(total / parcelas);
+  return Math.floor(total / parcelas);
 }

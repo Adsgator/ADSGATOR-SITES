@@ -5,6 +5,7 @@ import { BrandLogo } from "@/components/brand";
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
 import { CHECKOUT_OFICIAL, mensagemDoCheckout } from "@/config/checkout";
 import { linkWhatsApp, site } from "@/config/site";
+import { noSandbox } from "@/lib/checkout/asaas";
 
 // Checkout em checkout.adsgator.com.br (plano geral, Parte 4; decisões do
 // Lucas de 2026-11-21): 100% da Adsgator, sem etapa do Asaas, que só processa
@@ -45,10 +46,12 @@ export default function LayoutDoCheckout({ children }: LayoutProps<"/checkout">)
         </div>
       </header>
 
-      {/* PRÉVIA: sai quando o checkout passar a cobrar de verdade. */}
-      <p className="bg-brand/15 px-4 py-2 text-center text-xs text-foreground">
-        Prévia do checkout: nada é cobrado nesta versão.
-      </p>
+      {/* Só com a conta de testes do Asaas (sandbox); some com a chave de produção. */}
+      {noSandbox() && (
+        <p className="bg-brand/15 px-4 py-2 text-center text-xs text-foreground" data-aviso-testes>
+          Ambiente de testes: nada é cobrado de verdade.
+        </p>
+      )}
 
       <main className="flex-1 bg-muted/40">{children}</main>
 

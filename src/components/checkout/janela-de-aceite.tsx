@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
-import { ExternalLinkIcon, LockIcon, XIcon } from "lucide-react";
+import { ExternalLinkIcon, LoaderCircleIcon, LockIcon, XIcon } from "lucide-react";
 
 import { site } from "@/config/site";
 import { dataCurta, reais, type Forma, type Pedido } from "@/lib/checkout/pedido";
@@ -56,6 +56,8 @@ export function JanelaDeAceite({
   forma,
   parcelas,
   aoContratar,
+  enviando,
+  erro,
 }: {
   aberta: boolean;
   aoMudar: (aberta: boolean) => void;
@@ -63,6 +65,10 @@ export function JanelaDeAceite({
   forma: Forma;
   parcelas: number;
   aoContratar: () => void;
+  /** Enquanto o pedido vai ao Asaas: o botão espera e não deixa clicar de novo. */
+  enviando: boolean;
+  /** O que deu errado no envio (ex.: cartão recusado), para a pessoa corrigir. */
+  erro: string | null;
 }) {
   const [aceite, setAceite] = useState(false);
   const depois = pedido.mensalidades.filter((m) => m.inicio !== "hoje");
@@ -166,6 +172,11 @@ export function JanelaDeAceite({
           </div>
 
           <div className="space-y-4 border-t px-6 py-5">
+            {erro && (
+              <p role="alert" className="rounded-lg bg-destructive/10 px-3.5 py-3 text-sm text-destructive" data-erro-envio>
+                {erro}
+              </p>
+            )}
             <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-3.5 text-sm has-checked:border-brand has-checked:bg-brand/10">
               <input
                 type="checkbox"
@@ -184,7 +195,7 @@ export function JanelaDeAceite({
               </Dialog.Close>
               <button
                 type="button"
-                disabled={!aceite}
+                disabled={!aceite || enviando}
                 onClick={aoContratar}
                 className={cn(
                   "inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-7 text-base font-medium text-brand-foreground transition-colors hover:bg-brand/90",
@@ -192,8 +203,17 @@ export function JanelaDeAceite({
                 )}
                 data-contratar-final
               >
-                <LockIcon className="size-4" aria-hidden="true" />
-                Contratar · {reais(pedido.totalHoje)}
+                {enviando ? (
+                  <>
+                    <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
+                    Processando…
+                  </>
+                ) : (
+                  <>
+                    <LockIcon className="size-4" aria-hidden="true" />
+                    Contratar · {reais(pedido.totalHoje)}
+                  </>
+                )}
               </button>
             </div>
           </div>

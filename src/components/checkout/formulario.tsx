@@ -5,12 +5,7 @@ import { CreditCardIcon, LoaderCircleIcon, LockIcon } from "lucide-react";
 
 import { IconePix } from "@/components/icone-pix";
 import {
-  cartaoValido,
-  cepValido,
   cnpjValido,
-  codigoValido,
-  cpfValido,
-  emailValido,
   estados,
   mascaraCartao,
   mascaraCep,
@@ -18,39 +13,17 @@ import {
   mascaraCpf,
   mascaraValidade,
   mascaraWhatsApp,
-  nomeCompletoValido,
   soDigitos,
-  validadeValida,
-  whatsAppValido,
 } from "@/lib/checkout/campos";
 import { dataCurta, montarPedido, reais, valorDaParcela, type Forma } from "@/lib/checkout/pedido";
+import type { RespostaDaContratacao } from "@/lib/checkout/contratacao";
+import { cartaoVazio, dadosVazios, validarDados, type Cartao, type Dados } from "@/lib/checkout/validacao";
 import { cn } from "@/lib/utils";
 
 import { ariaDoErro, Campo, estiloDoCampo, Seletor } from "./campo";
 import { JanelaDeAceite } from "./janela-de-aceite";
 import { ResultadoDaContratacao } from "./resultado";
 import { ResumoDoPedido } from "./resumo";
-
-const dadosVazios = {
-  whatsapp: "",
-  email: "",
-  cnpj: "",
-  cpf: "",
-  empresa: "",
-  nome: "",
-  cep: "",
-  endereco: "",
-  numero: "",
-  complemento: "",
-  bairro: "",
-  cidade: "",
-  uf: "",
-  indicacao: "",
-};
-type Dados = typeof dadosVazios;
-
-const cartaoVazio = { numero: "", nome: "", validade: "", codigo: "" };
-type Cartao = typeof cartaoVazio;
 
 type Consulta = "parada" | "buscando" | "achou" | "falhou";
 
@@ -73,7 +46,9 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
   const [consultaCnpj, setConsultaCnpj] = useState<Consulta>("parada");
   const [consultaCep, setConsultaCep] = useState<Consulta>("parada");
   const [janela, setJanela] = useState(false);
-  const [contratado, setContratado] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [erroDoEnvio, setErroDoEnvio] = useState<string | null>(null);
+  const [resposta, setResposta] = useState<Extract<RespostaDaContratacao, { ok: true }> | null>(null);
   const topo = useRef<HTMLDivElement>(null);
 
   const pedido = useMemo(() => montarPedido(escolhidos, forma), [escolhidos, forma]);
@@ -84,45 +59,19 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
 
   function escolherForma(f: Forma) {
     setForma(f);
-    if (tentou) setErros(validar(dados, cartao, semCnpj, f));
-  }
-
-  function validar(d: Dados, c: Cartao, sem: boolean, f: Forma) {
-    const e: Record<string, string> = {};
-    if (!whatsAppValido(d.whatsapp)) e.whatsapp = "Informe o WhatsApp com o DDD.";
-    if (!emailValido(d.email)) e.email = "Informe um e-mail válido.";
-    if (sem) {
-      if (!cpfValido(d.cpf)) e.cpf = "Confira o CPF.";
-    } else {
-      if (!cnpjValido(d.cnpj)) e.cnpj = "Confira o CNPJ.";
-      if (d.empresa.trim().length < 2) e.empresa = "Informe o nome da empresa.";
-    }
-    if (!nomeCompletoValido(d.nome)) e.nome = "Informe o seu nome completo.";
-    if (!cepValido(d.cep)) e.cep = "Informe o CEP.";
-    if (!d.numero.trim()) e.numero = "Informe o número (ou SN).";
-    if (!d.endereco.trim()) e.endereco = "Informe o endereço.";
-    if (!d.bairro.trim()) e.bairro = "Informe o bairro.";
-    if (!d.cidade.trim()) e.cidade = "Informe a cidade.";
-    if (!d.uf) e.uf = "Escolha o estado.";
-    if (f === "cartao") {
-      if (!cartaoValido(c.numero)) e["cartao-numero"] = "Confira o número do cartão.";
-      if (c.nome.trim().length < 3) e["cartao-nome"] = "Informe o nome como está no cartão.";
-      if (!validadeValida(c.validade)) e["cartao-validade"] = "Confira a validade.";
-      if (!codigoValido(c.codigo)) e["cartao-codigo"] = "Confira o código.";
-    }
-    return e;
+    if (tentou) setErros(validarDados(dados, cartao, semCnpj, f));
   }
 
   function mudarDados(campo: keyof Dados, valor: string) {
     const novos = { ...dados, [campo]: valor };
     setDados(novos);
-    if (tentou) setErros(validar(novos, cartao, semCnpj, forma));
+    if (tentou) setErros(validarDados(novos, cartao, semCnpj, forma));
   }
 
   function mudarCartao(campo: keyof Cartao, valor: string) {
     const novo = { ...cartao, [campo]: valor };
     setCartao(novo);
-    if (tentou) setErros(validar(dados, novo, semCnpj, forma));
+    if (tentou) setErros(validarDados(dados, novo, semCnpj, forma));
   }
 
   async function buscarCep(cep: string, base: Dados) {
@@ -140,7 +89,7 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
       };
       setDados(novos);
       setConsultaCep("achou");
-      if (tentou) setErros(validar(novos, cartao, semCnpj, forma));
+      if (tentou) setErros(validarDados(novos, cartao, semCnpj, forma));
     } catch {
       setConsultaCep("falhou");
     }
@@ -180,32 +129,67 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
     }
   }
 
+  function levarAoPrimeiroErro(e: Record<string, string>) {
+    const primeiro = ordemDosCampos.find((c) => e[c]);
+    if (!primeiro) return false;
+    const el = document.getElementById(primeiro);
+    el?.scrollIntoView({ block: "center" });
+    el?.focus({ preventScroll: true });
+    return true;
+  }
+
   function aoClicarEmContratar() {
     setTentou(true);
-    const e = validar(dados, cartao, semCnpj, forma);
+    setErroDoEnvio(null);
+    const e = validarDados(dados, cartao, semCnpj, forma);
     setErros(e);
-    const primeiro = ordemDosCampos.find((c) => e[c]);
-    if (primeiro) {
-      const el = document.getElementById(primeiro);
-      el?.scrollIntoView({ block: "center" });
-      el?.focus({ preventScroll: true });
-      return;
+    if (!levarAoPrimeiroErro(e)) setJanela(true);
+  }
+
+  async function aoContratar() {
+    if (enviando) return;
+    setEnviando(true);
+    setErroDoEnvio(null);
+    try {
+      const r = await fetch("/contratar", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          servicos: escolhidos,
+          forma,
+          parcelas,
+          semCnpj,
+          dados,
+          cartao: forma === "cartao" ? cartao : cartaoVazio,
+          aceite: true,
+        }),
+      });
+      const j = (await r.json()) as RespostaDaContratacao;
+      if (!j.ok) {
+        setErroDoEnvio(j.erro);
+        if (j.campos) {
+          setErros(j.campos);
+          setJanela(false);
+          levarAoPrimeiroErro(j.campos);
+        }
+        return;
+      }
+      setJanela(false);
+      setResposta(j);
+      topo.current?.scrollIntoView({ block: "start" });
+    } catch {
+      setErroDoEnvio(
+        "A conexão caiu antes da resposta. Para não cobrar duas vezes, fale com a gente no WhatsApp antes de tentar de novo.",
+      );
+    } finally {
+      setEnviando(false);
     }
-    setJanela(true);
   }
 
-  function aoContratar() {
-    // PRÉVIA: aqui vai o envio ao servidor, que confere tudo de novo, calcula o
-    // preço pelo catálogo e manda ao Asaas.
-    setJanela(false);
-    setContratado(true);
-    topo.current?.scrollIntoView({ block: "start" });
-  }
-
-  if (contratado) {
+  if (resposta) {
     return (
       <div ref={topo}>
-        <ResultadoDaContratacao pedido={pedido} forma={forma} parcelas={parcelas} email={dados.email.trim()} />
+        <ResultadoDaContratacao resposta={resposta} email={dados.email.trim()} />
       </div>
     );
   }
@@ -579,6 +563,11 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
             <LockIcon className="size-4" aria-hidden="true" />
             Contratar · {reais(pedido.totalHoje)}
           </button>
+          {erroDoEnvio && !janela && (
+            <p role="alert" className="mt-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive" data-erro-envio>
+              {erroDoEnvio}
+            </p>
+          )}
           <p className="mt-3 text-center text-sm text-muted-foreground">
             Antes de pagar, você revisa tudo e aceita os Termos.
           </p>
@@ -592,6 +581,8 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
         forma={forma}
         parcelas={parcelas}
         aoContratar={aoContratar}
+        enviando={enviando}
+        erro={erroDoEnvio}
       />
     </div>
   );

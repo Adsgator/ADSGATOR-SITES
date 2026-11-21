@@ -8,6 +8,9 @@
 // - "Não tenho CNPJ" troca para CPF; o CNPJ e o CEP preenchem sozinhos;
 // - a janela de aceite: o botão final só funciona com "Li e aceito" marcado,
 //   e o Contratar leva à tela do Pix ou do cartão aprovado;
+// - a contratação de verdade no SANDBOX do Asaas (Pix e cartão em 12x), com o
+//   aviso "Ambiente de testes"; os clientes de teste levam "[TESTE]" e as
+//   cobranças são apagadas por tests/checkout-limpar.mjs;
 // - fora do Google (noindex), nenhum pedido ao Google, nenhum cookie;
 // - um cartão só, o Resumo (sem a seção "O que foi combinado"), sem ícones, com
 //   a parcela da criação em destaque e a garantia de 7 dias; os seletores com o
@@ -17,7 +20,13 @@
 // Uso: node tests/checkout.mjs [checkout]
 //   padrão: http://checkout.localhost:3005
 
+import { createRequire } from "node:module";
 import { chromium } from "playwright-core";
+
+// A chave do sandbox, para conferir no Asaas o que o checkout criou.
+createRequire(import.meta.url)("@next/env").loadEnvConfig(process.cwd(), false, { info() {}, error: console.error });
+const asaas = (caminho) =>
+  fetch(process.env.ASAAS_API_URL + caminho, { headers: { access_token: process.env.ASAAS_API_KEY, "user-agent": "adsgator-checkout" } }).then((x) => x.json());
 
 const CHECKOUT = process.argv[2] ?? "http://checkout.localhost:3005";
 let falhas = 0;
@@ -35,6 +44,41 @@ try {
   check("abre no endereço do checkout", r.status === 200, String(r.status));
   check("fora do Google (noindex)", /noindex/.test(r.headers.get("x-robots-tag") ?? ""));
   check("CSP sem endereços do Google", !/google/.test(r.headers.get("content-security-policy") ?? ""));
+
+  // O servidor confere de novo, sem passar pela tela (requisição alterada).
+  const dadosOk = {
+    whatsapp: "(19) 99999-0000", email: "teste@exemplo.com.br", cpf: "529.982.247-25", nome: "[TESTE] Pessoa de Teste",
+    cep: "01001-000", endereco: "Praça da Sé", numero: "100", bairro: "Sé", cidade: "São Paulo", uf: "SP",
+  };
+  const cartaoOk = { numero: "4444 4444 4444 4444", nome: "PESSOA DE TESTE", validade: "12/30", codigo: "123" };
+  const enviar = (corpo) =>
+    fetch(`${CHECKOUT}/contratar`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(corpo) })
+      .then(async (x) => ({ status: x.status, j: await x.json() }));
+  const base = { servicos: ["google-ads"], forma: "cartao", parcelas: 1, semCnpj: true, dados: dadosOk, cartao: cartaoOk, aceite: true };
+  const semAceite = await enviar({ ...base, aceite: false });
+  check("servidor: sem o aceite dos Termos, recusa", semAceite.status === 400 && !semAceite.j.ok, JSON.stringify(semAceite.j));
+  const linkRuim = await enviar({ ...base, servicos: ["google-ads", "inventado"] });
+  check("servidor: serviço que não existe, recusa", linkRuim.status === 400, JSON.stringify(linkRuim.j));
+  const cpfRuim = await enviar({ ...base, dados: { ...dadosOk, cpf: "111.111.111-11" } });
+  check("servidor: CPF errado, recusa com o campo", cpfRuim.status === 400 && cpfRuim.j.campos?.cpf, JSON.stringify(cpfRuim.j));
+  const parcelasRuins = await enviar({ ...base, parcelas: 12 });
+  check("servidor: mensalidade em 12x, recusa", parcelasRuins.status === 400, JSON.stringify(parcelasRuins.j));
+  const comPreco = await enviar({ ...base, servicos: ["landing-page"], valor: 1, totalHoje: 1, parcelas: 1 });
+  check("servidor: preço vindo da tela é ignorado (cobra o do catálogo)", comPreco.j.ok && comPreco.j.valor === 160000, JSON.stringify(comPreco.j));
+
+  // Só o Google Ads no cartão: 1ª mensalidade cobrada agora e a assinatura no
+  // mesmo dia do mês seguinte (conferido direto no Asaas).
+  const soAds = await enviar(base);
+  check("sandbox: Google Ads no cartão aprovado", soAds.j.ok && soAds.j.situacao === "aprovado", JSON.stringify(soAds.j));
+  const [ano, mes, dia] = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date()).split("-").map(Number);
+  const ultimo = new Date(Date.UTC(mes === 12 ? ano + 1 : ano, mes === 12 ? 1 : mes, 0)).getUTCDate();
+  const esperado = `${mes === 12 ? ano + 1 : ano}-${String(mes === 12 ? 1 : mes + 1).padStart(2, "0")}-${String(Math.min(dia, ultimo)).padStart(2, "0")}`;
+  const cliente = (await asaas("/customers?cpfCnpj=52998224725&limit=1")).data?.[0]?.id;
+  const assinaturas = (await asaas(`/subscriptions?customer=${cliente}&limit=100`)).data ?? [];
+  const vencimentos = (await Promise.all(assinaturas.map((a) => asaas(`/subscriptions/${a.id}/payments`))))
+    .flatMap((x) => x.data ?? [])
+    .map((x) => x.dueDate);
+  check("sandbox: assinatura no mesmo dia do mês seguinte, no cartão", vencimentos.includes(esperado) && assinaturas.every((a) => a.billingType === "CREDIT_CARD"), `${esperado} · ${vencimentos.join(", ")}`);
 
   for (const reducedMotion of ["reduce", "no-preference"]) {
     for (const tela of [
@@ -100,7 +144,7 @@ try {
       const resumo = limpo(await p.locator("[data-resumo]").innerText());
       check(`${rotulo}: Google Ads começa na aprovação`, /aprovar a sua página/.test(resumo));
       const opcoes = await p.locator("#parcelas option").allInnerTexts();
-      check(`${rotulo}: até 12x`, opcoes.length === 12 && /12x de R\$\s104,17/.test(opcoes[11]), opcoes.at(-1));
+      check(`${rotulo}: até 12x`, opcoes.length === 12 && /12x de R\$\s104,16/.test(opcoes[11]), opcoes.at(-1));
       await p.locator('[data-forma="pix"]').check();
       check(`${rotulo}: combo no Pix`, limpo(await total(p)) === "R$ 1.100,00", await total(p));
 
@@ -154,8 +198,12 @@ try {
       await p.locator("[data-aceite]").check();
       check(`${rotulo}: Contratar liberado com o aceite`, await p.locator("[data-contratar-final]").isEnabled());
       await p.locator("[data-contratar-final]").click();
-      await p.locator('[data-resultado="pix"]').waitFor({ timeout: 5000 }).catch(() => {});
-      check(`${rotulo}: tela do Pix`, (await p.locator('[data-resultado="pix"]').count()) === 1);
+      await p.locator('[data-resultado="pix"], [data-erro-envio]').first().waitFor({ timeout: 70000 }).catch(() => {});
+      const erroPix = await p.locator("[data-erro-envio]").first().innerText().catch(() => "");
+      check(`${rotulo}: tela do Pix (sandbox)`, (await p.locator('[data-resultado="pix"]').count()) === 1, erroPix);
+      // O QR só vem com a chave Pix ativa na conta; sem ela, a tela mostra o link da cobrança.
+      const temQr = (await p.locator("[data-qr-pix]").count()) === 1;
+      check(`${rotulo}: QR do Pix ou o link da cobrança`, temQr || (await p.getByRole("link", { name: "Abrir a cobrança" }).count()) === 1, temQr ? "QR" : "link");
 
       // Cartão: de novo, até o aprovado.
       await p.goto(`${CHECKOUT}/?s=landing-page`, { waitUntil: "networkidle" });
@@ -178,7 +226,7 @@ try {
       await p.locator("[data-contratar]").click();
       await p.locator("[data-aceite]").check();
       await p.locator("[data-contratar-final]").click();
-      await p.locator('[data-resultado="cartao"]').waitFor({ timeout: 5000 }).catch(() => {});
+      await p.locator('[data-resultado="cartao"], [data-erro-envio]').first().waitFor({ timeout: 70000 }).catch(() => {});
       const aprovado = (await p.locator('[data-resultado="cartao"]').innerText().catch(() => "")).replace(/\s/g, " ");
       check(`${rotulo}: tela do cartão aprovado em 12x`, /12x de R\$ 133,33/.test(aprovado), aprovado.slice(0, 120));
 
