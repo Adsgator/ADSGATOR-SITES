@@ -32,26 +32,32 @@ export function comoPaga(pedido: Pedido, forma: Forma, parcelas: number) {
   return "no cartão, à vista";
 }
 
-/** Uma linha do resumo: o nome e o preço e, embaixo, o que ajuda (o prazo,
- * quando a mensalidade começa). Sem ícones, para ficar limpo (Lucas, 2026-11-21). */
+/** Uma linha do resumo, sem ícones, para ficar limpo (Lucas, 2026-11-21): o
+ * nome com a nota curta embaixo (o prazo) e o preço ao lado; o detalhe longo
+ * (quando a mensalidade começa) ocupa a largura toda. */
 function LinhaDoResumo({
   slug,
   nome,
   nota,
+  detalhe,
   preco,
 }: {
   slug: string;
   nome: string;
   nota?: string;
+  detalhe?: string;
   preco: React.ReactNode;
 }) {
   return (
     <li data-servico={slug}>
       <div className="flex items-start justify-between gap-4">
-        <span className="font-medium">{nome}</span>
-        <span className="shrink-0 text-right">{preco}</span>
+        <div className="min-w-0">
+          <p className="font-medium">{nome}</p>
+          {nota && <p className="mt-0.5 text-sm text-muted-foreground">{nota}</p>}
+        </div>
+        <div className="shrink-0 text-right">{preco}</div>
       </div>
-      {nota && <p className="mt-1 text-sm leading-5 text-muted-foreground">{nota}</p>}
+      {detalhe && <p className="mt-1 text-sm leading-5 text-muted-foreground">{detalhe}</p>}
     </li>
   );
 }
@@ -59,27 +65,26 @@ function LinhaDoResumo({
 /** O preço da criação: no cartão parcelado, a parcela em destaque e o valor no
  * cartão de referência (Lucas, 2026-11-21); no Pix ou à vista, o valor. */
 function PrecoDaCriacao({ linha, forma, parcelas }: { linha: LinhaDeHoje; forma: Forma; parcelas: number }) {
-  const cheio = linha.valorCheio && <span className="mr-1 line-through">{reais(linha.valorCheio)}</span>;
+  // O preço cheio (sem o combo) em cima do preço de hoje (Lucas, 2026-11-21).
+  const cheio = linha.valorCheio && (
+    <span className="block text-xs text-muted-foreground line-through">{reais(linha.valorCheio)}</span>
+  );
   if (forma === "cartao" && parcelas > 1)
     return (
       <>
-        <span className="block font-semibold">
-          <span className="text-sm font-normal text-muted-foreground">{parcelas}x de </span>
-          {reais(valorDaParcela(linha.valor, parcelas))}
+        <span className="block">
+          <span className="text-sm text-muted-foreground">{parcelas}x de </span>
+          <span className="text-lg font-semibold tracking-tight">{reais(valorDaParcela(linha.valor, parcelas))}</span>
         </span>
-        <span className="block text-xs text-muted-foreground">
-          {cheio}
-          {reais(linha.valor)} no cartão
-        </span>
+        {cheio}
+        <span className="block text-xs text-muted-foreground">{reais(linha.valor)} no cartão</span>
       </>
     );
   return (
     <>
+      {cheio}
       <span className="block font-semibold">{reais(linha.valor)}</span>
-      <span className="block text-xs text-muted-foreground">
-        {cheio}
-        {forma === "pix" ? "no Pix" : "no cartão, à vista"}
-      </span>
+      <span className="block text-xs text-muted-foreground">{forma === "pix" ? "no Pix" : "no cartão, à vista"}</span>
     </>
   );
 }
@@ -113,7 +118,8 @@ export function ResumoDoPedido({
             key={l.slug}
             slug={l.slug}
             nome={l.nome}
-            nota={l.mensal && mensalDeHoje ? inicioDaMensalidade(mensalDeHoje, pedido) : nota(l.slug)}
+            nota={l.mensal ? undefined : nota(l.slug)}
+            detalhe={l.mensal && mensalDeHoje ? inicioDaMensalidade(mensalDeHoje, pedido) : undefined}
             preco={
               l.mensal ? (
                 <span className="font-semibold">{reais(l.valor)}</span>
@@ -131,21 +137,30 @@ export function ResumoDoPedido({
         </p>
       )}
 
-      <div className="mt-5 rounded-xl bg-muted/70 px-4 py-3.5">
-        <div className="flex items-baseline justify-between gap-4">
-          <span className="font-semibold">Total hoje</span>
+      {/* "Total hoje" em cima; o valor e a forma numa linha; as parcelas embaixo
+          (Lucas, 2026-11-21). */}
+      <div className="mt-5 rounded-xl bg-muted/70 px-4 py-3.5" data-bloco-total>
+        <p className="text-sm font-medium text-muted-foreground">Total hoje</p>
+        <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2">
           <strong className="text-2xl font-semibold tracking-tight" data-total>
             {reais(pedido.totalHoje)}
           </strong>
-        </div>
-        <p className="mt-0.5 text-right text-sm text-muted-foreground">{comoPaga(pedido, forma, parcelas)}</p>
+          <span className="text-sm text-muted-foreground">
+            {forma === "pix" ? "no Pix" : parcelas > 1 ? "no cartão" : "no cartão, à vista"}
+          </span>
+        </p>
+        {forma === "cartao" && parcelas > 1 && (
+          <p className="text-sm text-muted-foreground">
+            ou {parcelas}x de {reais(valorDaParcela(pedido.totalHoje, parcelas))} sem juros
+          </p>
+        )}
       </div>
 
       {economiaNoPix > 0 &&
         (forma === "cartao" ? (
           <div className="mt-4 rounded-xl border border-brand bg-brand/15 p-4" data-destaque-pix>
-            <p className="flex items-center gap-2 font-semibold">
-              <IconePix className="size-4 shrink-0" />
+            <p className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+              <IconePix className="size-5 shrink-0" />
               No Pix sai por {reais(pedido.totalHoje - economiaNoPix)}
             </p>
             <p className="mt-1 text-sm leading-5">Você economiza {reais(economiaNoPix)} pagando à vista no Pix.</p>
@@ -173,7 +188,7 @@ export function ResumoDoPedido({
                 key={m.slug}
                 slug={m.slug}
                 nome={m.nome}
-                nota={inicioDaMensalidade(m, pedido)}
+                detalhe={inicioDaMensalidade(m, pedido)}
                 preco={<span className="font-semibold">{m.inicio === "incluida" ? "Incluída" : `${reais(m.valor)}/mês`}</span>}
               />
             ))}

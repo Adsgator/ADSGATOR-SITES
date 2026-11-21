@@ -65,9 +65,9 @@ try {
       check(`${rotulo}: um cartão só, o Resumo`, (await p.getByRole("heading", { name: "O que foi combinado" }).count()) === 0 && (await p.getByRole("heading", { name: "Resumo", exact: true }).count()) === 1);
       check(`${rotulo}: serviço sem ícone, só com o prazo`, (await p.locator("[data-servicos] svg").count()) === 0 && /Pronta em até 7 dias úteis\./.test(await p.locator('[data-servico="landing-page"]').innerText()));
       check(`${rotulo}: parcela em destaque e o cartão de referência`, /12x de R\$ 133,33.*R\$ 1\.600,00 no cartão/s.test(limpo(await p.locator('[data-servico="landing-page"]').innerText())));
+      check(`${rotulo}: total com a forma numa linha e as parcelas embaixo`, /Total hoje\s+R\$ 1\.600,00\s+no cartão\s+ou 12x de R\$ 133,33 sem juros/.test(limpo(await p.locator("[data-bloco-total]").innerText())), limpo(await p.locator("[data-bloco-total]").innerText()));
       check(`${rotulo}: garantia de 7 dias`, /Garantia de 7 dias/.test(await p.locator("[data-resumo]").innerText()));
       check(`${rotulo}: seletores com o desenho dos campos`, (await p.evaluate(() => ["uf", "parcelas"].map((id) => getComputedStyle(document.getElementById(id)).appearance))).every((a) => a === "none"));
-      check(`${rotulo}: parcelas no total`, /em 12x de R\$ 133,33 sem juros/.test(limpo(await p.locator("[data-resumo]").innerText())));
       check(`${rotulo}: ícone do Pix no destaque`, (await p.locator("[data-destaque-pix] svg").count()) === 1);
       check(`${rotulo}: sem passos numerados e sem o atalho de dúvida`, (await p.locator("main ol").count()) === 0 && !/Ficou alguma dúvida/.test(await p.locator("main").innerText()));
       await p.getByRole("button", { name: "Pagar no Pix" }).click();
