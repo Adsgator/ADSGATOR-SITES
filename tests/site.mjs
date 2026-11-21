@@ -108,18 +108,20 @@ for (const [origem, esperado] of antigos) {
 const browser = await chromium.launch({ channel: "chrome" });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 const page = await ctx.newPage();
-// A Privacidade diz o que o site carrega de fora: só a Adobe Fonts (a Servus
-// Slab, fonte da marca). Fora isso, toda requisição é para o próprio site
-// (com ou sem www).
+// A Privacidade diz o que o site carrega de fora: a Adobe Fonts (a Servus
+// Slab, fonte da marca) e o Google (o GTM, com o Analytics e o Google Ads, só
+// gravando cookie depois do "Aceitar"). Fora isso, toda requisição é para o
+// próprio site (com ou sem www).
 const origens = new Set([
   ...[BASE, SEM_WWW].filter(Boolean).map((u) => new URL(u).origin),
   "https://use.typekit.net",
   "https://p.typekit.net",
 ]);
+const doGoogle = /(^|\.)(googletagmanager\.com|google-analytics\.com|google\.com|google\.com\.br|doubleclick\.net|googleadservices\.com|googlesyndication\.com)$/;
 const externos = new Set();
 page.on("request", (req) => {
   const u = new URL(req.url());
-  if (!["data:", "blob:"].includes(u.protocol) && !origens.has(u.origin)) externos.add(u.origin);
+  if (!["data:", "blob:"].includes(u.protocol) && !origens.has(u.origin) && !doGoogle.test(u.hostname)) externos.add(u.origin);
 });
 const problemas = [];
 // Cada problema leva a página aberta e, quando houver, o endereço do recurso
@@ -141,6 +143,11 @@ const tituloNaServus = () =>
 
 try {
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
+  // O aviso de cookies aparece e cobre o canto de baixo até a escolha: o teste
+  // recusa, como um visitante, e confere que nada gravou cookie.
+  const aviso = page.locator("[data-aviso-cookies]");
+  check("aviso de cookies na primeira visita", await aviso.waitFor({ timeout: 5000 }).then(() => true, () => false));
+  await aviso.getByRole("button", { name: "Recusar" }).click();
   check("início abre", (await h1()).includes("chega ao seu WhatsApp"));
   check("sem meta noindex", (await page.locator('meta[name="robots"][content*="noindex"]').count()) === 0);
   check("tema claro por padrão", (await classeHtml()).includes("light") && !(await classeHtml()).includes("dark"));
@@ -249,11 +256,12 @@ try {
   await page.getByRole("dialog").waitFor({ state: "detached" });
   check("celular: o menu leva à Ajuda e fecha", (await h1()) === "Central de Ajuda");
 
-  // O que a Privacidade promete: nenhum cookie e, no navegador, só o tema.
+  // O que a Privacidade promete: sem o "Aceitar" do aviso de cookies (este teste
+  // não aceita), nenhum cookie; no navegador, só o tema.
   const cookies = await ctx.cookies();
-  check("sem cookies", cookies.length === 0, cookies.map((c) => c.name).join(", "));
+  check("sem cookies antes de aceitar", cookies.length === 0, cookies.map((c) => c.name).join(", "));
   const guardado = await page.evaluate(() => Object.keys(localStorage));
-  check("no navegador, só a preferência de tema", guardado.every((k) => k === "theme"), guardado.join(", "));
+  check("no navegador, só o tema e a escolha dos cookies", guardado.every((k) => k === "theme" || k === "cookie-consent"), guardado.join(", "));
 } catch (e) {
   check("execução sem erro", false, e.message.split("\n")[0]);
 } finally {
@@ -265,7 +273,7 @@ const inesperados = problemas.filter(
   (p) => !(p.includes("(/nao-existe-teste)") && p.includes("status of 404")),
 );
 check("console sem erros nem avisos", inesperados.length === 0, inesperados.join(" || "));
-check("nada carregado de fora do site além da Adobe Fonts", externos.size === 0, [...externos].join(", "));
+check("nada carregado de fora do site além da Adobe Fonts e do Google", externos.size === 0, [...externos].join(", "));
 console.log(resultados.join("\n"));
 const falhas = resultados.filter((r) => r.startsWith("FALHOU")).length;
 console.log(`\n${resultados.length - falhas} passaram, ${falhas} falharam (${BASE})`);

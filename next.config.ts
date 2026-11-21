@@ -11,12 +11,30 @@ const isDev = process.env.NODE_ENV === "development";
 // Adobe Fonts (Servus Slab, a fonte da marca): o CSS vem de use.typekit.net,
 // que importa um arquivo vazio de contagem de p.typekit.net; as fontes vêm de
 // use.typekit.net. A licença não permite servir os arquivos daqui.
+// Medição (GTM com o Google Analytics e o Google Ads): os endereços do guia do
+// Google para CSP (developers.google.com/tag-platform/security/guides/csp, lido
+// em 2026-11-20): GTM e o modo de visualização dele, GA4 com os recursos de
+// anúncio e as conversões e o remarketing do Google Ads; do domínio do Google
+// por país, só o .com.br.
+const google = {
+  // googleads.g.doubleclick.net também como script: a tag de remarketing do Google
+  // Ads carrega um script de lá (visto no teste; o guia só o lista em img e connect).
+  script: "https://www.googletagmanager.com https://tagmanager.google.com https://www.googleadservices.com https://www.google.com https://googleads.g.doubleclick.net",
+  img: "https://www.googletagmanager.com https://*.google-analytics.com https://*.google.com https://*.google.com.br https://*.g.doubleclick.net https://www.googleadservices.com https://pagead2.googlesyndication.com https://ssl.gstatic.com https://www.gstatic.com",
+  connect:
+    "https://www.googletagmanager.com https://*.google-analytics.com https://*.google.com https://*.google.com.br https://*.g.doubleclick.net https://ad.doubleclick.net https://www.googleadservices.com https://pagead2.googlesyndication.com",
+  frame: "https://www.googletagmanager.com",
+  style: "https://www.googletagmanager.com https://tagmanager.google.com https://fonts.googleapis.com",
+  font: "https://fonts.gstatic.com",
+};
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
-  "style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net",
-  "img-src 'self' blob: data:",
-  "font-src 'self' https://use.typekit.net",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} ${google.script}`,
+  `style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net ${google.style}`,
+  `img-src 'self' blob: data: ${google.img}`,
+  `connect-src 'self' ${google.connect}`,
+  `frame-src ${google.frame}`,
+  `font-src 'self' data: https://use.typekit.net ${google.font}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

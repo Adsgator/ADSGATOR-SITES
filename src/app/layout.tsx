@@ -4,8 +4,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { DadosEstruturados, dadosDaEmpresa } from "@/components/dados-estruturados";
+import { AvisoDeCookies, RastreamentoDoWhatsApp } from "@/components/medicao";
 import { ThemeProvider } from "@/components/theme-provider";
 import { site } from "@/config/site";
+import { scriptDaMedicao } from "@/lib/medicao";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,6 +42,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
+        {/* Medição: o consentimento negado por padrão e o GTM, antes de tudo
+            (components/medicao.tsx; CSP no next.config.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: scriptDaMedicao(site.gtmId) }} />
         {/* Servus Slab, a fonte da marca, pelo projeto web da Adobe Fonts do
             Lucas (a licença só permite servir pela Adobe; CSP no
             next.config.ts). */}
@@ -48,6 +53,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col">
         <DadosEstruturados dados={dadosDaEmpresa} />
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${site.gtmId}`}
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
         {/* Claro por padrão (decisão 1 do plano); o visitante pode trocar. */}
         <ThemeProvider
           attribute="class"
@@ -59,6 +72,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {/* O cabeçalho é fixo (flutua ao rolar): o conteúdo começa abaixo dele. */}
           <main className="flex-1 pt-16">{children}</main>
           <SiteFooter />
+          <AvisoDeCookies />
+          <RastreamentoDoWhatsApp />
         </ThemeProvider>
       </body>
     </html>

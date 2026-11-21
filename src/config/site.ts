@@ -11,6 +11,8 @@ export const site = {
   },
   horario: "Segunda a sexta, das 9h às 12h e das 13h30 às 17h",
   cnpj: "37.040.687/0001-07",
+  // Google Tag Manager do site (Analytics e, quando houver, Google Ads).
+  gtmId: "GTM-KWN4R48",
 } as const;
 
 /** WhatsApp da Adsgator com a mensagem pronta. Cada página manda a sua, para

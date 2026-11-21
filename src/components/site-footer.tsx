@@ -15,6 +15,7 @@ import {
 import { BrandLogo } from "@/components/brand";
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
 import { LinkConvite } from "@/components/link-convite";
+import { BotaoPreferenciasDeCookies } from "@/components/medicao";
 import { IconeGoogle, IconeInstagram, IconeLinkedIn } from "@/components/icones-redes";
 import { RodapeLogo } from "@/components/rodape-logo";
 import { servicos } from "@/config/navegacao";
@@ -147,9 +148,12 @@ export function SiteFooter() {
       </div>
 
       <div className="mt-16 border-t border-white/10">
-        <p className="mx-auto max-w-[96rem] px-4 py-6 text-xs text-muted-foreground sm:px-8 lg:px-12">
-          © {new Date().getFullYear()} {site.nome} · CNPJ {site.cnpj}
-        </p>
+        <div className="mx-auto flex max-w-[96rem] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 text-xs text-muted-foreground sm:px-8 lg:px-12">
+          <p>
+            © {new Date().getFullYear()} {site.nome} · CNPJ {site.cnpj}
+          </p>
+          <BotaoPreferenciasDeCookies className="underline-offset-4 hover:text-foreground hover:underline" />
+        </div>
       </div>
       <div className="px-4 pt-4 pb-10">
         <RodapeLogo />
