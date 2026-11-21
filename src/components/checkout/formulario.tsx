@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { CreditCardIcon, GlobeIcon, LayoutTemplateIcon, LoaderCircleIcon, LockIcon, TargetIcon, WrenchIcon } from "lucide-react";
 
+import { IconePix } from "@/components/icone-pix";
 import {
   cartaoValido,
   cepValido,
@@ -36,18 +37,6 @@ const icones: Record<string, typeof TargetIcon> = {
   "site-institucional": GlobeIcon,
   manutencao: WrenchIcon,
 };
-
-/** Título de seção com o número do passo, como na faixa do topo. */
-function TituloDaSecao({ id, numero, children }: { id: string; numero: number; children: React.ReactNode }) {
-  return (
-    <h2 id={id} className="flex items-center gap-3 text-lg font-semibold">
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-semibold text-brand-foreground">
-        {numero}
-      </span>
-      {children}
-    </h2>
-  );
-}
 
 const dadosVazios = {
   whatsapp: "",
@@ -232,11 +221,11 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
 
   return (
     <div ref={topo} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8">
-      {/* 1. Serviços */}
+      {/* Serviços */}
       <section aria-labelledby="titulo-servicos" className={cn(cartaoDaSecao, "lg:col-start-1")}>
-        <TituloDaSecao id="titulo-servicos" numero={1}>
+        <h2 id="titulo-servicos" className="text-lg font-semibold">
           O que foi combinado
-        </TituloDaSecao>
+        </h2>
         <ul className="mt-5 divide-y" data-servicos>
           {noCartao.servicos.map((s) => {
             const Icone = icones[s.slug] ?? TargetIcon;
@@ -252,13 +241,21 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
                   <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                     <h3 className="font-semibold">{s.nome}</h3>
                     {naHoje ? (
-                      <p className="text-right text-sm">
-                        {naHoje.valorCheio && (
-                          <span className="mr-2 text-xs text-muted-foreground line-through">{reais(naHoje.valorCheio)}</span>
-                        )}
-                        <strong className="font-semibold">{reais(naHoje.valor)}</strong>
-                        <span className="text-muted-foreground"> em até {s.maxParcelas}x</span>
-                      </p>
+                      // O parcelado em destaque e o valor no cartão como referência
+                      // (Lucas, 2026-11-21); o Pix vem logo abaixo, como o mais barato.
+                      <div className="sm:text-right" data-preco>
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">{s.maxParcelas}x de </span>
+                          <strong className="text-lg font-semibold tracking-tight">
+                            {reais(valorDaParcela(naHoje.valor, s.maxParcelas))}
+                          </strong>
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          sem juros ·{" "}
+                          {naHoje.valorCheio && <span className="mr-1 line-through">{reais(naHoje.valorCheio)}</span>}
+                          {reais(naHoje.valor)} no cartão
+                        </p>
+                      </div>
                     ) : mensalidade ? (
                       <p className="text-sm font-semibold">
                         {mensalidade.inicio === "incluida" ? "Incluída" : `${reais(mensalidade.valor)}/mês`}
@@ -268,6 +265,7 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
                   <p className="text-sm leading-6 text-muted-foreground">{s.resumo}</p>
                   {naHoje && pix && pix.valor < naHoje.valor && (
                     <p className="inline-flex flex-wrap items-center gap-x-2 rounded-full bg-brand/15 px-3 py-1 text-xs font-medium">
+                      <IconePix className="size-3.5" />
                       <span>ou {reais(pix.valor)} no Pix</span>
                       <span className="rounded-full bg-brand px-2 py-0.5 text-[0.7rem] text-brand-foreground">
                         economize {reais(naHoje.valor - pix.valor)}
@@ -297,11 +295,11 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
       </aside>
 
       <div className="space-y-6 lg:col-start-1">
-        {/* 2. Dados */}
+        {/* Dados */}
         <section aria-labelledby="titulo-dados" className={cartaoDaSecao}>
-          <TituloDaSecao id="titulo-dados" numero={2}>
+          <h2 id="titulo-dados" className="text-lg font-semibold">
             Seus dados
-          </TituloDaSecao>
+          </h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Campo id="whatsapp" rotulo="WhatsApp" erro={erros.whatsapp}>
               <input
@@ -515,11 +513,11 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
           </Campo>
         </section>
 
-        {/* 3. Pagamento */}
+        {/* Pagamento */}
         <section aria-labelledby="titulo-pagamento" className={cartaoDaSecao}>
-          <TituloDaSecao id="titulo-pagamento" numero={3}>
+          <h2 id="titulo-pagamento" className="text-lg font-semibold">
             Pagamento
-          </TituloDaSecao>
+          </h2>
           <fieldset className="mt-5 grid gap-3 sm:grid-cols-2">
             <legend className="sr-only">Forma de pagamento</legend>
             {(["cartao", "pix"] as const).map((f) => {
@@ -542,12 +540,15 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
                     data-forma={f}
                   />
                   <span className="flex-1">
-                    <span className="block font-medium">{f === "pix" ? "Pix" : "Cartão de crédito"}</span>
+                    <span className="flex items-center gap-2 font-medium">
+                      {f === "pix" ? <IconePix className="size-4" /> : <CreditCardIcon className="size-4" aria-hidden="true" />}
+                      {f === "pix" ? "Pix" : "Cartão de crédito"}
+                    </span>
                     <span className="block text-xs text-muted-foreground">
                       {f === "pix"
                         ? `${reais(p.totalHoje)} à vista · vence em ${dataCurta(p.vencimento)}`
                         : p.maxParcelas > 1
-                          ? `${reais(p.totalHoje)} em até ${p.maxParcelas}x sem juros`
+                          ? `até ${p.maxParcelas}x de ${reais(valorDaParcela(p.totalHoje, p.maxParcelas))} sem juros`
                           : reais(p.totalHoje)}
                     </span>
                   </span>

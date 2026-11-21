@@ -9,8 +9,6 @@ import { servicosDoLink } from "@/lib/checkout/catalogo";
 // a tela mostra só eles (Lucas, 2026-11-21): para mudar, a pessoa fala com a
 // Adsgator, que manda um link novo.
 
-const passos = ["O que foi combinado", "Seus dados", "Pagamento"];
-
 export default async function PaginaDoCheckout({ searchParams }: PageProps<"/checkout">) {
   const escolhidos = servicosDoLink((await searchParams).s);
 
@@ -23,20 +21,8 @@ export default async function PaginaDoCheckout({ searchParams }: PageProps<"/che
             Falta pouco para <span className="highlight">começar</span>
           </h1>
           <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-            Confira o que foi combinado, preencha os seus dados e escolha como pagar. Leva uns 3 minutos.
+            Confira o que foi combinado, preencha os seus dados e escolha como pagar.
           </p>
-          {escolhidos.length > 0 && (
-            <ol className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm">
-              {passos.map((passo, i) => (
-                <li key={passo} className="flex items-center gap-2.5">
-                  <span className="flex size-7 items-center justify-center rounded-full bg-brand text-xs font-semibold text-brand-foreground">
-                    {i + 1}
-                  </span>
-                  {passo}
-                </li>
-              ))}
-            </ol>
-          )}
         </div>
       </div>
 
