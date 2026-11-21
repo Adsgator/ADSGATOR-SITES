@@ -1,4 +1,4 @@
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, GlobeIcon, LayoutTemplateIcon, TargetIcon, WrenchIcon, type LucideIcon } from "lucide-react";
 
 import { IconePix } from "@/components/icone-pix";
 import { dataCurta, reais, valorDaParcela, type Forma, type Mensalidade, type Pedido } from "@/lib/checkout/pedido";
@@ -24,6 +24,45 @@ export function comoPaga(pedido: Pedido, forma: Forma, parcelas: number) {
   return "no cartão, à vista";
 }
 
+const icones: Record<string, LucideIcon> = {
+  "google-ads": TargetIcon,
+  "landing-page": LayoutTemplateIcon,
+  "site-institucional": GlobeIcon,
+  manutencao: WrenchIcon,
+};
+
+/** Um serviço do pedido: ícone, nome, preço, o que é e, se houver, quando começa. */
+function ItemDoPedido({
+  slug,
+  nome,
+  descricao,
+  preco,
+  nota,
+}: {
+  slug: string;
+  nome: string;
+  descricao?: string;
+  preco: React.ReactNode;
+  nota?: string;
+}) {
+  const Icone = icones[slug] ?? TargetIcon;
+  return (
+    <li className="flex gap-3" data-servico={slug}>
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand/15 ring-1 ring-brand/30">
+        <Icone className="size-[1.125rem]" aria-hidden="true" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
+          <span className="font-semibold">{nome}</span>
+          <span className="font-semibold whitespace-nowrap">{preco}</span>
+        </p>
+        {descricao && <p className="mt-1 text-xs leading-5 text-muted-foreground">{descricao}</p>}
+        {nota && <p className="mt-1 text-xs leading-5">{nota}</p>}
+      </div>
+    </li>
+  );
+}
+
 export function ResumoDoPedido({
   pedido,
   forma,
@@ -39,28 +78,31 @@ export function ResumoDoPedido({
   aoEscolherPix: () => void;
 }) {
   const depois = pedido.mensalidades.filter((m) => m.inicio !== "hoje");
-  const temAds = pedido.servicos.some((s) => s.slug === "google-ads");
+  const descricao = (slug: string) => pedido.servicos.find((s) => s.slug === slug)?.resumo;
   const temMensal = pedido.mensalidades.length > 0;
   const mensalDeHoje = pedido.mensalidades.find((m) => m.inicio === "hoje");
 
   return (
-    <div className="rounded-2xl border bg-card p-6 shadow-sm" data-resumo>
-      <h2 className="text-base font-semibold">Resumo</h2>
+    <div className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6" data-resumo>
+      <h2 className="text-lg font-semibold">Seu pedido</h2>
 
-      <ul className="mt-4 space-y-3 text-sm">
+      <ul className="mt-5 space-y-5" data-servicos>
         {pedido.hoje.map((l) => (
-          <li key={l.slug} className="flex items-start justify-between gap-4">
-            <span>
-              {l.nome}
-              {l.mensal && <span className="block text-xs text-muted-foreground">1ª mensalidade</span>}
-            </span>
-            <span className="text-right whitespace-nowrap">
-              {l.valorCheio && (
-                <span className="mr-2 text-xs text-muted-foreground line-through">{reais(l.valorCheio)}</span>
-              )}
-              {reais(l.valor)}
-            </span>
-          </li>
+          <ItemDoPedido
+            key={l.slug}
+            slug={l.slug}
+            nome={l.nome}
+            descricao={descricao(l.slug)}
+            nota={l.mensal ? "1ª mensalidade" : undefined}
+            preco={
+              <>
+                {l.valorCheio && (
+                  <span className="mr-1.5 text-xs font-normal text-muted-foreground line-through">{reais(l.valorCheio)}</span>
+                )}
+                {reais(l.valor)}
+              </>
+            }
+          />
         ))}
       </ul>
 
@@ -104,17 +146,18 @@ export function ResumoDoPedido({
         ))}
 
       {depois.length > 0 && (
-        <div className="mt-5 border-t pt-4">
+        <div className="mt-5 border-t pt-5">
           <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Depois</h3>
-          <ul className="mt-3 space-y-3 text-sm">
+          <ul className="mt-4 space-y-5">
             {depois.map((m) => (
-              <li key={m.slug}>
-                <span className="flex justify-between gap-4">
-                  <span>{m.nome}</span>
-                  <span className="whitespace-nowrap">{m.inicio === "incluida" ? "Incluída" : `${reais(m.valor)}/mês`}</span>
-                </span>
-                <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{inicioDaMensalidade(m, pedido)}</span>
-              </li>
+              <ItemDoPedido
+                key={m.slug}
+                slug={m.slug}
+                nome={m.nome}
+                descricao={descricao(m.slug)}
+                nota={inicioDaMensalidade(m, pedido)}
+                preco={m.inicio === "incluida" ? "Incluída" : `${reais(m.valor)}/mês`}
+              />
             ))}
           </ul>
         </div>
@@ -129,12 +172,6 @@ export function ResumoDoPedido({
           <li className="flex gap-2">
             <CheckIcon className="mt-0.5 size-3.5 shrink-0 text-success" aria-hidden="true" />
             Sem fidelidade: cancele quando quiser.
-          </li>
-        )}
-        {temAds && (
-          <li className="flex gap-2">
-            <CheckIcon className="mt-0.5 size-3.5 shrink-0 text-success" aria-hidden="true" />
-            A verba dos anúncios é paga por você direto ao Google.
           </li>
         )}
         <li className="flex gap-2">

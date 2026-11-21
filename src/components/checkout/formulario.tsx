@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { CreditCardIcon, GlobeIcon, LayoutTemplateIcon, LoaderCircleIcon, LockIcon, TargetIcon, WrenchIcon } from "lucide-react";
+import { CreditCardIcon, LoaderCircleIcon, LockIcon } from "lucide-react";
 
 import { IconePix } from "@/components/icone-pix";
 import {
@@ -29,14 +29,7 @@ import { cn } from "@/lib/utils";
 import { ariaDoErro, Campo, estiloDoCampo } from "./campo";
 import { JanelaDeAceite } from "./janela-de-aceite";
 import { ResultadoDaContratacao } from "./resultado";
-import { inicioDaMensalidade, ResumoDoPedido } from "./resumo";
-
-const icones: Record<string, typeof TargetIcon> = {
-  "google-ads": TargetIcon,
-  "landing-page": LayoutTemplateIcon,
-  "site-institucional": GlobeIcon,
-  manutencao: WrenchIcon,
-};
+import { ResumoDoPedido } from "./resumo";
 
 const dadosVazios = {
   whatsapp: "",
@@ -220,71 +213,11 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
   const cartaoDaSecao = "rounded-2xl border bg-card p-5 shadow-sm sm:p-7";
 
   return (
-    <div ref={topo} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8">
-      {/* Serviços */}
-      <section aria-labelledby="titulo-servicos" className={cn(cartaoDaSecao, "lg:col-start-1")}>
-        <h2 id="titulo-servicos" className="text-lg font-semibold">
-          O que foi combinado
-        </h2>
-        <ul className="mt-5 divide-y" data-servicos>
-          {noCartao.servicos.map((s) => {
-            const Icone = icones[s.slug] ?? TargetIcon;
-            const naHoje = noCartao.hoje.find((l) => l.slug === s.slug && !l.mensal);
-            const pix = noPix.hoje.find((l) => l.slug === s.slug && !l.mensal);
-            const mensalidade = noCartao.mensalidades.find((m) => m.slug === s.slug);
-            return (
-              <li key={s.slug} className="flex gap-4 py-5 first:pt-0 last:pb-0" data-servico={s.slug}>
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand/15 ring-1 ring-brand/30">
-                  <Icone className="size-5" aria-hidden="true" />
-                </span>
-                <div className="min-w-0 flex-1 space-y-1.5">
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                    <h3 className="font-semibold">{s.nome}</h3>
-                    {naHoje ? (
-                      // O parcelado em destaque e o valor no cartão como referência
-                      // (Lucas, 2026-11-21); o Pix vem logo abaixo, como o mais barato.
-                      <div className="sm:text-right" data-preco>
-                        <p className="text-sm">
-                          <span className="text-muted-foreground">{s.maxParcelas}x de </span>
-                          <strong className="text-lg font-semibold tracking-tight">
-                            {reais(valorDaParcela(naHoje.valor, s.maxParcelas))}
-                          </strong>
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          sem juros ·{" "}
-                          {naHoje.valorCheio && <span className="mr-1 line-through">{reais(naHoje.valorCheio)}</span>}
-                          {reais(naHoje.valor)} no cartão
-                        </p>
-                      </div>
-                    ) : mensalidade ? (
-                      <p className="text-sm font-semibold">
-                        {mensalidade.inicio === "incluida" ? "Incluída" : `${reais(mensalidade.valor)}/mês`}
-                      </p>
-                    ) : null}
-                  </div>
-                  <p className="text-sm leading-6 text-muted-foreground">{s.resumo}</p>
-                  {naHoje && pix && pix.valor < naHoje.valor && (
-                    <p className="inline-flex flex-wrap items-center gap-x-2 rounded-full bg-brand/15 px-3 py-1 text-xs font-medium">
-                      <IconePix className="size-3.5" />
-                      <span>ou {reais(pix.valor)} no Pix</span>
-                      <span className="rounded-full bg-brand px-2 py-0.5 text-[0.7rem] text-brand-foreground">
-                        economize {reais(naHoje.valor - pix.valor)}
-                      </span>
-                    </p>
-                  )}
-                  {mensalidade && mensalidade.inicio !== "hoje" && (
-                    <p className="text-xs leading-5 text-muted-foreground">{inicioDaMensalidade(mensalidade, noCartao)}</p>
-                  )}
-                  {naHoje?.valorCheio && <p className="text-xs text-muted-foreground">Preço menor por ser junto com o Google Ads.</p>}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      {/* Resumo: logo abaixo dos serviços no celular, ao lado no computador. */}
-      <aside className="lg:sticky lg:top-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start" aria-label="Resumo do pedido">
+    <div ref={topo} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-8">
+      {/* O pedido: em cima no celular, ao lado no computador. Um cartão só com os
+          serviços, os preços e quando cada mensalidade começa, sem repetir numa
+          seção à parte (Lucas, 2026-11-21). */}
+      <aside className="lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1 lg:self-start" aria-label="Seu pedido">
         <ResumoDoPedido
           pedido={pedido}
           forma={forma}

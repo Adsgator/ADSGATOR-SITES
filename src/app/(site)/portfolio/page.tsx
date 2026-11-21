@@ -114,7 +114,7 @@ export default function Page() {
           <div>
             <h2 className="font-heading text-3xl leading-tight sm:text-4xl">A próxima página aqui pode ser a sua.</h2>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted-foreground">
-              Sob medida, rápida no celular e no seu nome, pronta em até 14 dias úteis depois do material.
+              Sob medida, rápida no celular e no seu nome, pronta em até 7 dias úteis depois do material.
             </p>
           </div>
           <Link

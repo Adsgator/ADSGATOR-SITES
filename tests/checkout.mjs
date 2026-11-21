@@ -1,7 +1,7 @@
 // Checkout (checkout.adsgator.com.br; plano geral, Parte 4), a prévia da tela:
 // - só os serviços do link (sem trocar), e a mensagem quando o link vem vazio;
-// - os preços: o parcelado em destaque, o cartão como referência e o Pix com
-//   a economia e o ícone ("Pagar no Pix" troca), combo no Pix e no cartão (até 12x), só a página, a página com a
+// - os preços: o cartão como referência, com as parcelas, e o Pix com a
+//   economia e o ícone ("Pagar no Pix" troca), combo no Pix e no cartão (até 12x), só a página, a página com a
 //   manutenção (30 dias depois da entrega), o site no combo, só o Google Ads
 //   (1ª mensalidade, sem parcelas) e a manutenção incluída no Google Ads;
 // - Contratar com o formulário vazio mostra os erros e não abre a janela;
@@ -9,7 +9,8 @@
 // - a janela de aceite: o botão final só funciona com "Li e aceito" marcado,
 //   e o Contratar leva à tela do Pix ou do cartão aprovado;
 // - fora do Google (noindex), nenhum pedido ao Google, nenhum cookie;
-// - celular sem rolagem para o lado e o resumo logo abaixo dos serviços,
+// - um cartão só com o pedido (sem a seção "O que foi combinado");
+// - celular sem rolagem para o lado e o pedido antes dos dados,
 //   console sem erros, nos dois modos de animação.
 // Uso: node tests/checkout.mjs [checkout]
 //   padrão: http://checkout.localhost:3005
@@ -59,7 +60,9 @@ try {
       check(`${rotulo}: só a página no cartão`, limpo(await total(p)) === "R$ 1.600,00", await total(p));
       check(`${rotulo}: Pix com a economia`, /No Pix sai por R\$ 1\.400,00/.test(limpo(await p.locator("[data-destaque-pix]").innerText())));
       check(`${rotulo}: selo de economia no Pix`, /Economize R\$ 200,00/.test(limpo(await p.locator("fieldset").innerText())));
-      check(`${rotulo}: parcelado em destaque, cartão de referência`, /12x de R\$ 133,33.*R\$ 1\.600,00 no cartão/s.test(limpo(await p.locator("[data-servico] [data-preco]").innerText())));
+      check(`${rotulo}: um cartão só com o pedido`, (await p.getByRole("heading", { name: "O que foi combinado" }).count()) === 0 && (await p.getByRole("heading", { name: "Seu pedido" }).count()) === 1);
+      check(`${rotulo}: o pedido diz o que é o serviço`, /Página sob medida/.test(await p.locator("[data-resumo]").innerText()));
+      check(`${rotulo}: parcelas no total`, /em 12x de R\$ 133,33 sem juros/.test(limpo(await p.locator("[data-resumo]").innerText())));
       check(`${rotulo}: ícone do Pix no destaque`, (await p.locator("[data-destaque-pix] svg").count()) === 1);
       check(`${rotulo}: sem passos numerados e sem o atalho de dúvida`, (await p.locator("main ol").count()) === 0 && !/Ficou alguma dúvida/.test(await p.locator("main").innerText()));
       await p.getByRole("button", { name: "Pagar no Pix" }).click();
@@ -96,15 +99,14 @@ try {
       await p.locator('[data-forma="pix"]').check();
       check(`${rotulo}: combo no Pix`, limpo(await total(p)) === "R$ 1.100,00", await total(p));
 
-      // Celular: resumo logo abaixo dos serviços, sem rolagem para o lado.
+      // Celular: o pedido antes dos dados, sem rolagem para o lado.
       if (tela.nome === "celular") {
         const ordem = await p.evaluate(() => {
-          const s = document.querySelector("[data-servicos]").getBoundingClientRect().top;
           const r = document.querySelector("[data-resumo]").getBoundingClientRect().top;
           const d = document.getElementById("whatsapp").getBoundingClientRect().top;
-          return s < r && r < d;
+          return r < d;
         });
-        check(`${rotulo}: resumo entre os serviços e os dados`, ordem);
+        check(`${rotulo}: o pedido antes dos dados`, ordem);
       }
       const largura = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       check(`${rotulo}: sem rolagem para o lado`, largura <= 0, `${largura}px`);

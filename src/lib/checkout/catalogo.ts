@@ -32,7 +32,7 @@ export const catalogo: Servico[] = [
   {
     slug: "landing-page",
     nome: "Landing page",
-    resumo: "Página sob medida, rápida no celular, com o domínio no seu nome. Pronta em até 14 dias úteis.",
+    resumo: "Página sob medida, rápida no celular, com o domínio no seu nome. Pronta em até 7 dias úteis.",
     tipo: "unico",
     preco: { cartao: 160000, pix: 140000 },
     precoNoCombo: { cartao: 125000, pix: 110000 },

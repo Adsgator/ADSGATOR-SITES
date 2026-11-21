@@ -155,7 +155,7 @@ const perguntas = [
   {
     pergunta: "Quanto tempo leva, do primeiro oi ao anúncio no ar?",
     resposta:
-      "O Google Ads entra no ar em até 3 dias úteis depois que chegam os acessos e o formulário, sem contar a análise do próprio Google. A página fica pronta em até 14 dias úteis depois que chega o material. Com os dois, a campanha entra logo depois que a página é publicada.",
+      "O Google Ads entra no ar em até 3 dias úteis depois que chegam os acessos e o formulário, sem contar a análise do próprio Google. A página fica pronta em até 7 dias úteis depois que chega o material. Com os dois, a campanha entra logo depois que você aprova a página.",
   },
   {
     pergunta: "Preciso ter CNPJ?",
@@ -172,7 +172,7 @@ const perguntas = [
       "Sem problema: o prazo só começa quando chega tudo, e a gente te lembra do que falta. Só um projeto parado há mais de 60 dias pode ser encerrado, como dizem os Termos.",
   },
   {
-    pergunta: "Eu aprovo a página antes de ir ao ar?",
+    pergunta: "Eu aprovo a página antes de começar a anunciar?",
     resposta:
       "Sim, em duas vezes: primeiro o roteiro, com as partes e a mensagem principal, e depois a página pronta, com os ajustes que você pedir.",
   },

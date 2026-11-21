@@ -39,7 +39,7 @@ const fatos = [
   "Sem taxa de criação",
   "Você fala direto com quem faz",
   "Resumo todo mês",
-  "Página pronta em até 14 dias úteis",
+  "Página pronta em até 7 dias úteis",
 ];
 
 const link = "font-medium text-foreground underline underline-offset-4";
@@ -76,7 +76,7 @@ const perguntas = [
   {
     pergunta: "Em quanto tempo começa?",
     resposta:
-      "O Google Ads entra no ar em até 3 dias úteis depois que chegam os acessos e o formulário. A página fica pronta em até 14 dias úteis depois que chega o material.",
+      "O Google Ads entra no ar em até 3 dias úteis depois que chegam os acessos e o formulário. A página fica pronta em até 7 dias úteis depois que chega o material.",
   },
   {
     pergunta: "Preciso ter site?",

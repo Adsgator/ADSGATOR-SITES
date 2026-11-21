@@ -52,7 +52,7 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Landing page para negócios locais",
   description:
-    "Uma página sob medida, rápida no celular, feita para transformar o clique em conversa no WhatsApp. Domínio no seu nome, pronta em até 14 dias úteis.",
+    "Uma página sob medida, rápida no celular, feita para transformar o clique em conversa no WhatsApp. Domínio no seu nome, pronta em até 7 dias úteis.",
   alternates: { canonical: "/landing-page" },
 };
 
@@ -149,7 +149,7 @@ const comoFicaPronta = [
     icone: <PaletteIcon className="size-4.5" />,
   },
   {
-    quando: "Até 14 dias úteis",
+    quando: "Até 7 dias úteis",
     titulo: "A página pronta",
     texto: "Contados depois que você manda todo o material.",
     icone: <CalendarCheckIcon className="size-4.5" />,
@@ -157,7 +157,7 @@ const comoFicaPronta = [
   {
     quando: "Se precisar",
     titulo: "Até 2 rodadas de ajustes",
-    texto: "Para deixar do jeito certo antes de ir ao ar.",
+    texto: "Para deixar do jeito certo antes de você aprovar.",
     icone: <RefreshCwIcon className="size-4.5" />,
   },
   {
@@ -194,7 +194,7 @@ const perguntas = [
       </>
     ),
   },
-  { pergunta: "Em quanto tempo fica pronta?", resposta: "Em até 14 dias úteis depois que você manda todo o material pedido." },
+  { pergunta: "Em quanto tempo fica pronta?", resposta: "Em até 7 dias úteis depois que você manda todo o material pedido." },
   {
     pergunta: "Eu aprovo o visual?",
     resposta:
@@ -256,7 +256,7 @@ export default function Page() {
                 </a>
               </div>
               <p className="mt-8 font-mono text-xs text-muted-foreground">
-                Pronta em até 14 dias úteis · Feita sob medida · Domínio no seu nome
+                Pronta em até 7 dias úteis · Feita sob medida · Domínio no seu nome
               </p>
             </div>
             <PaginaMontando />

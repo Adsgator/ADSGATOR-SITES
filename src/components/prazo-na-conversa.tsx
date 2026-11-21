@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 // "Como funciona", o que a gente vai te pedir: a mensagem de quando chega tudo,
 // com o prazo escrito com data (Base, processo "Entrada do cliente", etapa
-// "Confirmar e passar o prazo": a data vai com o dia da semana, não "14 dias
+// "Confirmar e passar o prazo": a data vai com o dia da semana, não "7 dias
 // úteis"). Exemplo, no tom das conversas reais. Quando aparece na tela, as
 // mensagens entram uma por vez (transição do CSS: roda também com "reduzir
 // animações" ligado).
