@@ -18,6 +18,7 @@ import { LinkConvite } from "@/components/link-convite";
 import { BotaoPreferenciasDeCookies } from "@/components/medicao";
 import { IconeGoogle, IconeInstagram, IconeLinkedIn } from "@/components/icones-redes";
 import { RodapeLogo } from "@/components/rodape-logo";
+import { enderecoDaAjuda } from "@/config/ajuda-enderecos";
 import { servicos } from "@/config/navegacao";
 import { site } from "@/config/site";
 
@@ -34,7 +35,7 @@ const colunas: { titulo: string; links: { href: string; rotulo: string; icone: L
   {
     titulo: "Ajuda",
     links: [
-      { href: "/ajuda", rotulo: "Central de Ajuda", icone: LifeBuoyIcon },
+      { href: enderecoDaAjuda, rotulo: "Central de Ajuda", icone: LifeBuoyIcon },
       { href: "/termos", rotulo: "Termos de Serviço", icone: FileTextIcon },
       { href: "/privacidade", rotulo: "Política de Privacidade", icone: ShieldCheckIcon },
     ],
@@ -128,7 +129,7 @@ export function SiteFooter() {
               </li>
             </ul>
             <Link
-              href="/ajuda"
+              href={enderecoDaAjuda}
               className="group block rounded-2xl border border-brand/40 bg-brand/10 p-5 transition-colors hover:bg-brand/15"
             >
               <span className="flex items-center gap-2 font-medium text-brand">
@@ -136,7 +137,7 @@ export function SiteFooter() {
                 Precisa de ajuda?
               </span>
               <span className="mt-2 block leading-6 text-muted-foreground">
-                Guias passo a passo: criar a conta do Google Ads, dar acesso e adicionar saldo.
+                Guias passo a passo: aceitar o convite, configurar o pagamento, dar acesso e adicionar saldo.
               </span>
               <span className="mt-3 inline-flex items-center gap-1.5 font-medium">
                 Ver os guias

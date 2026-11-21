@@ -1,6 +1,9 @@
 import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
+import { enderecoDaAjuda, guiasAntigos, guiasPublicados } from "./src/config/ajuda-enderecos";
+import { site } from "./src/config/site";
+
 const isDev = process.env.NODE_ENV === "development";
 
 // CSP sem nonce, como no guia de CSP do Next ("Without Nonces"): assim as
@@ -95,6 +98,30 @@ const cspBriefing = [
   ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
+// Central de Ajuda em ajuda.adsgator.com.br (plano geral, Parte 3). Por dentro
+// fica em /ajuda (src/app/ajuda). No endereço ajuda.: "/" e "/<guia>" abrem a
+// central; os endereços da ajuda antiga (/ajuda/<artigo>/, nas mensagens e
+// nos e-mails já enviados) levam ao guia novo; as páginas do site levam ao
+// www. No www (e no adsgator.com.br/ajuda dos rodapés dos e-mails), /ajuda leva
+// à central. A central não mede nada: CSP sem nenhum endereço do Google.
+// ajuda.localhost é o mesmo endereço no `next dev` do Lucas.
+const naAjuda = [{ type: "host" as const, value: "ajuda\\..+" }];
+const paginasDoSite = ["google-ads", "landing-page", "manutencao", "como-funciona", "portfolio", "quem-esta-por-tras", "termos", "privacidade"];
+const cspAjuda = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net",
+  "img-src 'self' blob: data:",
+  "connect-src 'self'",
+  "font-src 'self' data: https://use.typekit.net",
+  "frame-src 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+].join("; ");
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async headers() {
@@ -110,10 +137,36 @@ const nextConfig: NextConfig = {
         has: noForms,
         headers: [{ key: "Content-Security-Policy", value: cspBriefing }],
       },
+      // Depois da geral: a mesma chave, a última vale.
+      {
+        source: "/:path*",
+        has: naAjuda,
+        headers: [{ key: "Content-Security-Policy", value: cspAjuda }],
+      },
     ];
   },
   async redirects() {
     return [
+      // Central de Ajuda, no endereço ajuda.: os artigos antigos primeiro
+      // (cada um no guia que faz o mesmo papel), depois o resto da ajuda
+      // antiga e as páginas do site.
+      ...Object.entries(guiasAntigos).map(([antigo, guia]) => ({
+        source: `/ajuda/${antigo}`,
+        has: naAjuda,
+        destination: `/${guia}`,
+        permanent: true,
+      })),
+      { source: "/ajuda/:resto*", has: naAjuda, destination: "/", permanent: true },
+      { source: "/ajuda-categorias/:resto*", has: naAjuda, destination: "/", permanent: true },
+      {
+        source: `/:pagina(${paginasDoSite.join("|")})`,
+        has: naAjuda,
+        destination: `${site.url}/:pagina`,
+        permanent: true,
+      },
+      // No www: /ajuda é a central.
+      { source: "/ajuda", missing: naAjuda, destination: `${enderecoDaAjuda}/`, permanent: true },
+      { source: "/ajuda/:resto*", missing: naAjuda, destination: `${enderecoDaAjuda}/:resto*`, permanent: true },
       ...enderecosAntigos.map(([source, destination]) => ({
         source,
         destination,
@@ -128,13 +181,23 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    return [
-      {
-        source: "/briefing-google-ads",
-        has: noForms,
-        destination: "/forms/briefing-google-ads.html",
-      },
-    ];
+    return {
+      // Antes das páginas: no endereço ajuda., "/" seria a página inicial do
+      // site.
+      beforeFiles: [
+        { source: "/", has: naAjuda, destination: "/ajuda" },
+        ...guiasPublicados.map((guia) => ({ source: `/${guia}`, has: naAjuda, destination: `/ajuda/${guia}` })),
+      ],
+      afterFiles: [
+        {
+          source: "/briefing-google-ads",
+          has: noForms,
+          destination: "/forms/briefing-google-ads.html",
+        },
+      ],
+      // Endereço que não é de nada, no ajuda.: a 404 da central.
+      fallback: [{ source: "/:resto", has: naAjuda, destination: "/ajuda/:resto" }],
+    };
   },
 };
 

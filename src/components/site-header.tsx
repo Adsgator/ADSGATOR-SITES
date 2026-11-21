@@ -10,18 +10,20 @@ import { MenuServicos } from "@/components/menu-servicos";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { enderecoDaAjuda } from "@/config/ajuda-enderecos";
 import { paginas, servicos } from "@/config/navegacao";
 import { linkWhatsApp, mensagemDaPagina, site } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 // Navegação do topo, depois do "Serviços" (roteiro do site, seção 2).
-const navegacao = [...paginas, { href: "/ajuda", rotulo: "Ajuda" }];
+// A Central de Ajuda fica em outro endereço (ajuda.adsgator.com.br).
+const navegacao = [...paginas, { href: enderecoDaAjuda, rotulo: "Ajuda" }];
 
 // Gaveta do celular: as mesmas páginas, com os serviços em grupo.
 const menu = [
   { href: "/", rotulo: "Início" },
   ...paginas,
-  { href: "/ajuda", rotulo: "Central de Ajuda" },
+  { href: enderecoDaAjuda, rotulo: "Central de Ajuda" },
 ];
 
 const botaoMarca = cn(

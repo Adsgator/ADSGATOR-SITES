@@ -6,7 +6,7 @@
 
 const BASE = process.argv[2] ?? "http://localhost:3005";
 const OFICIAL = "https://www.adsgator.com.br";
-const paginas = ["/", "/google-ads", "/landing-page", "/manutencao", "/como-funciona", "/portfolio", "/quem-esta-por-tras", "/termos", "/privacidade", "/ajuda"];
+const paginas = ["/", "/google-ads", "/landing-page", "/manutencao", "/como-funciona", "/portfolio", "/quem-esta-por-tras", "/termos", "/privacidade"];
 const servicos = ["/google-ads", "/landing-page", "/manutencao"];
 let falhas = 0;
 function check(nome, ok, detalhe = "") {
@@ -42,6 +42,22 @@ for (const caminho of paginas) {
 }
 const repetidos = [...titulos].filter(([, n]) => n > 1).map(([t]) => t);
 check("títulos diferentes em cada página", repetidos.length === 0, repetidos.join(" | "));
+
+// A Central de Ajuda (ajuda.adsgator.com.br): título, descrição e canonical no
+// endereço dela.
+const AJUDA = BASE.startsWith("https://") ? "https://ajuda.adsgator.com.br" : BASE.replace("://localhost", "://ajuda.localhost");
+for (const caminho of ["/", "/aceitar-convite", "/configurar-pagamento", "/id-da-conta", "/acesso-ao-perfil", "/adicionar-saldo"]) {
+  const resposta = await fetch(AJUDA + caminho);
+  const html = await resposta.text();
+  const titulo = html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "";
+  const descricao = meta(html, "name", "description");
+  const canonical = html.match(/<link rel="canonical" href="([^"]*)"/)?.[1] ?? "";
+  check(
+    `ajuda ${caminho}: título, descrição e canonical`,
+    resposta.status === 200 && titulo.length >= 10 && titulo.length <= 65 && descricao.length >= 50 && descricao.length <= 170 && canonical.replace(/\/$/, "") === `https://ajuda.adsgator.com.br${caminho}`.replace(/\/$/, ""),
+    `título ${titulo.length} car., descrição ${descricao.length} car., ${canonical}`,
+  );
+}
 
 const mapa = await (await fetch(BASE + "/sitemap.xml")).text();
 const noMapa = [...mapa.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1].replace(OFICIAL, "") || "/");

@@ -715,6 +715,35 @@ página); aprovar a página de amostra.
   novo (os e-mails já enviados continuam no antigo, por isso o
   redirecionamento).
 
+**Como ficou (2026-11-20/21, branch `ajuda`; decisões do Lucas):**
+- A central fica em `ajuda.adsgator.com.br`, separada do site: mesma
+  identidade, cabeçalho e rodapé próprios, sem medição e sem aviso de cookies.
+  Por dentro, `src/app/ajuda` (fora do grupo `(site)`, que tem o cabeçalho, o
+  rodapé, o aviso de cookies e o clique no WhatsApp). O script da medição
+  continua no `<head>` do layout comum (roda também quando a pessoa sai da 404
+  para o site) e não faz nada em `ajuda.`; a CSP de `ajuda.` não tem nenhum
+  endereço do Google.
+- Endereços (`next.config.ts`, `src/config/ajuda-enderecos.ts`): em `ajuda.`,
+  `/` e `/<guia>` abrem a central; os 5 artigos antigos
+  (`/ajuda/<artigo>/`) levam ao guia que faz o mesmo papel; o resto da ajuda
+  antiga leva à lista; as páginas do site levam ao www. No www (e no
+  `adsgator.com.br/ajuda` dos e-mails), `/ajuda` leva à central. No `next dev`,
+  a central abre em `http://ajuda.localhost:3005`.
+- Os guias (`src/content/ajuda.tsx`): aceitar o convite (conta criada pela
+  Adsgator ou conta que o cliente já tinha), configurar o pagamento e verificar
+  a empresa, onde fica a ID da conta, dar acesso ao perfil no Google e adicionar
+  saldo. Passos da ajuda oficial do Google (lida em 2026-11-20, links no fim de
+  cada guia). "Fiz este passo" com a barra de progresso; capturas reais do
+  Lucas em `public/capturas/NN.png` (até chegarem, um quadro numerado que o
+  teste acusa).
+- Testes: `tests/ajuda.mjs` (os endereços antigos clicados, a lista, os guias,
+  o progresso, o copiar, nenhum cookie e nenhum pedido ao Google, celular, os
+  dois modos de animação); `site.mjs` e `seo.mjs` ajustados para a central em
+  outro endereço.
+- Pendente: as 15 capturas, o Lucas ver no localhost, ligar `ajuda.` ao
+  projeto na Vercel (autorização dele), publicar e testar em produção; depois,
+  os links da Base e os 2 modelos de saldo do painel.
+
 ### Fase 3: página inicial e páginas dos planos
 
 - Simples, seguindo a direção da seção 1: o que a Adsgator faz, os planos à

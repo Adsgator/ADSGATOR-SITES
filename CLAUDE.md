@@ -40,9 +40,10 @@ também).
   igual a antes.
 - `/termos`, `/privacidade` e `/ajuda` em `adsgator.com.br`: estão no rodapé
   de todos os e-mails (configuráveis no painel, mas os já enviados não
-  mudam).
-- O artigo de ajuda "Como adicionar saldo no Google Ads", linkado pelos
-  e-mails de saldo no endereço antigo do WordPress (detalhes no plano).
+  mudam). O `/ajuda` leva à Central de Ajuda em `ajuda.adsgator.com.br`.
+- Os 5 artigos da ajuda antiga (`ajuda.adsgator.com.br/ajuda/<artigo>/`),
+  nas mensagens e nos e-mails já enviados, entre eles o de saldo: cada um
+  leva ao guia novo (`src/config/ajuda-enderecos.ts`; `tests/ajuda.mjs`).
 - `forms.adsgator.com.br`: links de briefing já enviados a clientes;
   continua sendo o endereço dos briefings (plano, Fase 4).
 - Endereços antigos do WordPress que tinham visitas: levantados na Fase 0 e

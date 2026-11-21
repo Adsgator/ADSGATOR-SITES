@@ -10,6 +10,9 @@ import { chromium } from "playwright-core";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
 const SEM_WWW = process.env.SEM_WWW;
+// A Central de Ajuda fica em outro endereço (tests/ajuda.mjs testa ela toda).
+const AJUDA = BASE.startsWith("https://") ? "https://ajuda.adsgator.com.br" : BASE.replace("://localhost", "://ajuda.localhost");
+const TITULO_DA_AJUDA = "Passo a passo para a sua conta";
 const saida = new URL("./.saida/", import.meta.url);
 await mkdir(saida, { recursive: true });
 
@@ -95,8 +98,8 @@ for (const [origem, esperado] of antigos) {
     robots.includes("Allow: /") && robots.includes("Sitemap: https://www.adsgator.com.br/sitemap.xml"),
   );
   const sitemap = await (await fetch(BASE + "/sitemap.xml")).text();
-  const urls = ["", "/termos", "/privacidade", "/ajuda"].map((p) => `https://www.adsgator.com.br${p}<`);
-  check("sitemap.xml com as 4 páginas", urls.every((u) => sitemap.includes(u)));
+  const urls = ["", "/termos", "/privacidade"].map((p) => `https://www.adsgator.com.br${p}<`);
+  check("sitemap.xml com o início, Termos e Privacidade, sem a ajuda", urls.every((u) => sitemap.includes(u)) && !sitemap.includes("/ajuda"));
   const og = await fetch(BASE + "/opengraph-image");
   check("imagem de compartilhamento", og.status === 200 && og.headers.get("content-type") === "image/png");
   // O Chrome às vezes pede /favicon.ico por conta própria; sem ele, dá 404 no console.
@@ -113,7 +116,7 @@ const page = await ctx.newPage();
 // gravando cookie depois do "Aceitar"). Fora isso, toda requisição é para o
 // próprio site (com ou sem www).
 const origens = new Set([
-  ...[BASE, SEM_WWW].filter(Boolean).map((u) => new URL(u).origin),
+  ...[BASE, SEM_WWW, AJUDA].filter(Boolean).map((u) => new URL(u).origin),
   "https://use.typekit.net",
   "https://p.typekit.net",
 ]);
@@ -170,7 +173,6 @@ try {
   for (const [rotulo, caminho, titulo] of [
     ["Termos de Serviço", "/termos", "Termos de Serviço"],
     ["Política de Privacidade", "/privacidade", "Política de Privacidade"],
-    ["Central de Ajuda", "/ajuda", "Central de Ajuda"],
   ]) {
     await rodape.getByRole("link", { name: rotulo }).click();
     await page.waitForURL(`**${caminho}`);
@@ -178,18 +180,23 @@ try {
     check(`${caminho}: título na Servus Slab`, await tituloNaServus());
     await page.screenshot({ path: new URL(`${caminho.slice(1)}.png`, saida).pathname.slice(1), fullPage: true });
   }
+  await rodape.getByRole("link", { name: "Central de Ajuda" }).click();
+  await page.waitForURL(`${AJUDA}/**`);
+  check("rodapé: Central de Ajuda abre a central", (await h1()) === TITULO_DA_AJUDA, page.url());
+  check("central: título na Servus Slab", await tituloNaServus());
+  await page.goBack({ waitUntil: "networkidle" });
   await page.locator("header").getByRole("link", { name: "Adsgator, página inicial" }).click();
   await page.waitForURL((u) => u.pathname === "/");
   check("logo volta para o início", (await h1()).includes("chega ao seu WhatsApp"));
   await page.locator("header").getByRole("link", { name: "Ajuda" }).click();
-  await page.waitForURL("**/ajuda");
-  check("cabeçalho: Ajuda", (await h1()) === "Central de Ajuda");
+  await page.waitForURL(`${AJUDA}/**`);
+  check("cabeçalho: Ajuda", (await h1()) === TITULO_DA_AJUDA, page.url());
 
   // Links dos e-mails, abertos direto como quem clica no e-mail.
   for (const [caminho, titulo] of [
     ["/termos", "Termos de Serviço"],
     ["/privacidade", "Política de Privacidade"],
-    ["/ajuda", "Central de Ajuda"],
+    ["/ajuda", TITULO_DA_AJUDA],
   ]) {
     const base = SEM_WWW ?? BASE;
     const r = await page.goto(base + caminho, { waitUntil: "networkidle" });
@@ -241,7 +248,7 @@ try {
 
   // Celular: nada sai para o lado.
   await page.setViewportSize({ width: 375, height: 800 });
-  for (const caminho of ["/", "/termos", "/privacidade", "/ajuda"]) {
+  for (const caminho of ["/", "/termos", "/privacidade"]) {
     await page.goto(BASE + caminho, { waitUntil: "networkidle" });
     const sobra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     check(`celular sem rolagem lateral em ${caminho}`, sobra <= 0, `${sobra}px`);
@@ -252,9 +259,9 @@ try {
   // Menu do celular: abre, leva à página e fecha.
   await page.getByRole("button", { name: "Abrir o menu" }).click();
   await page.getByRole("dialog").getByRole("link", { name: "Central de Ajuda" }).click();
-  await page.waitForURL("**/ajuda");
-  await page.getByRole("dialog").waitFor({ state: "detached" });
-  check("celular: o menu leva à Ajuda e fecha", (await h1()) === "Central de Ajuda");
+  await page.waitForURL(`${AJUDA}/**`);
+  check("celular: o menu leva à Central de Ajuda", (await h1()) === TITULO_DA_AJUDA, page.url());
+  await page.goBack({ waitUntil: "networkidle" });
 
   // O que a Privacidade promete: sem o "Aceitar" do aviso de cookies (este teste
   // não aceita), nenhum cookie; no navegador, só o tema.
