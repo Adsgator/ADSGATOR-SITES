@@ -774,8 +774,9 @@ página); aprovar a página de amostra.
   que cada um anda nos dois modos: tudo certo no localhost.
 - Desenhos **publicados em 2026-11-21** (autorizados pelo Lucas; `main`
   3210ff0): `tests/ajuda.mjs` e `seo.mjs` tudo certo em produção.
-- Pendente: os links da Base e os 2 modelos de saldo do painel (com a
-  aprovação dele).
+- Os links da Base, os 2 modelos de saldo e o rodapé dos e-mails do painel
+  apontam para a central nova (2026-11-21, com a autorização do Lucas). A Fase
+  2 está concluída.
 
 ### Fase 3: página inicial e páginas dos planos
 
