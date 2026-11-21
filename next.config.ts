@@ -216,6 +216,8 @@ const nextConfig: NextConfig = {
         { source: "/", has: noCheckout, destination: "/checkout" },
         { source: "/consulta/:resto*", has: noCheckout, destination: "/checkout/consulta/:resto*" },
         { source: "/contratar", has: noCheckout, destination: "/checkout/contratar" },
+        { source: "/mensalidade", has: noCheckout, destination: "/checkout/mensalidade" },
+        { source: "/mensalidade/pagar", has: noCheckout, destination: "/checkout/mensalidade/pagar" },
         { source: "/situacao/:cobranca", has: noCheckout, destination: "/checkout/situacao/:cobranca" },
       ],
       afterFiles: [

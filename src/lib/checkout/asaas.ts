@@ -130,6 +130,46 @@ export async function qrCodeDoPix(cobranca: string) {
   return chamar<QrCodeDoPix>("GET", `/payments/${cobranca}/pixQrCode`);
 }
 
+export type ClienteDoAsaas = {
+  id: string;
+  name: string;
+  email?: string;
+  cpfCnpj: string;
+  mobilePhone?: string;
+  phone?: string;
+  postalCode?: string;
+  addressNumber?: string;
+  complement?: string;
+  deleted?: boolean;
+};
+
+export async function clientePorId(cliente: string) {
+  return chamar<ClienteDoAsaas>("GET", `/customers/${cliente}`);
+}
+
+/** As assinaturas do cliente (até 100; um cliente da Adsgator tem poucas). */
+export async function assinaturasDoCliente(cliente: string) {
+  const r = await chamar<{ data: (Assinatura & { externalReference?: string; deleted?: boolean })[] }>(
+    "GET",
+    `/subscriptions?customer=${cliente}&limit=100`,
+  );
+  return r.data;
+}
+
+/** As cobranças avulsas e de assinatura do cliente (até 100). */
+export async function cobrancasDoCliente(cliente: string) {
+  const r = await chamar<{ data: (Cobranca & { billingType: string; externalReference?: string; deleted?: boolean })[] }>(
+    "GET",
+    `/payments?customer=${cliente}&limit=100`,
+  );
+  return r.data;
+}
+
+/** As cobranças de uma assinatura, da mais nova para a mais antiga. */
+export async function cobrancasDaAssinatura(assinatura: string) {
+  return (await chamar<{ data: (Cobranca & { billingType: string })[] }>("GET", `/subscriptions/${assinatura}/payments`)).data;
+}
+
 export async function situacaoDaCobranca(cobranca: string) {
   return (await chamar<{ status: string }>("GET", `/payments/${cobranca}`)).status;
 }

@@ -1,27 +1,24 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { CreditCardIcon, LoaderCircleIcon, LockIcon } from "lucide-react";
+import { LoaderCircleIcon, LockIcon } from "lucide-react";
 
-import { IconePix } from "@/components/icone-pix";
 import {
   cnpjValido,
   estados,
-  mascaraCartao,
   mascaraCep,
   mascaraCnpj,
   mascaraCpf,
-  mascaraValidade,
   mascaraWhatsApp,
   soDigitos,
 } from "@/lib/checkout/campos";
 import { dataCurta, montarPedido, reais, valorDaParcela, type Forma } from "@/lib/checkout/pedido";
 import type { RespostaDaContratacao } from "@/lib/checkout/contratacao";
 import { cartaoVazio, dadosVazios, validarDados, type Cartao, type Dados } from "@/lib/checkout/validacao";
-import { cn } from "@/lib/utils";
 
 import { ariaDoErro, Campo, estiloDoCampo, Seletor } from "./campo";
 import { JanelaDeAceite } from "./janela-de-aceite";
+import { CamposDoCartao, EscolhaDaForma } from "./pagamento";
 import { ResultadoDaContratacao } from "./resultado";
 import { ResumoDoPedido } from "./resumo";
 
@@ -434,49 +431,18 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
           <h2 id="titulo-pagamento" className="text-lg font-semibold">
             Pagamento
           </h2>
-          <fieldset className="mt-5 grid gap-3 sm:grid-cols-2">
-            <legend className="sr-only">Forma de pagamento</legend>
-            {(["cartao", "pix"] as const).map((f) => {
-              const p = f === "pix" ? noPix : noCartao;
-              return (
-                <label
-                  key={f}
-                  className={cn(
-                    "relative flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors hover:border-foreground/30",
-                    forma === f && "border-brand bg-brand/10 hover:border-brand",
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="forma"
-                    value={f}
-                    checked={forma === f}
-                    onChange={() => escolherForma(f)}
-                    className="size-5 shrink-0 accent-[var(--brand)]"
-                    data-forma={f}
-                  />
-                  <span className="flex-1">
-                    <span className="flex items-center gap-2 font-medium">
-                      {f === "pix" ? <IconePix className="size-4" /> : <CreditCardIcon className="size-4" aria-hidden="true" />}
-                      {f === "pix" ? "Pix" : "Cartão de crédito"}
-                    </span>
-                    <span className="mt-0.5 block text-sm text-muted-foreground">
-                      {f === "pix"
-                        ? `${reais(p.totalHoje)} à vista · vence em ${dataCurta(p.vencimento)}`
-                        : p.maxParcelas > 1
-                          ? `até ${p.maxParcelas}x de ${reais(valorDaParcela(p.totalHoje, p.maxParcelas))} sem juros`
-                          : reais(p.totalHoje)}
-                    </span>
-                  </span>
-                  {f === "pix" && economiaNoPix > 0 && (
-                    <span className="absolute -top-2.5 right-3 rounded-full bg-brand px-2.5 py-0.5 text-[0.7rem] font-semibold text-brand-foreground">
-                      Economize {reais(economiaNoPix)}
-                    </span>
-                  )}
-                </label>
-              );
-            })}
-          </fieldset>
+          <EscolhaDaForma
+            forma={forma}
+            aoEscolher={escolherForma}
+            economiaNoPix={economiaNoPix}
+            descricao={{
+              pix: `${reais(noPix.totalHoje)} à vista · vence em ${dataCurta(noPix.vencimento)}`,
+              cartao:
+                noCartao.maxParcelas > 1
+                  ? `até ${noCartao.maxParcelas}x de ${reais(valorDaParcela(noCartao.totalHoje, noCartao.maxParcelas))} sem juros`
+                  : reais(noCartao.totalHoje),
+            }}
+          />
 
           {forma === "pix" ? (
             <p className="mt-4 text-sm text-muted-foreground">
@@ -486,55 +452,7 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
             </p>
           ) : (
             <div className="mt-5 grid gap-4 sm:grid-cols-6">
-              <Campo id="cartao-numero" rotulo="Número do cartão" erro={erros["cartao-numero"]} className="sm:col-span-6">
-                <div className="relative">
-                  <input
-                    id="cartao-numero"
-                    inputMode="numeric"
-                    autoComplete="cc-number"
-                    placeholder="0000 0000 0000 0000"
-                    value={cartao.numero}
-                    onChange={(e) => mudarCartao("numero", mascaraCartao(e.target.value))}
-                    className={cn(estiloDoCampo, "pr-11")}
-                    {...ariaDoErro("cartao-numero", erros["cartao-numero"])}
-                  />
-                  <CreditCardIcon className="pointer-events-none absolute top-1/2 right-3.5 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-                </div>
-              </Campo>
-              <Campo id="cartao-nome" rotulo="Nome impresso no cartão" erro={erros["cartao-nome"]} className="sm:col-span-6">
-                <input
-                  id="cartao-nome"
-                  autoComplete="cc-name"
-                  value={cartao.nome}
-                  onChange={(e) => mudarCartao("nome", e.target.value.toUpperCase())}
-                  className={estiloDoCampo}
-                  {...ariaDoErro("cartao-nome", erros["cartao-nome"])}
-                />
-              </Campo>
-              <Campo id="cartao-validade" rotulo="Validade" erro={erros["cartao-validade"]} className="sm:col-span-3">
-                <input
-                  id="cartao-validade"
-                  inputMode="numeric"
-                  autoComplete="cc-exp"
-                  placeholder="MM/AA"
-                  value={cartao.validade}
-                  onChange={(e) => mudarCartao("validade", mascaraValidade(e.target.value))}
-                  className={estiloDoCampo}
-                  {...ariaDoErro("cartao-validade", erros["cartao-validade"])}
-                />
-              </Campo>
-              <Campo id="cartao-codigo" rotulo="Código de segurança" erro={erros["cartao-codigo"]} className="sm:col-span-3">
-                <input
-                  id="cartao-codigo"
-                  inputMode="numeric"
-                  autoComplete="cc-csc"
-                  placeholder="3 ou 4 dígitos"
-                  value={cartao.codigo}
-                  onChange={(e) => mudarCartao("codigo", soDigitos(e.target.value).slice(0, 4))}
-                  className={estiloDoCampo}
-                  {...ariaDoErro("cartao-codigo", erros["cartao-codigo"])}
-                />
-              </Campo>
+              <CamposDoCartao cartao={cartao} erros={erros} aoMudar={mudarCartao} />
               {pedido.maxParcelas > 1 && (
                 <Campo id="parcelas" rotulo="Parcelas" className="sm:col-span-6">
                   <Seletor id="parcelas" value={parcelas} onChange={(e) => setParcelas(Number(e.target.value))}>

@@ -54,11 +54,16 @@ export function validarDados(d: Dados, c: Cartao, semCnpj: boolean, forma: Forma
   if (!d.bairro.trim()) e.bairro = "Informe o bairro.";
   if (!d.cidade.trim()) e.cidade = "Informe a cidade.";
   if (!d.uf) e.uf = "Escolha o estado.";
-  if (forma === "cartao") {
-    if (!cartaoValido(c.numero)) e["cartao-numero"] = "Confira o número do cartão.";
-    if (c.nome.trim().length < 3) e["cartao-nome"] = "Informe o nome como está no cartão.";
-    if (!validadeValida(c.validade)) e["cartao-validade"] = "Confira a validade.";
-    if (!codigoValido(c.codigo)) e["cartao-codigo"] = "Confira o código.";
-  }
+  if (forma === "cartao") Object.assign(e, validarCartao(c));
+  return e;
+}
+
+/** Erros dos campos do cartão (também usada sozinha, no link da mensalidade). */
+export function validarCartao(c: Cartao) {
+  const e: Record<string, string> = {};
+  if (!cartaoValido(c.numero)) e["cartao-numero"] = "Confira o número do cartão.";
+  if (c.nome.trim().length < 3) e["cartao-nome"] = "Informe o nome como está no cartão.";
+  if (!validadeValida(c.validade)) e["cartao-validade"] = "Confira a validade.";
+  if (!codigoValido(c.codigo)) e["cartao-codigo"] = "Confira o código.";
   return e;
 }

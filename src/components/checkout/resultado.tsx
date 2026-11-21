@@ -42,7 +42,15 @@ function ProximosPassos({ email }: { email: string }) {
   );
 }
 
-function PagamentoNoPix({ resposta, email }: { resposta: Extract<Resposta, { forma: "pix" }>; email: string }) {
+function PagamentoNoPix({
+  resposta,
+  email,
+  depois,
+}: {
+  resposta: Extract<Resposta, { forma: "pix" }>;
+  email: string;
+  depois?: React.ReactNode;
+}) {
   const [pago, setPago] = useState(false);
   const [copiado, setCopiado] = useState(false);
 
@@ -72,7 +80,7 @@ function PagamentoNoPix({ resposta, email }: { resposta: Extract<Resposta, { for
         <CheckCircle2Icon className="size-10 text-success" aria-hidden="true" />
         <h2 className="mt-4 font-heading text-2xl tracking-tight">Pagamento confirmado</h2>
         <p className="mt-2 text-sm text-muted-foreground">Recebemos o seu Pix de {reais(resposta.valor)}. Obrigado!</p>
-        <ProximosPassos email={email} />
+        {depois ?? <ProximosPassos email={email} />}
       </div>
     );
   }
@@ -126,13 +134,22 @@ function PagamentoNoPix({ resposta, email }: { resposta: Extract<Resposta, { for
           )}
         </div>
       )}
-      <ProximosPassos email={email} />
+      {depois ?? <ProximosPassos email={email} />}
     </div>
   );
 }
 
-export function ResultadoDaContratacao({ resposta, email }: { resposta: Resposta; email: string }) {
-  if (resposta.forma === "pix") return <PagamentoNoPix resposta={resposta} email={email} />;
+export function ResultadoDaContratacao({
+  resposta,
+  email,
+  depois,
+}: {
+  resposta: Resposta;
+  email: string;
+  /** O que vem depois, no lugar do texto da contratação (ex.: no link da mensalidade). */
+  depois?: React.ReactNode;
+}) {
+  if (resposta.forma === "pix") return <PagamentoNoPix resposta={resposta} email={email} depois={depois} />;
 
   const como =
     resposta.parcelas > 1
@@ -148,7 +165,7 @@ export function ResultadoDaContratacao({ resposta, email }: { resposta: Resposta
           O pagamento de {reais(resposta.valor)} {como} está sendo conferido pela operadora do cartão. Assim que for
           aprovado, você recebe a confirmação.
         </p>
-        <ProximosPassos email={email} />
+        {depois ?? <ProximosPassos email={email} />}
       </div>
     );
   }
@@ -160,7 +177,7 @@ export function ResultadoDaContratacao({ resposta, email }: { resposta: Resposta
       <p className="mt-2 text-sm text-muted-foreground">
         Pagamento de {reais(resposta.valor)} aprovado {como}.
       </p>
-      <ProximosPassos email={email} />
+      {depois ?? <ProximosPassos email={email} />}
     </div>
   );
 }

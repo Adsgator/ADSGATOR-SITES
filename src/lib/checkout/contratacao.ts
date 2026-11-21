@@ -81,7 +81,7 @@ export function lerPedido(corpo: unknown): PedidoDeContratacao | null {
   };
 }
 
-function dataIso(d: Data) {
+export function dataIso(d: Data) {
   return `${d.ano}-${String(d.mes).padStart(2, "0")}-${String(d.dia).padStart(2, "0")}`;
 }
 
@@ -100,7 +100,7 @@ export function ipDoComprador(headers: Headers) {
   return ip.replace(/^::ffff:/, "");
 }
 
-const reaisDoAsaas = (centavos: number) => centavos / 100;
+export const reaisDoAsaas = (centavos: number) => centavos / 100;
 
 export async function contratar(
   p: PedidoDeContratacao,
@@ -144,17 +144,10 @@ export async function contratar(
     }));
 
   const noCartao = p.forma === "cartao";
-  const [mes, ano] = p.cartao.validade.split("/");
-  const cartao: Partial<asaas.CartaoDoAsaas> = noCartao
-    ? {
-        creditCard: {
-          holderName: p.cartao.nome,
-          number: soDigitos(p.cartao.numero),
-          expiryMonth: mes,
-          expiryYear: `20${ano}`,
-          ccv: p.cartao.codigo,
-        },
-        creditCardHolderInfo: {
+  const cartao = noCartao
+    ? cartaoParaOAsaas(
+        p.cartao,
+        {
           name: d.nome,
           email: d.email,
           cpfCnpj: documento,
@@ -163,8 +156,8 @@ export async function contratar(
           addressComplement: d.complemento || undefined,
           mobilePhone: telefone,
         },
-        remoteIp: ip,
-      }
+        ip,
+      )
     : {};
 
   const hoje = hojeEmSaoPaulo();
@@ -194,44 +187,103 @@ export async function contratar(
       ...cartao,
     });
   } else {
-    const total = mensais.reduce((s, l) => s + l.valor, 0);
-    const nomes = mensais.map((l) => nomeNaCobranca[l.slug] ?? l.nome).join(" + ");
-    cobranca = await asaas.criarCobranca({
-      customer: cliente,
+    cobranca = await ativarMensalidade({
+      cliente,
+      slugs: mensais.map((l) => l.slug),
+      total: mensais.reduce((s, l) => s + l.valor, 0),
       billingType,
-      dueDate: vencimento,
-      description: `${nomes} · 1ª mensalidade · Adsgator`,
-      externalReference: referencia,
-      value: reaisDoAsaas(total),
-      ...cartao,
+      vencimento,
+      proximo: dataIso(mesmoDiaNoMesSeguinte(hoje)),
+      referencia,
+      cartao,
     });
-    try {
-      await asaas.criarAssinatura({
-        customer: cliente,
-        billingType,
-        value: reaisDoAsaas(total),
-        nextDueDate: dataIso(mesmoDiaNoMesSeguinte(hoje)),
-        cycle: "MONTHLY",
-        description: `${nomes} · mensalidade · Adsgator`,
-        externalReference: referencia,
-        ...cartao,
-      });
-    } catch (e) {
-      // A 1ª mensalidade já foi criada (e, no cartão, paga): a pessoa não pode
-      // ver erro. O Lucas cria a assinatura à mão pelo registro do servidor.
-      console.error("checkout: assinatura não criada", { cliente, cobranca: cobranca.id, referencia, erro: String(e) });
-    }
   }
 
-  if (noCartao) {
+  return respostaDaCobranca(cobranca, p.forma, pedido.totalHoje, p.parcelas, vencimento);
+}
+
+/** O cartão no formato do Asaas, com quem é o titular e o IP de quem compra. */
+export function cartaoParaOAsaas(
+  c: Cartao,
+  titular: asaas.CartaoDoAsaas["creditCardHolderInfo"],
+  ip: string,
+): asaas.CartaoDoAsaas {
+  const [mes, ano] = c.validade.split("/");
+  return {
+    creditCard: { holderName: c.nome, number: soDigitos(c.numero), expiryMonth: mes, expiryYear: `20${ano}`, ccv: c.codigo },
+    creditCardHolderInfo: titular,
+    remoteIp: ip,
+  };
+}
+
+/** A 1ª mensalidade numa cobrança avulsa (Pix com vencimento, cartão na hora)
+ * e a assinatura com as próximas, a partir de `proximo`. Usada pela
+ * contratação (só o plano mensal) e pelo link da mensalidade (combo e
+ * manutenção depois da entrega). */
+export async function ativarMensalidade(m: {
+  cliente: string;
+  slugs: string[];
+  /** Em centavos. */
+  total: number;
+  billingType: "PIX" | "CREDIT_CARD";
+  /** Vencimento da 1ª (aaaa-mm-dd). */
+  vencimento: string;
+  /** Vencimento da 2ª, que dá o dia das próximas (aaaa-mm-dd). */
+  proximo: string;
+  referencia: string;
+  cartao: Partial<asaas.CartaoDoAsaas>;
+}) {
+  const nomes = m.slugs.map((s) => nomeNaCobranca[s] ?? s).join(" + ");
+  const cobranca = await asaas.criarCobranca({
+    customer: m.cliente,
+    billingType: m.billingType,
+    dueDate: m.vencimento,
+    description: `${nomes} · 1ª mensalidade · Adsgator`,
+    externalReference: m.referencia,
+    value: reaisDoAsaas(m.total),
+    ...m.cartao,
+  });
+  try {
+    await asaas.criarAssinatura({
+      customer: m.cliente,
+      billingType: m.billingType,
+      value: reaisDoAsaas(m.total),
+      nextDueDate: m.proximo,
+      cycle: "MONTHLY",
+      description: `${nomes} · mensalidade · Adsgator`,
+      externalReference: m.referencia,
+      ...m.cartao,
+    });
+  } catch (e) {
+    // A 1ª mensalidade já foi criada (e, no cartão, paga): a pessoa não pode
+    // ver erro. O Lucas cria a assinatura à mão pelo registro do servidor.
+    console.error("checkout: assinatura não criada", {
+      cliente: m.cliente,
+      cobranca: cobranca.id,
+      referencia: m.referencia,
+      erro: String(e),
+    });
+  }
+  return cobranca;
+}
+
+/** O que a tela recebe depois da cobrança: o QR do Pix ou a situação do cartão. */
+export async function respostaDaCobranca(
+  cobranca: asaas.Cobranca,
+  forma: Forma,
+  valor: number,
+  parcelas: number,
+  vencimento: string,
+): Promise<{ status: number; corpo: RespostaDaContratacao }> {
+  if (forma === "cartao") {
     return {
       status: 200,
       corpo: {
         ok: true,
         forma: "cartao",
         situacao: SITUACOES_PAGAS.includes(cobranca.status) ? "aprovado" : "em_analise",
-        valor: pedido.totalHoje,
-        parcelas: p.parcelas,
+        valor,
+        parcelas,
       },
     };
   }
@@ -249,7 +301,7 @@ export async function contratar(
       ok: true,
       forma: "pix",
       cobranca: cobranca.id,
-      valor: pedido.totalHoje,
+      valor,
       vencimento,
       pix,
       linkDaCobranca: pix ? undefined : cobranca.invoiceUrl,
