@@ -11,8 +11,9 @@ import {
   type Pedido,
 } from "@/lib/checkout/pedido";
 
-/** Quando cada mensalidade começa, dito para o cliente. */
-export function inicioDaMensalidade(m: Mensalidade, pedido: Pedido) {
+/** Quando cada mensalidade começa, dito para o cliente. No cartão, a 1ª é
+ * cobrada na hora; no Pix, vence em 3 dias. */
+export function inicioDaMensalidade(m: Mensalidade, pedido: Pedido, forma: Forma) {
   switch (m.inicio) {
     case "aprovacao":
       return "Começa quando você aprovar a sua página. Você recebe o link para pagar, com vencimento em 3 dias.";
@@ -21,7 +22,9 @@ export function inicioDaMensalidade(m: Mensalidade, pedido: Pedido) {
     case "incluida":
       return "Incluída no Google Ads para a página feita pela Adsgator.";
     case "hoje":
-      return `1ª mensalidade: vence em ${dataCurta(pedido.vencimento)}, e as próximas todo dia ${pedido.diaDaRenovacao}.`;
+      return forma === "cartao"
+        ? `1ª mensalidade cobrada hoje no cartão; as próximas, todo dia ${pedido.diaDaRenovacao}, no mesmo cartão.`
+        : `1ª mensalidade: vence em ${dataCurta(pedido.vencimento)}, e as próximas todo dia ${pedido.diaDaRenovacao}.`;
   }
 }
 
@@ -120,7 +123,7 @@ export function ResumoDoPedido({
             slug={l.slug}
             nome={l.nome}
             nota={l.mensal ? undefined : nota(l.slug)}
-            detalhe={l.mensal && mensalDeHoje ? inicioDaMensalidade(mensalDeHoje, pedido) : undefined}
+            detalhe={l.mensal && mensalDeHoje ? inicioDaMensalidade(mensalDeHoje, pedido, forma) : undefined}
             preco={
               l.mensal ? (
                 <span className="font-semibold">{reais(l.valor)}</span>
@@ -191,7 +194,7 @@ export function ResumoDoPedido({
                 key={m.slug}
                 slug={m.slug}
                 nome={m.nome}
-                detalhe={inicioDaMensalidade(m, pedido)}
+                detalhe={inicioDaMensalidade(m, pedido, forma)}
                 preco={<span className="font-semibold">{m.inicio === "incluida" ? "Incluída" : `${reais(m.valor)}/mês`}</span>}
               />
             ))}

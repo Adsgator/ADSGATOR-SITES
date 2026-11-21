@@ -132,6 +132,10 @@ try {
       await p.goto(`${CHECKOUT}/?s=google-ads`, { waitUntil: "networkidle" });
       check(`${rotulo}: só o Google Ads`, limpo(await total(p)) === "R$ 500,00", await total(p));
       check(`${rotulo}: 1ª mensalidade`, /1ª mensalidade/.test(await p.locator("[data-resumo]").innerText()));
+      check(`${rotulo}: no cartão, a 1ª é cobrada hoje`, /cobrada hoje no cartão/.test(await p.locator("[data-resumo]").innerText()));
+      await p.locator('[data-forma="pix"]').check();
+      check(`${rotulo}: no Pix, a 1ª vence em 3 dias`, /1ª mensalidade: vence em/.test(await p.locator("[data-resumo]").innerText()));
+      await p.locator('[data-forma="cartao"]').check();
       check(`${rotulo}: mensalidade sem parcelas`, (await p.locator("#parcelas").count()) === 0);
       check(`${rotulo}: mensalidade sem destaque do Pix`, (await p.locator("[data-destaque-pix]").count()) === 0);
       await p.goto(`${CHECKOUT}/?s=google-ads,manutencao`, { waitUntil: "networkidle" });

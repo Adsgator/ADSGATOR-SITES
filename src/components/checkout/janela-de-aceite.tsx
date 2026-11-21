@@ -17,7 +17,7 @@ import { comoPaga, inicioDaMensalidade } from "./resumo";
 // 10 e 14).
 
 /** Pontos principais dos Termos que valem para este pedido. */
-function pontosDosTermos(pedido: Pedido) {
+function pontosDosTermos(pedido: Pedido, forma: Forma) {
   const temAds = pedido.servicos.some((s) => s.slug === "google-ads");
   const temCriacao = pedido.servicos.some((s) => s.tipo === "unico");
   const temMensal = pedido.mensalidades.some((m) => m.inicio !== "incluida");
@@ -37,7 +37,7 @@ function pontosDosTermos(pedido: Pedido) {
     );
   if (pedido.hoje.some((l) => l.mensal))
     pontos.push(
-      `A mensalidade é paga antes: a primeira vence em ${dataCurta(pedido.vencimento)}, e cada uma libera os 30 dias seguintes.`,
+      `A mensalidade é paga antes: a primeira ${forma === "cartao" ? "é cobrada hoje" : `vence em ${dataCurta(pedido.vencimento)}`}, e cada uma libera os 30 dias seguintes.`,
     );
   if (temAds) pontos.push("A verba dos anúncios é paga por você direto ao Google e não entra nesta cobrança.");
   if (temMensal) {
@@ -131,7 +131,7 @@ export function JanelaDeAceite({
                         <span>{m.nome}</span>
                         <span className="whitespace-nowrap">{m.inicio === "incluida" ? "Incluída" : `${reais(m.valor)}/mês`}</span>
                       </span>
-                      <span className="mt-0.5 block text-xs text-muted-foreground">{inicioDaMensalidade(m, pedido)}</span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">{inicioDaMensalidade(m, pedido, forma)}</span>
                     </li>
                   ))}
                 </ul>
@@ -141,7 +141,7 @@ export function JanelaDeAceite({
             <section>
               <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Pontos principais dos Termos</h3>
               <ul className="mt-3 space-y-2.5">
-                {pontosDosTermos(pedido).map((p) => (
+                {pontosDosTermos(pedido, forma).map((p) => (
                   <li key={p} className="flex gap-2.5 leading-6">
                     <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-brand" />
                     {p}
