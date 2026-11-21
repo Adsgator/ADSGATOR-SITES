@@ -1,7 +1,15 @@
-import { CheckIcon, GlobeIcon, LayoutTemplateIcon, TargetIcon, WrenchIcon, type LucideIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 
 import { IconePix } from "@/components/icone-pix";
-import { dataCurta, reais, valorDaParcela, type Forma, type Mensalidade, type Pedido } from "@/lib/checkout/pedido";
+import {
+  dataCurta,
+  reais,
+  valorDaParcela,
+  type Forma,
+  type LinhaDeHoje,
+  type Mensalidade,
+  type Pedido,
+} from "@/lib/checkout/pedido";
 
 /** Quando cada mensalidade começa, dito para o cliente. */
 export function inicioDaMensalidade(m: Mensalidade, pedido: Pedido) {
@@ -13,7 +21,7 @@ export function inicioDaMensalidade(m: Mensalidade, pedido: Pedido) {
     case "incluida":
       return "Incluída no Google Ads para a página feita pela Adsgator.";
     case "hoje":
-      return `A primeira vence em ${dataCurta(pedido.vencimento)}, e as próximas todo dia ${pedido.diaDaRenovacao}.`;
+      return `1ª mensalidade: vence em ${dataCurta(pedido.vencimento)}, e as próximas todo dia ${pedido.diaDaRenovacao}.`;
   }
 }
 
@@ -24,42 +32,55 @@ export function comoPaga(pedido: Pedido, forma: Forma, parcelas: number) {
   return "no cartão, à vista";
 }
 
-const icones: Record<string, LucideIcon> = {
-  "google-ads": TargetIcon,
-  "landing-page": LayoutTemplateIcon,
-  "site-institucional": GlobeIcon,
-  manutencao: WrenchIcon,
-};
-
-/** Um serviço do pedido: ícone, nome, preço, o que é e, se houver, quando começa. */
-function ItemDoPedido({
+/** Uma linha do resumo: o nome e o preço e, embaixo, o que ajuda (o prazo,
+ * quando a mensalidade começa). Sem ícones, para ficar limpo (Lucas, 2026-11-21). */
+function LinhaDoResumo({
   slug,
   nome,
-  descricao,
-  preco,
   nota,
+  preco,
 }: {
   slug: string;
   nome: string;
-  descricao?: string;
-  preco: React.ReactNode;
   nota?: string;
+  preco: React.ReactNode;
 }) {
-  const Icone = icones[slug] ?? TargetIcon;
   return (
-    <li className="flex gap-3" data-servico={slug}>
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand/15 ring-1 ring-brand/30">
-        <Icone className="size-[1.125rem]" aria-hidden="true" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
-          <span className="font-semibold">{nome}</span>
-          <span className="font-semibold whitespace-nowrap">{preco}</span>
-        </p>
-        {descricao && <p className="mt-1 text-xs leading-5 text-muted-foreground">{descricao}</p>}
-        {nota && <p className="mt-1 text-xs leading-5">{nota}</p>}
+    <li data-servico={slug}>
+      <div className="flex items-start justify-between gap-4">
+        <span className="font-medium">{nome}</span>
+        <span className="shrink-0 text-right">{preco}</span>
       </div>
+      {nota && <p className="mt-1 text-sm leading-5 text-muted-foreground">{nota}</p>}
     </li>
+  );
+}
+
+/** O preço da criação: no cartão parcelado, a parcela em destaque e o valor no
+ * cartão de referência (Lucas, 2026-11-21); no Pix ou à vista, o valor. */
+function PrecoDaCriacao({ linha, forma, parcelas }: { linha: LinhaDeHoje; forma: Forma; parcelas: number }) {
+  const cheio = linha.valorCheio && <span className="mr-1 line-through">{reais(linha.valorCheio)}</span>;
+  if (forma === "cartao" && parcelas > 1)
+    return (
+      <>
+        <span className="block font-semibold">
+          <span className="text-sm font-normal text-muted-foreground">{parcelas}x de </span>
+          {reais(valorDaParcela(linha.valor, parcelas))}
+        </span>
+        <span className="block text-xs text-muted-foreground">
+          {cheio}
+          {reais(linha.valor)} no cartão
+        </span>
+      </>
+    );
+  return (
+    <>
+      <span className="block font-semibold">{reais(linha.valor)}</span>
+      <span className="block text-xs text-muted-foreground">
+        {cheio}
+        {forma === "pix" ? "no Pix" : "no cartão, à vista"}
+      </span>
+    </>
   );
 }
 
@@ -78,62 +99,60 @@ export function ResumoDoPedido({
   aoEscolherPix: () => void;
 }) {
   const depois = pedido.mensalidades.filter((m) => m.inicio !== "hoje");
-  const descricao = (slug: string) => pedido.servicos.find((s) => s.slug === slug)?.resumo;
+  const nota = (slug: string) => pedido.servicos.find((s) => s.slug === slug)?.nota;
   const temMensal = pedido.mensalidades.length > 0;
   const mensalDeHoje = pedido.mensalidades.find((m) => m.inicio === "hoje");
 
   return (
-    <div className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6" data-resumo>
-      <h2 className="text-lg font-semibold">Seu pedido</h2>
+    <div className="rounded-2xl border bg-card p-5 text-[0.9375rem] shadow-sm sm:p-6" data-resumo>
+      <h2 className="text-lg font-semibold">Resumo</h2>
 
-      <ul className="mt-5 space-y-5" data-servicos>
+      <ul className="mt-5 space-y-4" data-servicos>
         {pedido.hoje.map((l) => (
-          <ItemDoPedido
+          <LinhaDoResumo
             key={l.slug}
             slug={l.slug}
             nome={l.nome}
-            descricao={descricao(l.slug)}
-            nota={l.mensal ? "1ª mensalidade" : undefined}
+            nota={l.mensal && mensalDeHoje ? inicioDaMensalidade(mensalDeHoje, pedido) : nota(l.slug)}
             preco={
-              <>
-                {l.valorCheio && (
-                  <span className="mr-1.5 text-xs font-normal text-muted-foreground line-through">{reais(l.valorCheio)}</span>
-                )}
-                {reais(l.valor)}
-              </>
+              l.mensal ? (
+                <span className="font-semibold">{reais(l.valor)}</span>
+              ) : (
+                <PrecoDaCriacao linha={l} forma={forma} parcelas={parcelas} />
+              )
             }
           />
         ))}
       </ul>
 
       {pedido.economiaNoCombo > 0 && (
-        <p className="mt-3 text-xs text-muted-foreground">
-          Com o Google Ads junto, a criação sai {reais(pedido.economiaNoCombo)} mais barata.
+        <p className="mt-3 text-sm font-medium">
+          Com o Google Ads junto, você economiza {reais(pedido.economiaNoCombo)} na criação.
         </p>
       )}
 
-      <div className="mt-4 flex items-end justify-between gap-4 border-t pt-4">
-        <span className="text-sm font-medium">Total hoje</span>
-        <span className="text-right">
-          <strong className="block text-2xl font-semibold tracking-tight" data-total>
+      <div className="mt-5 rounded-xl bg-muted/70 px-4 py-3.5">
+        <div className="flex items-baseline justify-between gap-4">
+          <span className="font-semibold">Total hoje</span>
+          <strong className="text-2xl font-semibold tracking-tight" data-total>
             {reais(pedido.totalHoje)}
           </strong>
-          <span className="text-xs text-muted-foreground">{comoPaga(pedido, forma, parcelas)}</span>
-        </span>
+        </div>
+        <p className="mt-0.5 text-right text-sm text-muted-foreground">{comoPaga(pedido, forma, parcelas)}</p>
       </div>
 
       {economiaNoPix > 0 &&
         (forma === "cartao" ? (
           <div className="mt-4 rounded-xl border border-brand bg-brand/15 p-4" data-destaque-pix>
-            <p className="flex items-center gap-2 text-sm font-semibold">
+            <p className="flex items-center gap-2 font-semibold">
               <IconePix className="size-4 shrink-0" />
               No Pix sai por {reais(pedido.totalHoje - economiaNoPix)}
             </p>
-            <p className="mt-1 text-xs leading-5">Você economiza {reais(economiaNoPix)} pagando à vista no Pix.</p>
+            <p className="mt-1 text-sm leading-5">Você economiza {reais(economiaNoPix)} pagando à vista no Pix.</p>
             <button
               type="button"
               onClick={aoEscolherPix}
-              className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full bg-brand text-sm font-semibold text-brand-foreground hover:bg-brand/90"
+              className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-sm font-semibold text-brand-foreground hover:bg-brand/90"
             >
               Pagar no Pix
             </button>
@@ -148,35 +167,30 @@ export function ResumoDoPedido({
       {depois.length > 0 && (
         <div className="mt-5 border-t pt-5">
           <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Depois</h3>
-          <ul className="mt-4 space-y-5">
+          <ul className="mt-3 space-y-4">
             {depois.map((m) => (
-              <ItemDoPedido
+              <LinhaDoResumo
                 key={m.slug}
                 slug={m.slug}
                 nome={m.nome}
-                descricao={descricao(m.slug)}
                 nota={inicioDaMensalidade(m, pedido)}
-                preco={m.inicio === "incluida" ? "Incluída" : `${reais(m.valor)}/mês`}
+                preco={<span className="font-semibold">{m.inicio === "incluida" ? "Incluída" : `${reais(m.valor)}/mês`}</span>}
               />
             ))}
           </ul>
         </div>
       )}
 
-      {mensalDeHoje && (
-        <p className="mt-4 text-xs leading-5 text-muted-foreground">{inicioDaMensalidade(mensalDeHoje, pedido)}</p>
-      )}
-
-      <ul className="mt-5 space-y-2 border-t pt-4 text-xs text-muted-foreground">
+      <ul className="mt-5 space-y-2 border-t pt-4 text-sm text-muted-foreground">
         {temMensal && (
           <li className="flex gap-2">
-            <CheckIcon className="mt-0.5 size-3.5 shrink-0 text-success" aria-hidden="true" />
+            <CheckIcon className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
             Sem fidelidade: cancele quando quiser.
           </li>
         )}
         <li className="flex gap-2">
-          <CheckIcon className="mt-0.5 size-3.5 shrink-0 text-success" aria-hidden="true" />
-          Desistiu em até 7 dias? Você recebe de volta o que pagou.
+          <CheckIcon className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+          Garantia de 7 dias: se desistir, você recebe de volta o valor pago.
         </li>
       </ul>
     </div>

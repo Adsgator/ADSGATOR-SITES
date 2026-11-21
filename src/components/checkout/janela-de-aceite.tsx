@@ -44,7 +44,7 @@ function pontosDosTermos(pedido: Pedido) {
     pontos.push("Sem fidelidade: os planos mensais podem ser cancelados quando você quiser, sem multa, avisando 48 horas antes do vencimento.");
     pontos.push("Com 7 dias de atraso na mensalidade, o serviço é suspenso; com 15, o plano é cancelado.");
   }
-  pontos.push("Desistência em 7 dias: se desistir em até 7 dias da contratação, você recebe de volta o que pagou à Adsgator.");
+  pontos.push("Garantia de 7 dias: se desistir em até 7 dias da contratação, você recebe de volta o que pagou à Adsgator.");
   pontos.push("A Adsgator não garante vendas, contatos nem posição no Google: o resultado do seu negócio é seu.");
   return pontos;
 }

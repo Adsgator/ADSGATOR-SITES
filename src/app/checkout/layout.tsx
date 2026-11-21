@@ -61,7 +61,7 @@ export default function LayoutDoCheckout({ children }: LayoutProps<"/checkout">)
             </p>
             <p className="max-w-md text-xs leading-5 text-muted-foreground">
               As cobranças são feitas pelo Asaas, a plataforma de pagamentos usada pela Adsgator. Os dados do
-              cartão vão direto para ele e não ficam guardados com a gente.
+              cartão são enviados a ele em conexão segura e não ficam guardados com a gente.
             </p>
           </div>
           <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-muted-foreground">

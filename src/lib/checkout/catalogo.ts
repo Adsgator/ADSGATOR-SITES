@@ -11,7 +11,8 @@ export type Preco = { cartao: number; pix: number };
 export type Servico = {
   slug: string;
   nome: string;
-  resumo: string;
+  /** Linha curta embaixo do nome, no resumo (ex.: o prazo). Só quando ajuda. */
+  nota?: string;
   tipo: "unico" | "mensal";
   preco: Preco;
   /** Preço da criação para quem contrata junto com o Google Ads (combo). */
@@ -24,7 +25,6 @@ export const catalogo: Servico[] = [
   {
     slug: "google-ads",
     nome: "Gestão de Google Ads",
-    resumo: "Campanhas criadas e acompanhadas por nós, com resumo todo mês. A verba é paga por você direto ao Google.",
     tipo: "mensal",
     preco: { cartao: 50000, pix: 50000 },
     maxParcelas: 1,
@@ -32,7 +32,7 @@ export const catalogo: Servico[] = [
   {
     slug: "landing-page",
     nome: "Landing page",
-    resumo: "Página sob medida, rápida no celular, com o domínio no seu nome. Pronta em até 7 dias úteis.",
+    nota: "Pronta em até 7 dias úteis.",
     tipo: "unico",
     preco: { cartao: 160000, pix: 140000 },
     precoNoCombo: { cartao: 125000, pix: 110000 },
@@ -41,7 +41,7 @@ export const catalogo: Servico[] = [
   {
     slug: "site-institucional",
     nome: "Site institucional",
-    resumo: "Site de até 5 páginas, sob medida, com o domínio no seu nome. Pronto em até 25 dias úteis.",
+    nota: "Pronto em até 25 dias úteis.",
     tipo: "unico",
     preco: { cartao: 320000, pix: 280000 },
     precoNoCombo: { cartao: 255000, pix: 225000 },
@@ -50,7 +50,6 @@ export const catalogo: Servico[] = [
   {
     slug: "manutencao",
     nome: "Manutenção e suporte",
-    resumo: "Hospedagem, renovação do domínio, monitoramento e até 2 horas de ajustes por mês.",
     tipo: "mensal",
     preco: { cartao: 15000, pix: 15000 },
     maxParcelas: 1,

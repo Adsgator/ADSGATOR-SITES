@@ -26,7 +26,7 @@ import {
 import { dataCurta, montarPedido, reais, valorDaParcela, type Forma } from "@/lib/checkout/pedido";
 import { cn } from "@/lib/utils";
 
-import { ariaDoErro, Campo, estiloDoCampo } from "./campo";
+import { ariaDoErro, Campo, estiloDoCampo, Seletor } from "./campo";
 import { JanelaDeAceite } from "./janela-de-aceite";
 import { ResultadoDaContratacao } from "./resultado";
 import { ResumoDoPedido } from "./resumo";
@@ -418,12 +418,11 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
               />
             </Campo>
             <Campo id="uf" rotulo="Estado" erro={erros.uf} className="sm:col-span-2">
-              <select
+              <Seletor
                 id="uf"
                 autoComplete="address-level1"
                 value={dados.uf}
                 onChange={(e) => mudarDados("uf", e.target.value)}
-                className={estiloDoCampo}
                 {...ariaDoErro("uf", erros.uf)}
               >
                 <option value="">Escolha</option>
@@ -432,7 +431,7 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
                     {uf}
                   </option>
                 ))}
-              </select>
+              </Seletor>
             </Campo>
           </div>
 
@@ -477,7 +476,7 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
                       {f === "pix" ? <IconePix className="size-4" /> : <CreditCardIcon className="size-4" aria-hidden="true" />}
                       {f === "pix" ? "Pix" : "Cartão de crédito"}
                     </span>
-                    <span className="block text-xs text-muted-foreground">
+                    <span className="mt-0.5 block text-sm text-muted-foreground">
                       {f === "pix"
                         ? `${reais(p.totalHoje)} à vista · vence em ${dataCurta(p.vencimento)}`
                         : p.maxParcelas > 1
@@ -554,22 +553,17 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
               </Campo>
               {pedido.maxParcelas > 1 && (
                 <Campo id="parcelas" rotulo="Parcelas" className="sm:col-span-6">
-                  <select
-                    id="parcelas"
-                    value={parcelas}
-                    onChange={(e) => setParcelas(Number(e.target.value))}
-                    className={estiloDoCampo}
-                  >
+                  <Seletor id="parcelas" value={parcelas} onChange={(e) => setParcelas(Number(e.target.value))}>
                     {Array.from({ length: pedido.maxParcelas }, (_, i) => i + 1).map((n) => (
                       <option key={n} value={n}>
                         {n === 1 ? `À vista, ${reais(pedido.totalHoje)}` : `${n}x de ${reais(valorDaParcela(pedido.totalHoje, n))} sem juros`}
                       </option>
                     ))}
-                  </select>
+                  </Seletor>
                 </Campo>
               )}
               {pedido.hoje.some((l) => l.mensal) && (
-                <p className="text-xs leading-5 text-muted-foreground sm:col-span-6">
+                <p className="text-sm leading-6 text-muted-foreground sm:col-span-6">
                   As próximas mensalidades são cobradas neste cartão, todo dia {pedido.diaDaRenovacao}.
                 </p>
               )}
@@ -585,7 +579,7 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
             <LockIcon className="size-4" aria-hidden="true" />
             Contratar · {reais(pedido.totalHoje)}
           </button>
-          <p className="mt-3 text-center text-xs text-muted-foreground">
+          <p className="mt-3 text-center text-sm text-muted-foreground">
             Antes de pagar, você revisa tudo e aceita os Termos.
           </p>
         </section>

@@ -9,7 +9,9 @@
 // - a janela de aceite: o botão final só funciona com "Li e aceito" marcado,
 //   e o Contratar leva à tela do Pix ou do cartão aprovado;
 // - fora do Google (noindex), nenhum pedido ao Google, nenhum cookie;
-// - um cartão só com o pedido (sem a seção "O que foi combinado");
+// - um cartão só, o Resumo (sem a seção "O que foi combinado"), sem ícones, com
+//   a parcela da criação em destaque e a garantia de 7 dias; os seletores com o
+//   desenho dos campos;
 // - celular sem rolagem para o lado e o pedido antes dos dados,
 //   console sem erros, nos dois modos de animação.
 // Uso: node tests/checkout.mjs [checkout]
@@ -60,8 +62,11 @@ try {
       check(`${rotulo}: só a página no cartão`, limpo(await total(p)) === "R$ 1.600,00", await total(p));
       check(`${rotulo}: Pix com a economia`, /No Pix sai por R\$ 1\.400,00/.test(limpo(await p.locator("[data-destaque-pix]").innerText())));
       check(`${rotulo}: selo de economia no Pix`, /Economize R\$ 200,00/.test(limpo(await p.locator("fieldset").innerText())));
-      check(`${rotulo}: um cartão só com o pedido`, (await p.getByRole("heading", { name: "O que foi combinado" }).count()) === 0 && (await p.getByRole("heading", { name: "Seu pedido" }).count()) === 1);
-      check(`${rotulo}: o pedido diz o que é o serviço`, /Página sob medida/.test(await p.locator("[data-resumo]").innerText()));
+      check(`${rotulo}: um cartão só, o Resumo`, (await p.getByRole("heading", { name: "O que foi combinado" }).count()) === 0 && (await p.getByRole("heading", { name: "Resumo", exact: true }).count()) === 1);
+      check(`${rotulo}: serviço sem ícone, só com o prazo`, (await p.locator("[data-servicos] svg").count()) === 0 && /Pronta em até 7 dias úteis\./.test(await p.locator('[data-servico="landing-page"]').innerText()));
+      check(`${rotulo}: parcela em destaque e o cartão de referência`, /12x de R\$ 133,33.*R\$ 1\.600,00 no cartão/s.test(limpo(await p.locator('[data-servico="landing-page"]').innerText())));
+      check(`${rotulo}: garantia de 7 dias`, /Garantia de 7 dias/.test(await p.locator("[data-resumo]").innerText()));
+      check(`${rotulo}: seletores com o desenho dos campos`, (await p.evaluate(() => ["uf", "parcelas"].map((id) => getComputedStyle(document.getElementById(id)).appearance))).every((a) => a === "none"));
       check(`${rotulo}: parcelas no total`, /em 12x de R\$ 133,33 sem juros/.test(limpo(await p.locator("[data-resumo]").innerText())));
       check(`${rotulo}: ícone do Pix no destaque`, (await p.locator("[data-destaque-pix] svg").count()) === 1);
       check(`${rotulo}: sem passos numerados e sem o atalho de dúvida`, (await p.locator("main ol").count()) === 0 && !/Ficou alguma dúvida/.test(await p.locator("main").innerText()));
@@ -145,7 +150,7 @@ try {
       check(`${rotulo}: janela de aceite abre`, (await p.locator("[data-janela-aceite]").count()) === 1);
       check(`${rotulo}: Contratar travado sem o aceite`, await p.locator("[data-contratar-final]").isDisabled());
       const textoDaJanela = await p.locator("[data-janela-aceite]").innerText();
-      check(`${rotulo}: janela traz os Termos`, /Sem fidelidade/.test(textoDaJanela) && /Desistência em 7 dias/.test(textoDaJanela));
+      check(`${rotulo}: janela traz os Termos`, /Sem fidelidade/.test(textoDaJanela) && /Garantia de 7 dias/.test(textoDaJanela));
       await p.locator("[data-aceite]").check();
       check(`${rotulo}: Contratar liberado com o aceite`, await p.locator("[data-contratar-final]").isEnabled());
       await p.locator("[data-contratar-final]").click();
