@@ -772,8 +772,10 @@ página); aprovar a página de amostra.
   chegar na tela, com transições de CSS: iguais nos dois modos de animação, sem
   botão de pausar (decisões dele), marcados "exemplo". `tests/ajuda.mjs` confere
   que cada um anda nos dois modos: tudo certo no localhost.
-- Pendente: o Lucas ver os desenhos no localhost e autorizar a publicação; os
-  links da Base e os 2 modelos de saldo do painel.
+- Desenhos **publicados em 2026-11-21** (autorizados pelo Lucas; `main`
+  3210ff0): `tests/ajuda.mjs` e `seo.mjs` tudo certo em produção.
+- Pendente: os links da Base e os 2 modelos de saldo do painel (com a
+  aprovação dele).
 
 ### Fase 3: página inicial e páginas dos planos
 
