@@ -101,7 +101,7 @@ for (const [origem, esperado] of antigos) {
   check("imagem de compartilhamento", og.status === 200 && og.headers.get("content-type") === "image/png");
   // O Chrome às vezes pede /favicon.ico por conta própria; sem ele, dá 404 no console.
   const ico = await fetch(BASE + "/favicon.ico");
-  check("favicon.ico", ico.status === 200 && ico.headers.get("content-type") === "image/x-icon", `${ico.status} ${ico.headers.get("content-type")}`);
+  check("favicon.ico", ico.status === 200 && ["image/x-icon", "image/vnd.microsoft.icon"].includes(ico.headers.get("content-type")), `${ico.status} ${ico.headers.get("content-type")}`);
 }
 
 // 4. No Chrome, com cliques.

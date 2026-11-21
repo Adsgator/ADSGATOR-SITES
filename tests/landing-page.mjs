@@ -54,6 +54,11 @@ try {
       // Topo: um ciclo inteiro da montagem, olhando também o resto da página.
       const amostras = [];
       let conferidoMeio = null;
+      // Quando a fase atual de 2 partes começou (zera a cada troca de fase): a
+      // conferência espera 600 ms dentro da mesma fase, para as transições
+      // terminarem. Contar as amostras somando as voltas pegava, em produção, o
+      // começo da volta seguinte, com a parte ainda entrando.
+      let desdeDuas = null;
       const inicio = Date.now();
       while (Date.now() - inicio < 26_000) {
         const a = await page.evaluate(() => {
@@ -73,7 +78,8 @@ try {
         amostras.push(a);
         // Com 2 partes montadas e as transições terminadas: as 2 primeiras à
         // vista, a última ainda escondida.
-        if (!conferidoMeio && a.feitos === 2 && amostras.filter((x) => x.feitos === 2).length >= 4) conferidoMeio = a.partes;
+        desdeDuas = a.feitos === 2 ? (desdeDuas ?? Date.now()) : null;
+        if (!conferidoMeio && desdeDuas && Date.now() - desdeDuas >= 600) conferidoMeio = a.partes;
         await page.waitForTimeout(200);
       }
       const contagens = new Set(amostras.map((a) => a.feitos));
