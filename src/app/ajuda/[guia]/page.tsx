@@ -16,6 +16,8 @@ import {
   guias,
   mensagemDeTerminei,
   mensagemDoGuia,
+  type GuiaDeExplicacao,
+  type GuiaDePassos,
   type Parte,
 } from "@/content/ajuda";
 
@@ -26,20 +28,19 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/ajuda/[guia]">): Promise<Metadata> {
   const guia = guiaPorSlug((await params).guia);
   if (!guia) return {};
-  return {
-    title: guia.curto,
-    description: guia.resumo,
-    alternates: { canonical: `/${guia.slug}` },
-  };
+  return { title: guia.curto, description: guia.resumo, alternates: { canonical: `/${guia.slug}` } };
 }
+
+// Links dentro do texto dos guias (para outro guia ou para o Google).
+const textoComLinks = "[&_a]:font-medium [&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-4";
 
 /** Os passos de uma parte, numerados, com o "Fiz este passo" e a barra. */
 function PassosDaParte({ parte, mostrarTitulo }: { parte: Parte; mostrarTitulo: boolean }) {
   return (
     <ProgressoDoGuia total={parte.passos.length}>
-      <section className="mt-10 first:mt-0">
+      <section className="mt-12 first:mt-0">
         {mostrarTitulo && parte.titulo && <h2 className="font-heading text-2xl sm:text-3xl">{parte.titulo}</h2>}
-        {parte.intro && <p className="mt-3 leading-7 text-muted-foreground">{parte.intro}</p>}
+        {parte.intro && <p className={`mt-3 leading-7 text-muted-foreground ${textoComLinks}`}>{parte.intro}</p>}
         <div className="mt-6">
           <BarraDoProgresso />
         </div>
@@ -49,7 +50,7 @@ function PassosDaParte({ parte, mostrarTitulo }: { parte: Parte; mostrarTitulo: 
               <NumeroDoPasso passo={i + 1} />
               <div className="min-w-0 pt-1">
                 <h3 className="font-heading text-xl leading-snug">{passo.titulo}</h3>
-                <div className="mt-2 leading-7 text-muted-foreground [&_a]:font-medium [&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-4">{passo.texto}</div>
+                <div className={`mt-2 leading-7 text-muted-foreground ${textoComLinks}`}>{passo.texto}</div>
                 {passo.captura && <CapturaDeTela captura={passo.captura} />}
                 {passo.dica && (
                   <p className="mt-4 flex gap-3 rounded-2xl bg-muted/60 p-4 text-sm leading-6">
@@ -67,35 +68,9 @@ function PassosDaParte({ parte, mostrarTitulo }: { parte: Parte; mostrarTitulo: 
   );
 }
 
-export default async function PaginaDoGuia({ params }: PageProps<"/ajuda/[guia]">) {
-  const guia = guiaPorSlug((await params).guia);
-  if (!guia) notFound();
-  const Icone = iconeDoGuia[guia.slug];
-  const proximo = guia.proximo && guiaPorSlug(guia.proximo);
-
+function CorpoDePassos({ guia }: { guia: GuiaDePassos }) {
   return (
-    <article className="mx-auto max-w-3xl px-4 pt-10 pb-24 sm:pt-14">
-      <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeftIcon className="size-4" />
-        Todos os guias
-      </Link>
-
-      <header className="mt-8">
-        <p className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
-          <Icone className="size-4 text-brand" />
-          {guia.grupo}
-        </p>
-        <h1 className="mt-3 font-heading text-3xl tracking-tight text-balance sm:text-5xl">{guia.titulo}</h1>
-        <p className="mt-4 text-lg leading-8 text-muted-foreground">{guia.resumo}</p>
-        <p className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <ClockIcon className="size-4" />
-            Leva {guia.tempo}
-          </span>
-          <span>Telas conferidas com a ajuda do Google em {guia.conferido}</span>
-        </p>
-      </header>
-
+    <>
       {(guia.antes || guia.emailDaAdsgator) && (
         <div className="mt-8 space-y-4">
           {guia.antes && (
@@ -145,16 +120,69 @@ export default async function PaginaDoGuia({ params }: PageProps<"/ajuda/[guia]"
           </a>
         </div>
       </section>
+    </>
+  );
+}
 
-      {proximo && (
-        <Link href={`/${proximo.slug}`} className="group mt-6 flex items-center justify-between gap-4 rounded-3xl border bg-card p-6 hover:border-brand/60">
-          <span>
-            <span className="block font-mono text-xs text-muted-foreground">Próximo guia</span>
-            <span className="mt-1 block font-heading text-xl">{proximo.curto}</span>
-          </span>
-          <ArrowRightIcon className="size-5 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
-        </Link>
-      )}
+function CorpoDeExplicacao({ guia }: { guia: GuiaDeExplicacao }) {
+  return (
+    <>
+      <div className="mt-12 space-y-12">
+        {guia.secoes.map((secao) => (
+          <section key={secao.titulo} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4">
+            <span aria-hidden="true" className="mt-2 h-6 w-1 rounded-full bg-brand/70" />
+            <div className="min-w-0">
+              <h2 className="font-heading text-2xl leading-snug">{secao.titulo}</h2>
+              <div className={`mt-3 leading-7 text-muted-foreground ${textoComLinks}`}>{secao.texto}</div>
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <section className="mt-14 grid gap-5 rounded-3xl border bg-card p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8">
+        <div>
+          <h2 className="font-heading text-2xl">Ficou alguma dúvida?</h2>
+          <p className="mt-2 leading-7 text-muted-foreground">Pergunta para a gente no WhatsApp. A gente explica olhando a sua campanha.</p>
+        </div>
+        <a
+          href={linkWhatsApp(mensagemDoGuia(guia.curto))}
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-6 font-medium text-brand-foreground hover:bg-brand/90"
+        >
+          <IconeWhatsApp className="size-4" />
+          Perguntar
+        </a>
+      </section>
+    </>
+  );
+}
+
+export default async function PaginaDoGuia({ params }: PageProps<"/ajuda/[guia]">) {
+  const guia = guiaPorSlug((await params).guia);
+  if (!guia) notFound();
+  const Icone = iconeDoGuia[guia.slug];
+  const relacionados = (guia.relacionados ?? []).map((slug) => guiaPorSlug(slug)).filter((g) => g !== undefined);
+
+  return (
+    <article className="mx-auto max-w-3xl px-4 pt-10 pb-24 sm:pt-14">
+      <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+        <ArrowLeftIcon className="size-4" />
+        Todos os guias
+      </Link>
+
+      <header className="mt-8">
+        <p className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+          <Icone className="size-4 text-brand" />
+          {guia.grupo}
+        </p>
+        <h1 className="mt-3 font-heading text-3xl tracking-tight text-balance sm:text-5xl">{guia.titulo}</h1>
+        <p className="mt-4 text-lg leading-8 text-muted-foreground">{guia.resumo}</p>
+        <p className="mt-4 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <ClockIcon className="size-4" />
+          {guia.tipo === "passos" ? `Leva ${guia.tempo}` : guia.tempo}
+        </p>
+      </header>
+
+      {guia.tipo === "passos" ? <CorpoDePassos guia={guia} /> : <CorpoDeExplicacao guia={guia} />}
 
       {guia.duvidas && (
         <section className="mt-14">
@@ -175,18 +203,27 @@ export default async function PaginaDoGuia({ params }: PageProps<"/ajuda/[guia]"
         </section>
       )}
 
-      <footer className="mt-14 border-t pt-6 text-sm text-muted-foreground">
-        <p>Baseado na ajuda oficial do Google:</p>
-        <ul className="mt-2 space-y-1">
-          {guia.fontes.map(({ titulo, href }) => (
-            <li key={href}>
-              <a href={href} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-foreground">
-                {titulo}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </footer>
+      {relacionados.length > 0 && (
+        <section className="mt-14">
+          <h2 className="font-heading text-2xl">{guia.tipo === "passos" ? "Próximo passo" : "Veja também"}</h2>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {relacionados.map((outro) => {
+              const IconeOutro = iconeDoGuia[outro.slug];
+              return (
+                <li key={outro.slug}>
+                  <Link href={`/${outro.slug}`} className="group flex h-full items-center gap-4 rounded-3xl border bg-card p-5 hover:border-brand/60">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+                      <IconeOutro className="size-5" />
+                    </span>
+                    <span className="flex-1 font-heading text-lg leading-snug">{outro.curto}</span>
+                    <ArrowRightIcon className="size-5 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
     </article>
   );
 }

@@ -10,7 +10,7 @@ import { grupos, guias, mensagemDaAjuda } from "@/content/ajuda";
 
 export const metadata: Metadata = {
   title: { absolute: "Central de Ajuda da Adsgator" },
-  description: "Passo a passo para aceitar o convite, configurar o pagamento, dar acesso ao perfil no Google e adicionar saldo no Google Ads.",
+  description: "Guias da Adsgator: configurar o Google Ads, dar acesso ao perfil no Google, pagar e adicionar saldo, e entender os resultados da campanha.",
   alternates: { canonical: "/" },
 };
 
@@ -22,7 +22,7 @@ export default function CentralDeAjuda() {
         Passo a passo para a sua conta
       </h1>
       <p className="mt-4 max-w-2xl text-lg leading-8 text-muted-foreground">
-        Os guias que a gente manda no WhatsApp e no e-mail ficam todos aqui, com as telas do Google. Travou em algum passo? É só chamar.
+        Tudo para configurar e acompanhar a sua conta do Google Ads e o seu perfil no Google, explicado sem complicação. Ficou alguma dúvida? É só chamar.
       </p>
 
       {grupos.map((grupo) => {
@@ -51,7 +51,7 @@ export default function CentralDeAjuda() {
                           {guia.tempo}
                         </span>
                         <span className="flex items-center gap-1 font-medium">
-                          Ver o guia
+                          {guia.tipo === "passos" ? "Ver o passo a passo" : "Ler"}
                           <ArrowRightIcon className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                         </span>
                       </span>

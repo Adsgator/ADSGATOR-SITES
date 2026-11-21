@@ -6,7 +6,7 @@
 //   feito!" e o copiar do e-mail;
 // - nenhum cookie, nenhum pedido ao Google e nenhum aviso de cookies;
 // - celular sem rolagem para o lado, console sem erros, nos dois modos de
-//   animação; e nenhuma captura faltando (o quadro provisório).
+//   animação; as capturas carregam; nenhuma frase de bastidor no texto.
 // Uso: node tests/ajuda.mjs [site] [central]
 //   padrão: http://localhost:3005 http://ajuda.localhost:3005
 //   produção: node tests/ajuda.mjs https://www.adsgator.com.br https://ajuda.adsgator.com.br
@@ -17,6 +17,14 @@ const SITE = process.argv[2] ?? "http://localhost:3005";
 const AJUDA = process.argv[3] ?? "http://ajuda.localhost:3005";
 const producao = SITE.startsWith("https://");
 let falhas = 0;
+// As capturas carregam quando chegam na tela: rola até cada uma, como quem lê.
+async function capturasQueNaoCarregaram(p) {
+  for (const img of await p.locator("main figure img").all()) {
+    await img.scrollIntoViewIfNeeded();
+    await img.evaluate((i) => (i.complete ? null : new Promise((ok) => i.addEventListener("load", ok, { once: true }))));
+  }
+  return p.locator("main figure img").evaluateAll((is) => is.filter((i) => !(i.naturalWidth > 0)).map((i) => i.src));
+}
 function check(nome, ok, detalhe = "") {
   console.log(`${ok ? "ok  " : "FALHA"} ${nome}${detalhe ? ` (${detalhe})` : ""}`);
   if (!ok) falhas++;
@@ -28,7 +36,18 @@ const guias = {
   "id-da-conta": "Onde fica o número (ID) da sua conta do Google Ads",
   "acesso-ao-perfil": "Dar acesso ao seu perfil no Google",
   "adicionar-saldo": "Adicionar saldo no Google Ads",
+  "cartao-ou-pix": "Cartão ou Pix: como pagar o Google Ads",
+  "verificacao-do-anunciante": "Verificação do anunciante: o que é e o que enviar",
+  "resumo-do-mes": "Como ler o resumo do mês",
+  "primeiros-dias": "Os primeiros dias da sua campanha",
+  "nao-vejo-meu-anuncio": "Pesquisei e não vi o meu anúncio. E agora?",
+  metricas: "As principais métricas do Google Ads, sem complicação",
+  leilao: "Como funciona o leilão do Google",
+  "cookies-e-lgpd": "LGPD e o aviso de cookies na sua página",
 };
+const dePassos = new Set(["aceitar-convite", "configurar-pagamento", "id-da-conta", "acesso-ao-perfil", "adicionar-saldo"]);
+// Frases de bastidor que não podem aparecer para o cliente (correção do Lucas, 2026-11-21).
+const deBastidor = /conferid[ao]s? com|ajuda oficial|regra do Google|Captura \d|não usa cookies|Marque cada passo/i;
 const antigos = {
   "como-criar-uma-conta-no-google-ads": "id-da-conta",
   "como-configurar-sua-conta-no-google-ads": "configurar-pagamento",
@@ -86,17 +105,24 @@ try {
       // A lista: os 5 guias; clicar num cartão abre o guia.
       await p.goto(AJUDA, { waitUntil: "networkidle" });
       const cartoes = await p.locator("main a[href^='/']").evaluateAll((as) => as.map((a) => a.getAttribute("href")));
-      check(`${rotulo}: a lista tem os 5 guias`, Object.keys(guias).every((s) => cartoes.includes(`/${s}`)), cartoes.join(" "));
+      check(`${rotulo}: a lista tem os ${Object.keys(guias).length} guias`, Object.keys(guias).every((s) => cartoes.includes(`/${s}`)), cartoes.join(" "));
       await p.getByRole("link", { name: /Adicionar saldo/ }).click();
       await p.waitForURL(`${AJUDA}/adicionar-saldo`);
       check(`${rotulo}: o cartão abre o guia`, (await p.locator("h1").textContent()) === guias["adicionar-saldo"]);
 
-      let faltando = [];
       for (const [slug, titulo] of Object.entries(guias)) {
         await p.goto(`${AJUDA}/${slug}`, { waitUntil: "networkidle" });
         const largura = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
         check(`${rotulo}, ${slug}: título e sem rolagem para o lado`, (await p.locator("h1").textContent()) === titulo && largura <= 0, `sobra ${largura}px`);
-        faltando.push(...(await p.locator("[data-captura-faltando]").evaluateAll((fs) => fs.map((f) => f.dataset.capturaFaltando))));
+        const texto = await p.locator("main").innerText();
+        check(`${rotulo}, ${slug}: sem frase de bastidor`, !deBastidor.test(texto), texto.match(deBastidor)?.[0]);
+        const quebradas = await capturasQueNaoCarregaram(p);
+        check(`${rotulo}, ${slug}: as ${await p.locator("main figure img").count()} capturas carregam`, quebradas.length === 0, quebradas.join(" "));
+        await p.evaluate(() => window.scrollTo(0, 0));
+        if (!dePassos.has(slug)) {
+          check(`${rotulo}, ${slug}: explicação com seções e o "Perguntar"`, (await p.locator("main h2").count()) >= 3 && (await p.getByRole("link", { name: "Perguntar" }).isVisible()));
+          continue;
+        }
 
         // "Fiz este passo" em todos os passos visíveis do primeiro caminho até "Tudo feito!".
         const barra = p.getByText(/passos feitos|Tudo feito!/).first();
@@ -109,9 +135,8 @@ try {
       await p.goto(`${AJUDA}/aceitar-convite`, { waitUntil: "networkidle" });
       await p.getByRole("button", { name: "Eu já tinha conta" }).click();
       check(`${rotulo}: "Eu já tinha conta" mostra o pedido de vinculação`, await p.getByRole("heading", { name: "Aceite o pedido da Adsgator" }).isVisible());
-      faltando.push(...(await p.locator("[data-captura-faltando]").evaluateAll((fs) => fs.map((f) => f.dataset.capturaFaltando))));
-      faltando = [...new Set(faltando.map(Number))].sort((a, b) => a - b);
-      check(`${rotulo}: nenhuma captura faltando`, faltando.length === 0, faltando.length ? `faltam ${faltando.join(", ")}` : "");
+      const doCaminho = await capturasQueNaoCarregaram(p);
+      check(`${rotulo}: as capturas do outro caminho carregam`, doCaminho.length === 0 && (await p.locator("main figure img").count()) === 3, doCaminho.join(" "));
 
       // Copiar o e-mail da Adsgator.
       await p.goto(`${AJUDA}/acesso-ao-perfil`, { waitUntil: "networkidle" });

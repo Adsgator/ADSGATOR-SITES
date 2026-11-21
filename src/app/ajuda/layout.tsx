@@ -51,7 +51,6 @@ export default function LayoutDaAjuda({ children }: LayoutProps<"/ajuda">) {
           <div className="space-y-1">
             <p className="font-medium text-foreground">Adsgator</p>
             <p>Atendimento no WhatsApp: {site.horario.toLowerCase()}.</p>
-            <p>Esta central não usa cookies nem medição.</p>
           </div>
           <nav aria-label="Links da Adsgator" className="flex flex-wrap gap-x-5 gap-y-2">
             <a href={site.url} className="hover:text-foreground">Site da Adsgator</a>

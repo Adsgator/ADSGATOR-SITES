@@ -46,7 +46,8 @@ check("títulos diferentes em cada página", repetidos.length === 0, repetidos.j
 // A Central de Ajuda (ajuda.adsgator.com.br): título, descrição e canonical no
 // endereço dela.
 const AJUDA = BASE.startsWith("https://") ? "https://ajuda.adsgator.com.br" : BASE.replace("://localhost", "://ajuda.localhost");
-for (const caminho of ["/", "/aceitar-convite", "/configurar-pagamento", "/id-da-conta", "/acesso-ao-perfil", "/adicionar-saldo"]) {
+const daAjuda = ["aceitar-convite", "configurar-pagamento", "id-da-conta", "acesso-ao-perfil", "adicionar-saldo", "cartao-ou-pix", "verificacao-do-anunciante", "resumo-do-mes", "primeiros-dias", "nao-vejo-meu-anuncio", "metricas", "leilao", "cookies-e-lgpd"];
+for (const caminho of ["/", ...daAjuda.map((s) => `/${s}`)]) {
   const resposta = await fetch(AJUDA + caminho);
   const html = await resposta.text();
   const titulo = html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "";

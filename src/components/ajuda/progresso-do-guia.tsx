@@ -38,12 +38,9 @@ export function BarraDoProgresso() {
   const tudo = feitosAgora === total;
   return (
     <div className="sticky top-16 z-30 -mx-4 mb-8 border-b bg-background/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
-      <div className="flex items-center justify-between gap-3 text-sm">
-        <p aria-live="polite" className={cn("font-medium", tudo && "text-brand")}>
-          {tudo ? "Tudo feito!" : `${feitosAgora} de ${total} passos feitos`}
-        </p>
-        <p className="font-mono text-xs text-muted-foreground">Marque cada passo ao terminar</p>
-      </div>
+      <p aria-live="polite" className={cn("text-sm font-medium", tudo && "text-brand")}>
+        {tudo ? "Tudo feito!" : `${feitosAgora} de ${total} passos feitos`}
+      </p>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
         <div
           className="h-full rounded-full bg-brand transition-[width] duration-300 ease-out"

@@ -9,13 +9,21 @@ export const AJUDA_OFICIAL = "https://ajuda.adsgator.com.br";
 export const enderecoDaAjuda =
   process.env.NODE_ENV === "development" ? "http://ajuda.localhost:3005" : AJUDA_OFICIAL;
 
-/** O endereço de cada guia, na ordem da lista. */
+/** O endereço de cada guia. */
 export const guiasPublicados = [
   "aceitar-convite",
   "configurar-pagamento",
   "id-da-conta",
   "acesso-ao-perfil",
   "adicionar-saldo",
+  "cartao-ou-pix",
+  "verificacao-do-anunciante",
+  "resumo-do-mes",
+  "primeiros-dias",
+  "nao-vejo-meu-anuncio",
+  "metricas",
+  "leilao",
+  "cookies-e-lgpd",
 ] as const;
 
 export type GuiaSlug = (typeof guiasPublicados)[number];
