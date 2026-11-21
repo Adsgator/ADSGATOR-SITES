@@ -1,6 +1,15 @@
 import type { StaticImageData } from "next/image";
 import { ChartNoAxesColumnIcon, LayoutTemplateIcon, RocketIcon, StoreIcon, WalletCardsIcon, type LucideIcon } from "lucide-react";
 
+import {
+  AvisoDeCookiesAnimado,
+  CartaoOuPix,
+  EtapasDaVerificacao,
+  FunilDasMetricas,
+  LeilaoAnimado,
+  LinhaDosPrimeirosDias,
+  OrcamentoDoDia,
+} from "@/components/ajuda/desenhos";
 import { ResumoDoMes } from "@/components/resumo-do-mes";
 import type { GuiaSlug } from "@/config/ajuda-enderecos";
 
@@ -413,6 +422,10 @@ export const guias: Guia[] = [
     tempo: "3 minutos de leitura",
     secoes: [
       {
+        titulo: "Os dois jeitos, lado a lado",
+        texto: <CartaoOuPix />,
+      },
+      {
         titulo: "Cartão: o Google cobra depois",
         texto: p(
           <>O Google cobra o que os anúncios gastaram no primeiro dia de cada mês, ou antes, quando o gasto chega a um valor combinado com ele.</>,
@@ -489,9 +502,14 @@ export const guias: Guia[] = [
       },
       {
         titulo: "Quanto tempo leva",
-        texto: p(
-          <>A análise leva até 5 dias úteis; em casos raros, até 30. Os anúncios continuam rodando enquanto isso.</>,
-          <>Quando o Google dá um prazo, ele não prorroga. Se o prazo passar, a conta para até a verificação terminar. Por isso, se chegar o aviso, faça logo ou chama a gente.</>,
+        texto: (
+          <>
+            {p(
+              <>A análise leva até 5 dias úteis; em casos raros, até 30. Os anúncios continuam rodando enquanto isso.</>,
+              <>Quando o Google dá um prazo, ele não prorroga. Se o prazo passar, a conta para até a verificação terminar. Por isso, se chegar o aviso, faça logo ou chama a gente.</>,
+            )}
+            <EtapasDaVerificacao />
+          </>
         ),
       },
     ],
@@ -574,6 +592,10 @@ export const guias: Guia[] = [
     tempo: "3 minutos de leitura",
     secoes: [
       {
+        titulo: "As duas primeiras semanas",
+        texto: <LinhaDosPrimeirosDias />,
+      },
+      {
         titulo: "Primeiro, a análise dos anúncios",
         texto: p(<>Todo anúncio novo passa pela análise do Google. A maioria sai em 24 a 48 horas; em conta nova, pode levar até 5 dias úteis.</>),
       },
@@ -632,6 +654,15 @@ export const guias: Guia[] = [
         ]),
       },
       {
+        titulo: "O mais comum: o orçamento do dia",
+        texto: (
+          <>
+            {p(<>Se você pesquisa no fim da tarde e o orçamento do dia já foi usado, o anúncio só volta no dia seguinte. Ele apareceu para quem pesquisou mais cedo.</>)}
+            <OrcamentoDoDia />
+          </>
+        ),
+      },
+      {
         titulo: "Por que não vale ficar pesquisando",
         texto: p(
           <>Cada vez que o anúncio aparece para você, conta nos números da campanha como se fosse um cliente que não se interessou. E, se você clicar, o Google cobra o clique.</>,
@@ -661,6 +692,15 @@ export const guias: Guia[] = [
     grupo: "resultados",
     tempo: "4 minutos de leitura",
     secoes: [
+      {
+        titulo: "O caminho, em números",
+        texto: (
+          <>
+            {p(<>Cada número mostra uma parte do caminho entre o anúncio e a mensagem no seu WhatsApp:</>)}
+            <FunilDasMetricas />
+          </>
+        ),
+      },
       { titulo: "Impressões", texto: p(<>Quantas vezes o seu anúncio apareceu para alguém. Conta uma a cada aparição.</>) },
       { titulo: "Cliques", texto: p(<>Quantas vezes alguém clicou no anúncio e foi para a sua página.</>) },
       {
@@ -722,9 +762,14 @@ export const guias: Guia[] = [
       },
       {
         titulo: "Quem paga mais nem sempre aparece primeiro",
-        texto: p(
-          <>Um anúncio bom, com uma página boa, pode ficar acima de um concorrente que paga mais, pagando menos que ele.</>,
-          <>E o clique custa, em geral, menos que o máximo da campanha: o Google cobra só o necessário para passar o anunciante logo abaixo.</>,
+        texto: (
+          <>
+            {p(
+              <>Um anúncio bom, com uma página boa, pode ficar acima de um concorrente que paga mais, pagando menos que ele.</>,
+              <>E o clique custa, em geral, menos que o máximo da campanha: o Google cobra só o necessário para passar o anunciante logo abaixo.</>,
+            )}
+            <LeilaoAnimado />
+          </>
         ),
       },
       {
@@ -767,8 +812,13 @@ export const guias: Guia[] = [
       },
       {
         titulo: "O que muda nos números",
-        texto: p(
-          <>Quem recusa os cookies não entra na conta do Google, mas pode te chamar no WhatsApp do mesmo jeito. Por isso o resumo do mês mostra menos contatos do que você recebe de verdade.</>,
+        texto: (
+          <>
+            {p(
+              <>Quem recusa os cookies não entra na conta do Google, mas pode te chamar no WhatsApp do mesmo jeito. Por isso o resumo do mês mostra menos contatos do que você recebe de verdade.</>,
+            )}
+            <AvisoDeCookiesAnimado />
+          </>
         ),
       },
       {

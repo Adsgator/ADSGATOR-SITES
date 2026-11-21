@@ -764,9 +764,16 @@ página); aprovar a página de amostra.
   (`vercel domains add ajuda.adsgator.com.br adsgator-sites`; o DNS não mudou).
   Em produção: `tests/ajuda.mjs` (os 5 endereços antigos e os dois `/ajuda`
   clicados), `site.mjs` (com `SEM_WWW`), `seo.mjs` e `medicao.mjs` tudo certo.
-- Pendente: desenhos e animações nos guias de explicação (pedido do Lucas,
-  mostrar no localhost antes); os links da Base e os 2 modelos de saldo do
-  painel.
+- Desenhos animados nos guias de explicação (pedido do Lucas, 2026-11-21;
+  branch `ajuda-desenhos`, `src/components/ajuda/desenhos.tsx`): o funil das
+  métricas, o leilão (lance, qualidade e a ordem), cartão ou Pix (o mês e o
+  saldo), as duas primeiras semanas, o orçamento ao longo do dia, o aviso de
+  cookies (quem aceita e quem recusa) e as etapas da verificação. Começam ao
+  chegar na tela, com transições de CSS: iguais nos dois modos de animação, sem
+  botão de pausar (decisões dele), marcados "exemplo". `tests/ajuda.mjs` confere
+  que cada um anda nos dois modos: tudo certo no localhost.
+- Pendente: o Lucas ver os desenhos no localhost e autorizar a publicação; os
+  links da Base e os 2 modelos de saldo do painel.
 
 ### Fase 3: página inicial e páginas dos planos
 

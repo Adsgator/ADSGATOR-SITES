@@ -169,6 +169,21 @@ try {
       }
       check(`${rotulo}: o rodapé tem o logo da Adsgator`, (await p.locator("footer svg, footer img").count()) > 0);
 
+      // Os desenhos dos guias de explicação andam sozinhos ao chegar na tela,
+      // também com "reduzir animações" ligado (no notebook, para não alongar).
+      if (tela.width >= 1024) {
+        for (const slug of ["cartao-ou-pix", "verificacao-do-anunciante", "primeiros-dias", "nao-vejo-meu-anuncio", "metricas", "leilao", "cookies-e-lgpd"]) {
+          await p.goto(`${AJUDA}/${slug}`, { waitUntil: "networkidle" });
+          const desenho = p.locator("article figure").filter({ hasText: "exemplo" }).first();
+          await desenho.scrollIntoViewIfNeeded();
+          const foto = () => desenho.evaluate((f) => f.innerText + [...f.querySelectorAll("*")].map((e) => `${e.getAttribute("class")}${e.getAttribute("style")}`).join("|"));
+          await p.waitForTimeout(400);
+          const antes = await foto();
+          await p.waitForTimeout(3000);
+          check(`${rotulo}, ${slug}: o desenho anda`, antes !== (await foto()));
+        }
+      }
+
       // Copiar o e-mail da Adsgator.
       await p.goto(`${AJUDA}/acesso-ao-perfil`, { waitUntil: "networkidle" });
       await p.getByRole("button", { name: "Copiar" }).click();
