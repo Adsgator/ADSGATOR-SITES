@@ -41,8 +41,17 @@ export type RespostaDaContratacao =
       /** null quando o Asaas não devolveu o QR; aí vale o link da cobrança. */
       pix: { imagem: string; copiaECola: string } | null;
       linkDaCobranca?: string;
+      /** Vencimento da próxima mensalidade (aaaa-mm-dd), quando há assinatura. */
+      proxima?: string;
     }
-  | { ok: true; forma: "cartao"; situacao: "aprovado" | "em_analise"; valor: number; parcelas: number }
+  | {
+      ok: true;
+      forma: "cartao";
+      situacao: "aprovado" | "em_analise";
+      valor: number;
+      parcelas: number;
+      proxima?: string;
+    }
   | { ok: false; erro: string; campos?: Record<string, string> };
 
 /** Situações do Asaas que contam como pago. */
@@ -173,6 +182,7 @@ export async function contratar(
   if (criacoes.length > 0 && mensais.length > 0) throw new Error("pedido com criação e mensalidade no mesmo dia");
 
   let cobranca: asaas.Cobranca;
+  let proxima: string | undefined;
   if (criacoes.length > 0) {
     const total = criacoes.reduce((s, l) => s + l.valor, 0);
     cobranca = await asaas.criarCobranca({
@@ -187,19 +197,20 @@ export async function contratar(
       ...cartao,
     });
   } else {
+    proxima = dataIso(mesmoDiaNoMesSeguinte(hoje));
     cobranca = await ativarMensalidade({
       cliente,
       slugs: mensais.map((l) => l.slug),
       total: mensais.reduce((s, l) => s + l.valor, 0),
       billingType,
       vencimento,
-      proximo: dataIso(mesmoDiaNoMesSeguinte(hoje)),
+      proximo: proxima,
       referencia,
       cartao,
     });
   }
 
-  return respostaDaCobranca(cobranca, p.forma, pedido.totalHoje, p.parcelas, vencimento);
+  return respostaDaCobranca(cobranca, p.forma, pedido.totalHoje, p.parcelas, vencimento, proxima);
 }
 
 /** O cartão no formato do Asaas, com quem é o titular e o IP de quem compra. */
@@ -274,6 +285,7 @@ export async function respostaDaCobranca(
   valor: number,
   parcelas: number,
   vencimento: string,
+  proxima?: string,
 ): Promise<{ status: number; corpo: RespostaDaContratacao }> {
   if (forma === "cartao") {
     return {
@@ -284,6 +296,7 @@ export async function respostaDaCobranca(
         situacao: SITUACOES_PAGAS.includes(cobranca.status) ? "aprovado" : "em_analise",
         valor,
         parcelas,
+        proxima,
       },
     };
   }
@@ -305,6 +318,7 @@ export async function respostaDaCobranca(
       vencimento,
       pix,
       linkDaCobranca: pix ? undefined : cobranca.invoiceUrl,
+      proxima,
     },
   };
 }

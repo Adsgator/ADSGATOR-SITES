@@ -1,7 +1,7 @@
-import { Eyebrow } from "@/components/eyebrow";
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
-import { DepoisDaMensalidade, FormularioDaMensalidade } from "@/components/checkout/mensalidade";
-import { ResultadoDaContratacao } from "@/components/checkout/resultado";
+import { ConteudoDaFaixa, Faixa } from "@/components/checkout/faixa";
+import { FormularioDaMensalidade } from "@/components/checkout/mensalidade";
+import { TelaDoResultado } from "@/components/checkout/resultado";
 import { mensagemDoCheckout } from "@/config/checkout";
 import { linkWhatsApp } from "@/config/site";
 import { servicoPorSlug } from "@/lib/checkout/catalogo";
@@ -68,56 +68,32 @@ export default async function PaginaDaMensalidade({ searchParams }: PageProps<"/
   const cabecalho = servico ? titulos[servico.slug] : undefined;
 
   // Voltou ao link com o Pix da 1ª ainda por pagar: o mesmo Pix.
-  const pixPendente =
-    situacao.tipo === "ativado" && situacao.pixPendente
-      ? (
-          await respostaDaCobranca(
-            situacao.pixPendente,
-            "pix",
-            Math.round(situacao.pixPendente.value * 100),
-            1,
-            situacao.pixPendente.dueDate,
-          )
-        ).corpo
-      : null;
+  if (situacao.tipo === "ativado" && situacao.pixPendente) {
+    const c = situacao.pixPendente;
+    const datas = datasDaMensalidade(situacao.link);
+    const { corpo } = await respostaDaCobranca(c, "pix", Math.round(c.value * 100), 1, c.dueDate, datas.proximo);
+    const nome = servicoPorSlug(situacao.link.servico)?.nome ?? "Mensalidade";
+    if (corpo.ok)
+      return <TelaDoResultado resposta={corpo} contexto={{ tipo: "mensalidade", servico: nome, dia: datas.diaDaRenovacao }} />;
+  }
+
+  if (pronto && servico && cabecalho)
+    return (
+      <FormularioDaMensalidade
+        token={l as string}
+        cabecalho={cabecalho}
+        cliente={pronto.cliente.name}
+        servico={{ slug: servico.slug, nome: servico.nome, valor: servico.preco.cartao }}
+        datas={datasDaMensalidade(pronto.link)}
+      />
+    );
 
   return (
     <>
-      <div className="dark section-ink bg-pattern-dark bg-background text-foreground">
-        <div className="mx-auto max-w-6xl px-4 pt-10 pb-24 sm:pt-14 sm:pb-28">
-          <Eyebrow>Mensalidade</Eyebrow>
-          <h1 className="mt-4 font-heading text-4xl leading-[1.05] tracking-tight text-balance sm:text-5xl">
-            {cabecalho?.titulo ?? "Sua mensalidade"}
-          </h1>
-          <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-            {cabecalho?.texto ?? "Confira a mensalidade e escolha como pagar."}
-          </p>
-        </div>
-      </div>
-
-      {/* relative: por cima da faixa, que tem posição própria (o padrão da marca). */}
-      <div className="relative mx-auto -mt-14 max-w-6xl px-4 pb-14 sm:-mt-16">
-        {pronto && servico ? (
-          <FormularioDaMensalidade
-            token={l as string}
-            cliente={pronto.cliente.name}
-            servico={{ slug: servico.slug, nome: servico.nome, valor: servico.preco.cartao }}
-            datas={datasDaMensalidade(pronto.link)}
-          />
-        ) : pixPendente?.ok ? (
-          <ResultadoDaContratacao
-            resposta={pixPendente}
-            email=""
-            depois={
-              situacao.tipo === "ativado" && (
-                <DepoisDaMensalidade forma="pix" dia={datasDaMensalidade(situacao.link).diaDaRenovacao} />
-              )
-            }
-          />
-        ) : (
-          <Aviso tipo={situacao.tipo} />
-        )}
-      </div>
+      <Faixa rotulo="Mensalidade" titulo="Sua mensalidade" />
+      <ConteudoDaFaixa>
+        <Aviso tipo={situacao.tipo} />
+      </ConteudoDaFaixa>
     </>
   );
 }

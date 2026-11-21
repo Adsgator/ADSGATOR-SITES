@@ -124,6 +124,8 @@ try {
       await p.locator("[data-ativar]").click();
       await p.locator('[data-resultado="cartao"], [data-erro-envio]').first().waitFor({ timeout: 70000 }).catch(() => {});
       const aprovado = (await p.locator('[data-resultado="cartao"]').innerText().catch(() => "")).replace(/\s+/g, " ");
+      check(`${rotulo}: a faixa diz "Mensalidade ativada"`, /Mensalidade ativada/.test(await p.locator("[data-titulo]").innerText().catch(() => "")));
+      check(`${rotulo}: a próxima cobrança no resumo`, aprovado.includes(`${proximo.slice(8, 10)}/${proximo.slice(5, 7)}/${proximo.slice(0, 4)}`), aprovado.slice(0, 200));
       check(`${rotulo}: cartão aprovado e a mensalidade ativa`, /A mensalidade está ativa/.test(aprovado) && new RegExp(`todo dia ${dia}`).test(aprovado), aprovado.slice(0, 140));
       const ref = `mensalidade:${JSON.parse(Buffer.from(new URL(urlCartao).searchParams.get("l").split(".")[0], "base64url").toString()).id}`;
       const assinatura = ((await asaas("GET", `/subscriptions?customer=${cliente.id}&limit=100`)).data ?? []).find((a) => a.externalReference === ref);

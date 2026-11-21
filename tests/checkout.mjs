@@ -233,6 +233,8 @@ try {
       await p.locator('[data-resultado="cartao"], [data-erro-envio]').first().waitFor({ timeout: 70000 }).catch(() => {});
       const aprovado = (await p.locator('[data-resultado="cartao"]').innerText().catch(() => "")).replace(/\s/g, " ");
       check(`${rotulo}: tela do cartão aprovado em 12x`, /12x de R\$ 133,33/.test(aprovado), aprovado.slice(0, 120));
+      check(`${rotulo}: a faixa diz "Contratação confirmada"`, /Contratação confirmada/.test(await p.locator("[data-titulo]").innerText()));
+      check(`${rotulo}: o que acontece agora, com o e-mail`, /teste@exemplo\.com\.br/.test(aprovado) && /O que acontece agora/i.test(aprovado));
 
       check(`${rotulo}: nenhum pedido ao Google`, doGoogle.length === 0, doGoogle[0]);
       check(`${rotulo}: nenhum cookie`, (await ctx.cookies()).length === 0);

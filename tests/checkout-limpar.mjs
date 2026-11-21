@@ -17,12 +17,17 @@ if (!URL_.includes("sandbox") || !CHAVE.startsWith("$aact_hmlg_")) {
   process.exit(1);
 }
 
-async function api(metodo, caminho) {
+// Erro do lado do Asaas (5xx) às vezes é passageiro: tenta mais uma vez.
+async function api(metodo, caminho, tentativa = 1) {
   const r = await fetch(URL_ + caminho, {
     method: metodo,
     headers: { access_token: CHAVE, "content-type": "application/json", "user-agent": "adsgator-checkout" },
     body: metodo === "POST" ? "{}" : undefined,
   });
+  if (r.status >= 500 && tentativa === 1) {
+    await new Promise((ok) => setTimeout(ok, 1500));
+    return api(metodo, caminho, 2);
+  }
   return { status: r.status, j: await r.json().catch(() => ({})) };
 }
 

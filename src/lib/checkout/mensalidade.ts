@@ -88,7 +88,7 @@ export async function pagarMensalidade(
   // Voltou ao link depois de gerar o Pix: o mesmo Pix, para pagar.
   if (situacao.tipo === "ativado" && situacao.pixPendente && p.forma === "pix") {
     const c = situacao.pixPendente;
-    return respostaDaCobranca(c, "pix", Math.round(c.value * 100), 1, c.dueDate);
+    return respostaDaCobranca(c, "pix", Math.round(c.value * 100), 1, c.dueDate, datasDaMensalidade(situacao.link).proximo);
   }
   if (situacao.tipo !== "pronto") {
     const { status, erro } = MENSAGENS[situacao.tipo];
@@ -134,5 +134,5 @@ export async function pagarMensalidade(
     referencia: referenciaDoLink(link),
     cartao,
   });
-  return respostaDaCobranca(cobranca, p.forma, servico.preco[p.forma], 1, vencimento);
+  return respostaDaCobranca(cobranca, p.forma, servico.preco[p.forma], 1, vencimento, datas.proximo);
 }
