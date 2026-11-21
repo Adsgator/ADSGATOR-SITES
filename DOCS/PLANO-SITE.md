@@ -759,9 +759,14 @@ página); aprovar a página de amostra.
   celular, os dois modos de animação: a busca, as categorias, o índice, o menu
   lateral e o logo do rodapé incluídos), `seo.mjs`, `site.mjs` e `medicao.mjs`
   tudo certo.
-- Pendente: o Lucas ver no localhost, ligar `ajuda.` ao projeto na Vercel
-  (autorização dele), publicar e testar em produção; depois, os links da Base e
-  os 2 modelos de saldo do painel.
+- **Publicada em 2026-11-21** (autorizada pelo Lucas): `main` f27b903 e
+  `ajuda.adsgator.com.br` ligado ao projeto `adsgator-sites` na Vercel
+  (`vercel domains add ajuda.adsgator.com.br adsgator-sites`; o DNS não mudou).
+  Em produção: `tests/ajuda.mjs` (os 5 endereços antigos e os dois `/ajuda`
+  clicados), `site.mjs` (com `SEM_WWW`), `seo.mjs` e `medicao.mjs` tudo certo.
+- Pendente: desenhos e animações nos guias de explicação (pedido do Lucas,
+  mostrar no localhost antes); os links da Base e os 2 modelos de saldo do
+  painel.
 
 ### Fase 3: página inicial e páginas dos planos
 
