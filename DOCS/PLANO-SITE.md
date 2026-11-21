@@ -1474,3 +1474,14 @@ que o site usar. Usados no rascunho da Política de Privacidade (Fase 1,
   continua com o botão de pausar. O Lucas foi avisado de que quem desliga as
   animações costuma fazer isso por enjoo com movimento. O detalhe das peças da
   amostra 3 está no plano geral (Parte 1, "Andamento").
+- 2026-11-21, Fase 4 (checkout), primeira versão da tela, só visual, no branch
+  `checkout`: `checkout.adsgator.com.br` por dentro em `/checkout` (como a
+  central: `checkout.localhost:3005` no `next dev`, fora do Google, sem medição,
+  a mesma CSP da central). Serviços pelo link (`?s=google-ads,landing-page`),
+  com a lista provisória em `src/lib/checkout/catalogo.ts` (vai para o cadastro
+  de serviços do painel) e as regras em `src/lib/checkout/pedido.ts` (combo, Pix,
+  até 12x, quando cada mensalidade começa). CNPJ e CEP preenchem sozinhos pelo
+  servidor (`/consulta/cnpj` na BrasilAPI e `/consulta/cep` no ViaCEP). Janela de
+  aceite (decisão 8 A do plano geral) e as telas do Pix e do cartão aprovado, de
+  mentira (o Asaas ainda não é chamado). `tests/checkout.mjs`: tudo certo no
+  computador e no celular, nos dois modos de animação.

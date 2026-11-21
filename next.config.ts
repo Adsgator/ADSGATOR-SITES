@@ -2,6 +2,7 @@ import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
 import { enderecoDaAjuda, guiasAntigos, guiasPublicados } from "./src/config/ajuda-enderecos";
+import { enderecoDoCheckout } from "./src/config/checkout";
 import { site } from "./src/config/site";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -122,6 +123,13 @@ const cspAjuda = [
   ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
+// Checkout em checkout.adsgator.com.br (plano geral, Parte 4). Por dentro fica
+// em /checkout (src/app/checkout). Abre pelo link que o Lucas manda: fora do
+// Google e sem medição, com a mesma CSP da central (só o próprio endereço; o
+// CEP e o CNPJ são consultados pelo servidor). checkout.localhost é o mesmo
+// endereço no `next dev` do Lucas.
+const noCheckout = [{ type: "host" as const, value: "checkout\\..+" }];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async headers() {
@@ -142,6 +150,14 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         has: naAjuda,
         headers: [{ key: "Content-Security-Policy", value: cspAjuda }],
+      },
+      {
+        source: "/:path*",
+        has: noCheckout,
+        headers: [
+          { key: "Content-Security-Policy", value: cspAjuda },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
       },
     ];
   },
@@ -164,6 +180,16 @@ const nextConfig: NextConfig = {
         destination: `${site.url}/:pagina`,
         permanent: true,
       },
+      // Checkout: no endereço checkout., as páginas do site levam ao www; no
+      // www, /checkout leva ao checkout.
+      {
+        source: `/:pagina(${paginasDoSite.join("|")})`,
+        has: noCheckout,
+        destination: `${site.url}/:pagina`,
+        permanent: true,
+      },
+      { source: "/checkout", missing: noCheckout, destination: `${enderecoDoCheckout}/`, permanent: false },
+      { source: "/checkout/:resto*", missing: noCheckout, destination: `${enderecoDoCheckout}/:resto*`, permanent: false },
       // No www: /ajuda é a central.
       { source: "/ajuda", missing: naAjuda, destination: `${enderecoDaAjuda}/`, permanent: true },
       { source: "/ajuda/:resto*", missing: naAjuda, destination: `${enderecoDaAjuda}/:resto*`, permanent: true },
@@ -187,6 +213,8 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         { source: "/", has: naAjuda, destination: "/ajuda" },
         ...guiasPublicados.map((guia) => ({ source: `/${guia}`, has: naAjuda, destination: `/ajuda/${guia}` })),
+        { source: "/", has: noCheckout, destination: "/checkout" },
+        { source: "/consulta/:resto*", has: noCheckout, destination: "/checkout/consulta/:resto*" },
       ],
       afterFiles: [
         {
