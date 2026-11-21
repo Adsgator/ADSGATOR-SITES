@@ -1,6 +1,9 @@
 // Checkout (checkout.adsgator.com.br; plano geral, Parte 4), a prévia da tela:
-// - os preços: combo no Pix e no cartão (até 12x), só a página, só o Google
-//   Ads (1ª mensalidade, sem parcelas) e a manutenção incluída no Google Ads;
+// - só os serviços do link (sem trocar), e a mensagem quando o link vem vazio;
+// - os preços: o cartão como referência e o Pix com a economia ("Pagar no Pix"
+//   troca), combo no Pix e no cartão (até 12x), só a página, a página com a
+//   manutenção (30 dias depois da entrega), o site no combo, só o Google Ads
+//   (1ª mensalidade, sem parcelas) e a manutenção incluída no Google Ads;
 // - Contratar com o formulário vazio mostra os erros e não abre a janela;
 // - "Não tenho CNPJ" troca para CPF; o CNPJ e o CEP preenchem sozinhos;
 // - a janela de aceite: o botão final só funciona com "Li e aceito" marcado,
@@ -44,34 +47,51 @@ try {
       p.on("pageerror", (e) => erros.push(e.message));
       p.on("request", (q) => /google|doubleclick|gtm/.test(new URL(q.url()).hostname) && doGoogle.push(q.url()));
 
-      // Combo.
-      await p.goto(`${CHECKOUT}/?s=google-ads,landing-page`, { waitUntil: "networkidle" });
-      check(`${rotulo}: combo no Pix`, limpo(await total(p)) === "R$ 1.100,00", await total(p));
-      const resumo = limpo(await p.locator("[data-resumo]").innerText());
-      check(`${rotulo}: Google Ads começa na aprovação`, /aprovar a sua página/.test(resumo));
-      await p.locator('[data-forma="cartao"]').check();
-      check(`${rotulo}: combo no cartão`, limpo(await total(p)) === "R$ 1.250,00", await total(p));
-      const opcoes = await p.locator("#parcelas option").allInnerTexts();
-      check(`${rotulo}: até 12x`, opcoes.length === 12 && /12x de R\$\s104,17/.test(opcoes[11]), opcoes.at(-1));
+      // Link sem serviços: a mensagem, sem formulário.
+      await p.goto(`${CHECKOUT}/`, { waitUntil: "networkidle" });
+      check(`${rotulo}: link sem serviços`, (await p.locator("[data-link-vazio]").count()) === 1 && (await p.locator("#whatsapp").count()) === 0);
 
-      // Só a página.
-      await p.locator('[data-servico="google-ads"]').uncheck();
+      // Só a página: cartão como referência, o Pix com a economia.
+      await p.goto(`${CHECKOUT}/?s=landing-page`, { waitUntil: "networkidle" });
+      check(`${rotulo}: só o que veio no link`, (await p.locator("[data-servico]").count()) === 1);
+      check(`${rotulo}: sem caixas para trocar serviço`, (await p.locator("[data-servicos] input").count()) === 0);
+      check(`${rotulo}: cartão vem escolhido`, await p.locator('[data-forma="cartao"]').isChecked());
       check(`${rotulo}: só a página no cartão`, limpo(await total(p)) === "R$ 1.600,00", await total(p));
-      await p.locator('[data-forma="pix"]').check();
-      check(`${rotulo}: só a página no Pix`, limpo(await total(p)) === "R$ 1.400,00", await total(p));
+      check(`${rotulo}: Pix com a economia`, /No Pix sai por R\$ 1\.400,00/.test(limpo(await p.locator("[data-destaque-pix]").innerText())));
+      check(`${rotulo}: selo de economia no Pix`, /Economize R\$ 200,00/.test(limpo(await p.locator("fieldset").innerText())));
+      await p.getByRole("button", { name: "Pagar no Pix" }).click();
+      check(`${rotulo}: "Pagar no Pix" troca para o Pix`, (await p.locator('[data-forma="pix"]').isChecked()) && limpo(await total(p)) === "R$ 1.400,00", await total(p));
 
-      // Só o Google Ads, depois com a manutenção.
-      await p.locator('[data-servico="landing-page"]').uncheck();
-      await p.locator('[data-servico="google-ads"]').check();
+      // Página com manutenção: começa 30 dias depois da entrega.
+      await p.goto(`${CHECKOUT}/?s=landing-page,manutencao`, { waitUntil: "networkidle" });
+      check(`${rotulo}: página com manutenção, hoje só a página`, limpo(await total(p)) === "R$ 1.600,00", await total(p));
+      check(`${rotulo}: manutenção 30 dias depois da entrega`, /30 dias depois da entrega/.test(await p.locator("[data-resumo]").innerText()));
+
+      // Site no combo.
+      await p.goto(`${CHECKOUT}/?s=google-ads,site-institucional`, { waitUntil: "networkidle" });
+      check(`${rotulo}: site no combo, cartão`, limpo(await total(p)) === "R$ 2.550,00", await total(p));
+      await p.locator('[data-forma="pix"]').check();
+      check(`${rotulo}: site no combo, Pix`, limpo(await total(p)) === "R$ 2.250,00", await total(p));
+
+      // Só o Google Ads, e com a manutenção.
+      await p.goto(`${CHECKOUT}/?s=google-ads`, { waitUntil: "networkidle" });
       check(`${rotulo}: só o Google Ads`, limpo(await total(p)) === "R$ 500,00", await total(p));
       check(`${rotulo}: 1ª mensalidade`, /1ª mensalidade/.test(await p.locator("[data-resumo]").innerText()));
-      await p.locator('[data-forma="cartao"]').check();
       check(`${rotulo}: mensalidade sem parcelas`, (await p.locator("#parcelas").count()) === 0);
-      await p.locator('[data-servico="manutencao"]').check();
+      check(`${rotulo}: mensalidade sem destaque do Pix`, (await p.locator("[data-destaque-pix]").count()) === 0);
+      await p.goto(`${CHECKOUT}/?s=google-ads,manutencao`, { waitUntil: "networkidle" });
       check(`${rotulo}: manutenção incluída no Google Ads`, /Incluída/.test(await p.locator("[data-resumo]").innerText()));
       check(`${rotulo}: total sem a manutenção`, limpo(await total(p)) === "R$ 500,00", await total(p));
-      await p.locator('[data-servico="manutencao"]').uncheck();
+
+      // Combo.
+      await p.goto(`${CHECKOUT}/?s=google-ads,landing-page`, { waitUntil: "networkidle" });
+      check(`${rotulo}: combo no cartão`, limpo(await total(p)) === "R$ 1.250,00", await total(p));
+      const resumo = limpo(await p.locator("[data-resumo]").innerText());
+      check(`${rotulo}: Google Ads começa na aprovação`, /aprovar a sua página/.test(resumo));
+      const opcoes = await p.locator("#parcelas option").allInnerTexts();
+      check(`${rotulo}: até 12x`, opcoes.length === 12 && /12x de R\$\s104,17/.test(opcoes[11]), opcoes.at(-1));
       await p.locator('[data-forma="pix"]').check();
+      check(`${rotulo}: combo no Pix`, limpo(await total(p)) === "R$ 1.100,00", await total(p));
 
       // Celular: resumo logo abaixo dos serviços, sem rolagem para o lado.
       if (tela.nome === "celular") {

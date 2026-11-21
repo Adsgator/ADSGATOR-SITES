@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { CreditCardIcon, LoaderCircleIcon, LockIcon } from "lucide-react";
+import { CreditCardIcon, GlobeIcon, LayoutTemplateIcon, LoaderCircleIcon, LockIcon, TargetIcon, WrenchIcon } from "lucide-react";
 
 import {
   cartaoValido,
@@ -22,14 +22,32 @@ import {
   validadeValida,
   whatsAppValido,
 } from "@/lib/checkout/campos";
-import type { Servico } from "@/lib/checkout/catalogo";
 import { dataCurta, montarPedido, reais, valorDaParcela, type Forma } from "@/lib/checkout/pedido";
 import { cn } from "@/lib/utils";
 
 import { ariaDoErro, Campo, estiloDoCampo } from "./campo";
 import { JanelaDeAceite } from "./janela-de-aceite";
 import { ResultadoDaContratacao } from "./resultado";
-import { ResumoDoPedido } from "./resumo";
+import { inicioDaMensalidade, ResumoDoPedido } from "./resumo";
+
+const icones: Record<string, typeof TargetIcon> = {
+  "google-ads": TargetIcon,
+  "landing-page": LayoutTemplateIcon,
+  "site-institucional": GlobeIcon,
+  manutencao: WrenchIcon,
+};
+
+/** Título de seção com o número do passo, como na faixa do topo. */
+function TituloDaSecao({ id, numero, children }: { id: string; numero: number; children: React.ReactNode }) {
+  return (
+    <h2 id={id} className="flex items-center gap-3 text-lg font-semibold">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-semibold text-brand-foreground">
+        {numero}
+      </span>
+      {children}
+    </h2>
+  );
+}
 
 const dadosVazios = {
   whatsapp: "",
@@ -56,19 +74,14 @@ type Consulta = "parada" | "buscando" | "achou" | "falhou";
 
 /** Ordem dos campos na tela, para levar ao primeiro erro. */
 const ordemDosCampos = [
-  "servicos", "whatsapp", "email", "cnpj", "cpf", "empresa", "nome", "cep", "numero", "endereco",
+  "whatsapp", "email", "cnpj", "cpf", "empresa", "nome", "cep", "numero", "endereco",
   "bairro", "cidade", "uf", "cartao-numero", "cartao-nome", "cartao-validade", "cartao-codigo",
 ];
 
-function precoDoCartao(s: Servico, combo: boolean) {
-  if (s.tipo === "mensal") return `${reais(s.preco.cartao)}/mês`;
-  const p = combo && s.precoNoCombo ? s.precoNoCombo : s.preco;
-  return `${reais(p.pix)} no Pix ou ${reais(p.cartao)} em até ${s.maxParcelas}x`;
-}
-
-export function FormularioDoCheckout({ servicos, escolhidosNoLink }: { servicos: Servico[]; escolhidosNoLink: string[] }) {
-  const [escolhidos, setEscolhidos] = useState<string[]>(escolhidosNoLink);
-  const [forma, setForma] = useState<Forma>("pix");
+export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
+  // O cartão vem escolhido, e o preço dele é a referência; o Pix aparece como
+  // a forma mais barata (Lucas, 2026-11-21).
+  const [forma, setForma] = useState<Forma>("cartao");
   const [parcelasEscolhidas, setParcelas] = useState(12);
   const [semCnpj, setSemCnpj] = useState(false);
   const [dados, setDados] = useState<Dados>(dadosVazios);
@@ -82,12 +95,18 @@ export function FormularioDoCheckout({ servicos, escolhidosNoLink }: { servicos:
   const topo = useRef<HTMLDivElement>(null);
 
   const pedido = useMemo(() => montarPedido(escolhidos, forma), [escolhidos, forma]);
+  const noCartao = useMemo(() => montarPedido(escolhidos, "cartao"), [escolhidos]);
+  const noPix = useMemo(() => montarPedido(escolhidos, "pix"), [escolhidos]);
+  const economiaNoPix = noCartao.totalHoje - noPix.totalHoje;
   const parcelas = Math.min(parcelasEscolhidas, pedido.maxParcelas);
-  const temAds = escolhidos.includes("google-ads");
+
+  function escolherForma(f: Forma) {
+    setForma(f);
+    if (tentou) setErros(validar(dados, cartao, semCnpj, f));
+  }
 
   function validar(d: Dados, c: Cartao, sem: boolean, f: Forma) {
     const e: Record<string, string> = {};
-    if (escolhidos.length === 0) e.servicos = "Escolha pelo menos um serviço.";
     if (!whatsAppValido(d.whatsapp)) e.whatsapp = "Informe o WhatsApp com o DDD.";
     if (!emailValido(d.email)) e.email = "Informe um e-mail válido.";
     if (sem) {
@@ -179,10 +198,6 @@ export function FormularioDoCheckout({ servicos, escolhidosNoLink }: { servicos:
     }
   }
 
-  function alternarServico(slug: string) {
-    setEscolhidos((atual) => (atual.includes(slug) ? atual.filter((s) => s !== slug) : [...atual, slug]));
-  }
-
   function aoClicarEmContratar() {
     setTentou(true);
     const e = validar(dados, cartao, semCnpj, forma);
@@ -213,64 +228,80 @@ export function FormularioDoCheckout({ servicos, escolhidosNoLink }: { servicos:
     );
   }
 
-  const tituloDaSecao = "text-lg font-semibold";
-  const cartaoDaSecao = "rounded-2xl border bg-card p-5 sm:p-7";
+  const cartaoDaSecao = "rounded-2xl border bg-card p-5 shadow-sm sm:p-7";
 
   return (
     <div ref={topo} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8">
       {/* 1. Serviços */}
       <section aria-labelledby="titulo-servicos" className={cn(cartaoDaSecao, "lg:col-start-1")}>
-        <h2 id="titulo-servicos" className={tituloDaSecao}>
-          O que você está contratando
-        </h2>
-        <div id="servicos" tabIndex={-1} className="mt-4 grid gap-3 outline-none sm:grid-cols-2" data-servicos>
-          {servicos.map((s) => {
-            const marcado = escolhidos.includes(s.slug);
-            const noCombo = s.tipo === "unico" && temAds && !!s.precoNoCombo;
+        <TituloDaSecao id="titulo-servicos" numero={1}>
+          O que foi combinado
+        </TituloDaSecao>
+        <ul className="mt-5 divide-y" data-servicos>
+          {noCartao.servicos.map((s) => {
+            const Icone = icones[s.slug] ?? TargetIcon;
+            const naHoje = noCartao.hoje.find((l) => l.slug === s.slug && !l.mensal);
+            const pix = noPix.hoje.find((l) => l.slug === s.slug && !l.mensal);
+            const mensalidade = noCartao.mensalidades.find((m) => m.slug === s.slug);
             return (
-              <label
-                key={s.slug}
-                className={cn(
-                  "flex cursor-pointer gap-3 rounded-xl border p-4 transition-colors hover:border-foreground/30",
-                  marcado && "border-brand bg-brand/10 hover:border-brand",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={marcado}
-                  onChange={() => alternarServico(s.slug)}
-                  className="mt-0.5 size-5 shrink-0 accent-[var(--brand)]"
-                  data-servico={s.slug}
-                />
-                <span className="space-y-1">
-                  <span className="block font-medium">{s.nome}</span>
-                  <span className="block text-xs leading-5 text-muted-foreground">{s.resumo}</span>
-                  <span className="block text-sm font-medium">
-                    {precoDoCartao(s, noCombo)}
-                    {noCombo && <span className="ml-1.5 rounded bg-brand px-1.5 py-0.5 text-[0.7rem] text-brand-foreground">combo</span>}
-                  </span>
+              <li key={s.slug} className="flex gap-4 py-5 first:pt-0 last:pb-0" data-servico={s.slug}>
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand/15 ring-1 ring-brand/30">
+                  <Icone className="size-5" aria-hidden="true" />
                 </span>
-              </label>
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                    <h3 className="font-semibold">{s.nome}</h3>
+                    {naHoje ? (
+                      <p className="text-right text-sm">
+                        {naHoje.valorCheio && (
+                          <span className="mr-2 text-xs text-muted-foreground line-through">{reais(naHoje.valorCheio)}</span>
+                        )}
+                        <strong className="font-semibold">{reais(naHoje.valor)}</strong>
+                        <span className="text-muted-foreground"> em até {s.maxParcelas}x</span>
+                      </p>
+                    ) : mensalidade ? (
+                      <p className="text-sm font-semibold">
+                        {mensalidade.inicio === "incluida" ? "Incluída" : `${reais(mensalidade.valor)}/mês`}
+                      </p>
+                    ) : null}
+                  </div>
+                  <p className="text-sm leading-6 text-muted-foreground">{s.resumo}</p>
+                  {naHoje && pix && pix.valor < naHoje.valor && (
+                    <p className="inline-flex flex-wrap items-center gap-x-2 rounded-full bg-brand/15 px-3 py-1 text-xs font-medium">
+                      <span>ou {reais(pix.valor)} no Pix</span>
+                      <span className="rounded-full bg-brand px-2 py-0.5 text-[0.7rem] text-brand-foreground">
+                        economize {reais(naHoje.valor - pix.valor)}
+                      </span>
+                    </p>
+                  )}
+                  {mensalidade && mensalidade.inicio !== "hoje" && (
+                    <p className="text-xs leading-5 text-muted-foreground">{inicioDaMensalidade(mensalidade, noCartao)}</p>
+                  )}
+                  {naHoje?.valorCheio && <p className="text-xs text-muted-foreground">Preço menor por ser junto com o Google Ads.</p>}
+                </div>
+              </li>
             );
           })}
-        </div>
-        {erros.servicos && <p className="mt-2 text-xs text-destructive">{erros.servicos}</p>}
-        {!temAds && escolhidos.some((s) => servicos.find((x) => x.slug === s)?.tipo === "unico") && (
-          <p className="mt-3 text-xs text-muted-foreground">Com a Gestão de Google Ads junto, a criação sai por um preço menor.</p>
-        )}
+        </ul>
       </section>
 
       {/* Resumo: logo abaixo dos serviços no celular, ao lado no computador. */}
       <aside className="lg:sticky lg:top-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start" aria-label="Resumo do pedido">
-        <ResumoDoPedido pedido={pedido} forma={forma} parcelas={parcelas} />
+        <ResumoDoPedido
+          pedido={pedido}
+          forma={forma}
+          parcelas={parcelas}
+          economiaNoPix={economiaNoPix}
+          aoEscolherPix={() => escolherForma("pix")}
+        />
       </aside>
 
       <div className="space-y-6 lg:col-start-1">
         {/* 2. Dados */}
         <section aria-labelledby="titulo-dados" className={cartaoDaSecao}>
-          <h2 id="titulo-dados" className={tituloDaSecao}>
+          <TituloDaSecao id="titulo-dados" numero={2}>
             Seus dados
-          </h2>
+          </TituloDaSecao>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Campo id="whatsapp" rotulo="WhatsApp" erro={erros.whatsapp}>
               <input
@@ -486,18 +517,18 @@ export function FormularioDoCheckout({ servicos, escolhidosNoLink }: { servicos:
 
         {/* 3. Pagamento */}
         <section aria-labelledby="titulo-pagamento" className={cartaoDaSecao}>
-          <h2 id="titulo-pagamento" className={tituloDaSecao}>
+          <TituloDaSecao id="titulo-pagamento" numero={3}>
             Pagamento
-          </h2>
-          <fieldset className="mt-4 grid gap-3 sm:grid-cols-2">
+          </TituloDaSecao>
+          <fieldset className="mt-5 grid gap-3 sm:grid-cols-2">
             <legend className="sr-only">Forma de pagamento</legend>
-            {(["pix", "cartao"] as const).map((f) => {
-              const total = montarPedido(escolhidos, f).totalHoje;
+            {(["cartao", "pix"] as const).map((f) => {
+              const p = f === "pix" ? noPix : noCartao;
               return (
                 <label
                   key={f}
                   className={cn(
-                    "flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors hover:border-foreground/30",
+                    "relative flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors hover:border-foreground/30",
                     forma === f && "border-brand bg-brand/10 hover:border-brand",
                   )}
                 >
@@ -506,27 +537,25 @@ export function FormularioDoCheckout({ servicos, escolhidosNoLink }: { servicos:
                     name="forma"
                     value={f}
                     checked={forma === f}
-                    onChange={() => {
-                      setForma(f);
-                      if (tentou) setErros(validar(dados, cartao, semCnpj, f));
-                    }}
+                    onChange={() => escolherForma(f)}
                     className="size-5 shrink-0 accent-[var(--brand)]"
                     data-forma={f}
                   />
                   <span className="flex-1">
                     <span className="block font-medium">{f === "pix" ? "Pix" : "Cartão de crédito"}</span>
                     <span className="block text-xs text-muted-foreground">
-                      {escolhidos.length === 0
-                        ? f === "pix"
-                          ? "Na hora, pelo QR Code"
-                          : "À vista ou parcelado"
-                        : f === "pix"
-                          ? `${reais(total)} · vence em ${dataCurta(pedido.vencimento)}`
-                          : montarPedido(escolhidos, f).maxParcelas > 1
-                            ? `${reais(total)} em até ${montarPedido(escolhidos, f).maxParcelas}x sem juros`
-                            : reais(total)}
+                      {f === "pix"
+                        ? `${reais(p.totalHoje)} à vista · vence em ${dataCurta(p.vencimento)}`
+                        : p.maxParcelas > 1
+                          ? `${reais(p.totalHoje)} em até ${p.maxParcelas}x sem juros`
+                          : reais(p.totalHoje)}
                     </span>
                   </span>
+                  {f === "pix" && economiaNoPix > 0 && (
+                    <span className="absolute -top-2.5 right-3 rounded-full bg-brand px-2.5 py-0.5 text-[0.7rem] font-semibold text-brand-foreground">
+                      Economize {reais(economiaNoPix)}
+                    </span>
+                  )}
                 </label>
               );
             })}
@@ -616,12 +645,11 @@ export function FormularioDoCheckout({ servicos, escolhidosNoLink }: { servicos:
           <button
             type="button"
             onClick={aoClicarEmContratar}
-            disabled={escolhidos.length === 0}
-            className="mt-7 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-brand px-7 text-base font-semibold text-brand-foreground transition-colors hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-45"
+            className="mt-7 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-brand px-7 text-base font-semibold text-brand-foreground transition-colors hover:bg-brand/90"
             data-contratar
           >
             <LockIcon className="size-4" aria-hidden="true" />
-            Contratar{escolhidos.length > 0 && ` · ${reais(pedido.totalHoje)}`}
+            Contratar · {reais(pedido.totalHoje)}
           </button>
           <p className="mt-3 text-center text-xs text-muted-foreground">
             Antes de pagar, você revisa tudo e aceita os Termos.

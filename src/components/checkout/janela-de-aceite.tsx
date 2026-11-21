@@ -31,6 +31,10 @@ function pontosDosTermos(pedido: Pedido) {
     pontos.push(
       "A mensalidade do Google Ads começa quando você aprovar a página: você recebe o link para pagar, com vencimento em 3 dias, e as próximas ficam nesse mesmo dia do mês.",
     );
+  if (pedido.mensalidades.some((m) => m.inicio === "entrega"))
+    pontos.push(
+      "A manutenção começa 30 dias depois da entrega da página, que já vem com 30 dias de suporte: você recebe o link para pagar, e as próximas ficam nesse mesmo dia do mês.",
+    );
   if (pedido.hoje.some((l) => l.mensal))
     pontos.push(
       `A mensalidade é paga antes: a primeira vence em ${dataCurta(pedido.vencimento)}, e cada uma libera os 30 dias seguintes.`,
