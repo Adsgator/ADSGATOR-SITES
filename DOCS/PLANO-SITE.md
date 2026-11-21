@@ -748,10 +748,17 @@ página); aprovar a página de amostra.
   o progresso, o copiar, nenhum cookie e nenhum pedido ao Google, celular, os
   dois modos de animação); `site.mjs` e `seo.mjs` ajustados para a central em
   outro endereço.
+- Cara de central (pedido do Lucas, 2026-11-21): busca na página inicial e no
+  cabeçalho (sem acento, com palavras do dia a dia em `palavrasDaBusca`, setas e
+  Enter; tudo no navegador), cartões das 5 categorias, menu lateral com as
+  categorias e os guias, o índice "Nesta página" (ao lado no computador, um
+  quadro que abre no celular), a trilha "Central de Ajuda › categoria" e o
+  rodapé com o logo. "Aceitar o convite" ficou só para quem já tinha conta (a
+  conta criada pela Adsgator tem o convite avisado pelo WhatsApp).
 - Verificado no localhost (2026-11-21): `tests/ajuda.mjs` tudo certo (notebook e
-  celular, os dois modos de animação), `seo.mjs` tudo certo; `site.mjs` e
-  `medicao.mjs` tudo certo na rodada anterior (a estrutura do site não mudou
-  depois).
+  celular, os dois modos de animação: a busca, as categorias, o índice, o menu
+  lateral e o logo do rodapé incluídos), `seo.mjs`, `site.mjs` e `medicao.mjs`
+  tudo certo.
 - Pendente: o Lucas ver no localhost, ligar `ajuda.` ao projeto na Vercel
   (autorização dele), publicar e testar em produção; depois, os links da Base e
   os 2 modelos de saldo do painel.

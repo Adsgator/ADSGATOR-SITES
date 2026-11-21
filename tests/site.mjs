@@ -12,7 +12,7 @@ const BASE = process.env.BASE ?? "http://localhost:3000";
 const SEM_WWW = process.env.SEM_WWW;
 // A Central de Ajuda fica em outro endereço (tests/ajuda.mjs testa ela toda).
 const AJUDA = BASE.startsWith("https://") ? "https://ajuda.adsgator.com.br" : BASE.replace("://localhost", "://ajuda.localhost");
-const TITULO_DA_AJUDA = "Passo a passo para a sua conta";
+const TITULO_DA_AJUDA = "Como podemos ajudar?";
 const saida = new URL("./.saida/", import.meta.url);
 await mkdir(saida, { recursive: true });
 

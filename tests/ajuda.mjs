@@ -62,9 +62,9 @@ try {
   const page = await browser.newPage();
   const links = [
     ...Object.entries(antigos).map(([antigo, novo]) => [`${AJUDA}/ajuda/${antigo}/`, `${AJUDA}/${novo}`, guias[novo]]),
-    [`${SITE}/ajuda`, `${AJUDA}/`, "Passo a passo para a sua conta"],
-    ...(producao ? [["https://adsgator.com.br/ajuda", `${AJUDA}/`, "Passo a passo para a sua conta"]] : []),
-    [`${AJUDA}/ajuda/um-artigo-que-saiu/`, `${AJUDA}/`, "Passo a passo para a sua conta"],
+    [`${SITE}/ajuda`, `${AJUDA}/`, "Como podemos ajudar?"],
+    ...(producao ? [["https://adsgator.com.br/ajuda", `${AJUDA}/`, "Como podemos ajudar?"]] : []),
+    [`${AJUDA}/ajuda/um-artigo-que-saiu/`, `${AJUDA}/`, "Como podemos ajudar?"],
   ];
   for (const [de, para, titulo] of links) {
     await page.goto("about:blank");
@@ -126,17 +126,48 @@ try {
 
         // "Fiz este passo" em todos os passos visíveis do primeiro caminho até "Tudo feito!".
         const barra = p.getByText(/passos feitos|Tudo feito!/).first();
-        const passos = p.locator("ol").first().getByRole("button", { name: "Fiz este passo" });
+        const passos = p.locator("article ol").first().getByRole("button", { name: "Fiz este passo" });
         const total = await passos.count();
         for (let i = 0; i < total; i++) await passos.first().click();
         check(`${rotulo}, ${slug}: marcar os ${total} passos chega em "Tudo feito!"`, total > 0 && (await barra.textContent()) === "Tudo feito!", await barra.textContent());
       }
-      // Os dois caminhos do convite: trocar mostra os outros passos.
-      await p.goto(`${AJUDA}/aceitar-convite`, { waitUntil: "networkidle" });
-      await p.getByRole("button", { name: "Eu já tinha conta" }).click();
-      check(`${rotulo}: "Eu já tinha conta" mostra o pedido de vinculação`, await p.getByRole("heading", { name: "Aceite o pedido da Adsgator" }).isVisible());
-      const doCaminho = await capturasQueNaoCarregaram(p);
-      check(`${rotulo}: as capturas do outro caminho carregam`, doCaminho.length === 0 && (await p.locator("main figure img").count()) === 3, doCaminho.join(" "));
+      // A busca da página inicial: palavra do dia a dia, sem acento, Enter abre o
+      // primeiro; clique num resultado; nada encontrado.
+      await p.goto(AJUDA, { waitUntil: "networkidle" });
+      const busca = p.locator("#busca").getByRole("combobox");
+      await busca.fill("recarregar");
+      const primeiro = (await p.locator("#busca").getByRole("option").first().textContent()) ?? "";
+      await busca.press("Enter");
+      await p.waitForURL(`${AJUDA}/adicionar-saldo`);
+      check(`${rotulo}: busca "recarregar" + Enter abre Adicionar saldo`, primeiro.startsWith("Adicionar saldo"), primeiro);
+      await p.goto(AJUDA, { waitUntil: "networkidle" });
+      await busca.fill("metricas");
+      await p.locator("#busca").getByRole("option", { name: /As principais métricas/ }).click();
+      await p.waitForURL(`${AJUDA}/metricas`);
+      check(`${rotulo}: busca sem acento acha e o clique abre o guia`, (await p.locator("h1").textContent()) === guias.metricas);
+      await p.goto(AJUDA, { waitUntil: "networkidle" });
+      await busca.fill("xyzxyz");
+      check(`${rotulo}: busca sem resultado avisa`, await p.getByText(/Nenhum guia com/).isVisible());
+
+      // As categorias levam à seção delas.
+      await busca.fill("");
+      await p.getByRole("link", { name: /^Pagamento/ }).first().click();
+      await p.waitForURL(`${AJUDA}/#pagamento`);
+      const topoPagamento = await p.locator("#pagamento").evaluate((s) => s.getBoundingClientRect().top);
+      check(`${rotulo}: a categoria Pagamento leva à seção`, topoPagamento >= 0 && topoPagamento < 200, `${Math.round(topoPagamento)}px`);
+
+      // O índice "Nesta página" leva à seção; o menu lateral marca o guia aberto.
+      await p.goto(`${AJUDA}/adicionar-saldo`, { waitUntil: "networkidle" });
+      if (tela.width < 1280) await p.getByRole("button", { name: "Nesta página" }).click();
+      await p.locator(`nav[aria-label^="Nesta página"]`).getByRole("link", { name: "Dúvidas" }).click();
+      await p.waitForURL(`${AJUDA}/adicionar-saldo#duvidas`);
+      const topoDuvidas = await p.locator("#duvidas").evaluate((s) => s.getBoundingClientRect().top);
+      check(`${rotulo}: o índice leva às Dúvidas`, topoDuvidas >= 0 && topoDuvidas < 200, `${Math.round(topoDuvidas)}px`);
+      if (tela.width >= 1024) {
+        const marcado = await p.locator('nav[aria-label="Categorias e guias"] [aria-current="page"]').textContent();
+        check(`${rotulo}: o menu lateral marca o guia aberto`, marcado === "Adicionar saldo", marcado);
+      }
+      check(`${rotulo}: o rodapé tem o logo da Adsgator`, (await p.locator("footer svg, footer img").count()) > 0);
 
       // Copiar o e-mail da Adsgator.
       await p.goto(`${AJUDA}/acesso-ao-perfil`, { waitUntil: "networkidle" });

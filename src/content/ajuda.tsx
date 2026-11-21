@@ -1,4 +1,5 @@
 import type { StaticImageData } from "next/image";
+import { ChartNoAxesColumnIcon, LayoutTemplateIcon, RocketIcon, StoreIcon, WalletCardsIcon, type LucideIcon } from "lucide-react";
 
 import { ResumoDoMes } from "@/components/resumo-do-mes";
 import type { GuiaSlug } from "@/config/ajuda-enderecos";
@@ -40,7 +41,35 @@ export type Parte = {
 
 export type Secao = { titulo: string; texto: React.ReactNode };
 
-export const grupos = ["Começar no Google Ads", "Perfil no Google", "Pagamento", "Entender os resultados", "Sua página"] as const;
+/** As categorias da central, na ordem da página inicial. */
+export const categorias = [
+  { id: "comecar", nome: "Começar no Google Ads", descricao: "Ligar a sua conta à Adsgator e deixar tudo pronto para anunciar.", icone: RocketIcon },
+  { id: "perfil", nome: "Perfil no Google", descricao: "O perfil da sua empresa no Google Maps e na pesquisa.", icone: StoreIcon },
+  { id: "pagamento", nome: "Pagamento", descricao: "Formas de pagar, saldo, notas fiscais e a verificação do Google.", icone: WalletCardsIcon },
+  { id: "resultados", nome: "Entender os resultados", descricao: "O que cada número quer dizer e como a campanha funciona.", icone: ChartNoAxesColumnIcon },
+  { id: "pagina", nome: "Sua página", descricao: "O que fica na sua landing page e por quê.", icone: LayoutTemplateIcon },
+] as const satisfies readonly { id: string; nome: string; descricao: string; icone: LucideIcon }[];
+
+export type CategoriaId = (typeof categorias)[number]["id"];
+
+export const categoriaPorId = (id: CategoriaId) => categorias.find((c) => c.id === id)!;
+
+/** Palavras que o cliente pode digitar na busca além do título e do resumo. */
+export const palavrasDaBusca: Record<GuiaSlug, string> = {
+  "aceitar-convite": "convite acesso vincular vinculação ligar conta email e-mail administrador",
+  "configurar-pagamento": "pagamento faturamento cartão pix cnpj mei cpf perfil de pagamentos cadastro configurar conta nova",
+  "id-da-conta": "id número numero conta código codigo cliente já tenho conta criar conta",
+  "acesso-ao-perfil": "google meu negócio negocio perfil da empresa maps mapa acesso administrador gerente convidar",
+  "adicionar-saldo": "saldo recarregar recarga crédito credito pix boleto fundos pagar acabou parou",
+  "cartao-ou-pix": "cartão cartao pix boleto mercado pago automático manual nota fiscal notas fatura comprovante",
+  "verificacao-do-anunciante": "verificação verificacao documento documentos rg cnh cnpj selfie identidade conta pausada",
+  "resumo-do-mes": "resumo relatório relatorio mês mes números numeros resultados toques whatsapp custo",
+  "primeiros-dias": "começo inicio início primeira semana aprendizado poucos contatos demora",
+  "nao-vejo-meu-anuncio": "não aparece nao aparece sumiu anúncio anuncio pesquisei não vejo",
+  metricas: "métricas metricas impressões cliques ctr cpc conversão conversao custo",
+  leilao: "leilão leilao lance preço preco clique caro posição posicao concorrência",
+  "cookies-e-lgpd": "lgpd cookies aviso lei privacidade dados medição",
+};
 
 type Base = {
   slug: GuiaSlug;
@@ -48,7 +77,7 @@ type Base = {
   /** Título curto, para o cartão da lista e as mensagens. */
   curto: string;
   resumo: string;
-  grupo: (typeof grupos)[number];
+  grupo: CategoriaId;
   tempo: string;
   duvidas?: { pergunta: string; resposta: React.ReactNode }[];
   /** Outros guias que ajudam depois deste (o primeiro é o "próximo"). */
@@ -62,8 +91,6 @@ export type GuiaDePassos = Base & {
   /** Mostra o e-mail da Adsgator com o botão de copiar. */
   emailDaAdsgator?: boolean;
   partes: Parte[];
-  /** Quando as partes são caminhos alternativos: a pergunta e as respostas. */
-  escolha?: { pergunta: string; respostas: string[] };
   pronto: React.ReactNode;
 };
 
@@ -112,28 +139,14 @@ export const guias: Guia[] = [
     slug: "aceitar-convite",
     titulo: "Aceitar o convite da Adsgator no Google Ads",
     curto: "Aceitar o convite da Adsgator",
-    resumo: "Para a gente cuidar dos seus anúncios, a sua conta do Google Ads precisa estar ligada à Adsgator. É só aceitar o convite.",
-    grupo: "Começar no Google Ads",
+    resumo: "Se você já tinha conta no Google Ads, a Adsgator manda um pedido para ligar a conta dela à sua. É só aceitar.",
+    grupo: "comecar",
     tempo: "2 minutos",
-    escolha: { pergunta: "Como é a sua conta?", respostas: ["A Adsgator criou a minha conta", "Eu já tinha conta"] },
+    // Só para quem já tinha conta (Lucas, 2026-11-21): a conta criada pela
+    // Adsgator tem o convite avisado pelo WhatsApp.
     partes: [
       {
-        titulo: "A Adsgator criou a minha conta",
-        intro: "O convite chega no seu e-mail. Aceitando, você entra na conta como administrador, com acesso a tudo.",
-        passos: [
-          {
-            titulo: "Abra o e-mail do Google Ads",
-            texto: <>Procure um e-mail do Google Ads com o convite para acessar a conta. Se não estiver na caixa de entrada, olhe no spam e na aba Promoções.</>,
-          },
-          {
-            titulo: "Aceite o convite",
-            texto: <>Clique no botão do e-mail e entre com a Conta do Google desse mesmo e-mail. Se esse e-mail ainda não tem Conta do Google, o próprio Google mostra como criar.</>,
-          },
-        ],
-      },
-      {
-        titulo: "Eu já tinha conta",
-        intro: "A Adsgator pediu para ligar a conta dela à sua. A conta continua sua: você vê tudo e pode desfazer a ligação quando quiser.",
+        intro: "A conta continua sua: você vê tudo e pode desfazer a ligação quando quiser.",
         passos: [
           {
             titulo: "Entre no Google Ads",
@@ -173,7 +186,7 @@ export const guias: Guia[] = [
     titulo: "Configurar o pagamento e verificar a empresa",
     curto: "Configurar o pagamento",
     resumo: "Com a conta pronta, falta cadastrar como você vai pagar o Google e confirmar os dados da sua empresa. O pagamento vai direto para o Google, no seu nome.",
-    grupo: "Começar no Google Ads",
+    grupo: "comecar",
     tempo: "10 minutos",
     antes: [
       <>Os dados da empresa como estão no cartão do CNPJ ou no certificado do MEI. Se a conta for no seu nome, os do seu RG ou CNH.</>,
@@ -247,7 +260,7 @@ export const guias: Guia[] = [
     titulo: "Onde fica o número (ID) da sua conta do Google Ads",
     curto: "Achar o número da sua conta",
     resumo: "Se você já tem conta no Google Ads, a gente precisa do número dela para mandar o convite. Não tem conta? A gente cria para você.",
-    grupo: "Começar no Google Ads",
+    grupo: "comecar",
     tempo: "1 minuto",
     partes: [
       {
@@ -282,7 +295,7 @@ export const guias: Guia[] = [
     titulo: "Dar acesso ao seu perfil no Google",
     curto: "Dar acesso ao seu perfil no Google",
     resumo: "O perfil da empresa é o que aparece no Google Maps e na pesquisa, com endereço, horário e avaliações. Com acesso, a gente confere o perfil e liga ele aos anúncios.",
-    grupo: "Perfil no Google",
+    grupo: "perfil",
     tempo: "3 minutos",
     emailDaAdsgator: true,
     partes: [
@@ -344,7 +357,7 @@ export const guias: Guia[] = [
     titulo: "Adicionar saldo no Google Ads",
     curto: "Adicionar saldo",
     resumo: "Se você paga com saldo, os anúncios rodam enquanto ele durar e param quando acaba. A gente avisa antes de acabar, e você coloca mais por aqui.",
-    grupo: "Pagamento",
+    grupo: "pagamento",
     tempo: "2 minutos",
     partes: [
       {
@@ -396,7 +409,7 @@ export const guias: Guia[] = [
     titulo: "Cartão ou Pix: como pagar o Google Ads",
     curto: "Cartão ou Pix",
     resumo: "Dá para pagar o Google de dois jeitos: no cartão, depois que os anúncios rodam, ou com saldo colocado antes, por Pix. Veja qual combina com você.",
-    grupo: "Pagamento",
+    grupo: "pagamento",
     tempo: "3 minutos de leitura",
     secoes: [
       {
@@ -448,7 +461,7 @@ export const guias: Guia[] = [
     titulo: "Verificação do anunciante: o que é e o que enviar",
     curto: "Verificação do anunciante",
     resumo: "O Google pede a todo anunciante que confirme quem é. Veja o que ele pede, quais documentos valem e quanto tempo leva.",
-    grupo: "Pagamento",
+    grupo: "pagamento",
     tempo: "3 minutos de leitura",
     secoes: [
       {
@@ -494,7 +507,7 @@ export const guias: Guia[] = [
     titulo: "Como ler o resumo do mês",
     curto: "Como ler o resumo do mês",
     resumo: "Todo mês você recebe os números da sua campanha e o que a gente fez nela. Veja o que cada número quer dizer.",
-    grupo: "Entender os resultados",
+    grupo: "resultados",
     tempo: "3 minutos de leitura",
     secoes: [
       {
@@ -557,7 +570,7 @@ export const guias: Guia[] = [
     titulo: "Os primeiros dias da sua campanha",
     curto: "Os primeiros dias da campanha",
     resumo: "Nos primeiros dias o Google ainda está aprendendo quem é o seu cliente. Veja o que esperar e por que os contatos começam aos poucos.",
-    grupo: "Entender os resultados",
+    grupo: "resultados",
     tempo: "3 minutos de leitura",
     secoes: [
       {
@@ -604,7 +617,7 @@ export const guias: Guia[] = [
     titulo: "Pesquisei e não vi o meu anúncio. E agora?",
     curto: "Pesquisei e não vi meu anúncio",
     resumo: "Não ver o anúncio quando você pesquisa não quer dizer que ele não está aparecendo para os seus clientes. Veja por que acontece.",
-    grupo: "Entender os resultados",
+    grupo: "resultados",
     tempo: "3 minutos de leitura",
     secoes: [
       {
@@ -645,7 +658,7 @@ export const guias: Guia[] = [
     titulo: "As principais métricas do Google Ads, sem complicação",
     curto: "As principais métricas",
     resumo: "Impressões, cliques, CTR, CPC, conversão: o que cada número quer dizer, em palavras simples.",
-    grupo: "Entender os resultados",
+    grupo: "resultados",
     tempo: "4 minutos de leitura",
     secoes: [
       { titulo: "Impressões", texto: p(<>Quantas vezes o seu anúncio apareceu para alguém. Conta uma a cada aparição.</>) },
@@ -688,7 +701,7 @@ export const guias: Guia[] = [
     titulo: "Como funciona o leilão do Google",
     curto: "Como funciona o leilão",
     resumo: "Cada pesquisa no Google é uma disputa rápida entre os anunciantes. Veja o que decide quem aparece e quanto custa cada clique.",
-    grupo: "Entender os resultados",
+    grupo: "resultados",
     tempo: "3 minutos de leitura",
     secoes: [
       {
@@ -737,7 +750,7 @@ export const guias: Guia[] = [
     titulo: "LGPD e o aviso de cookies na sua página",
     curto: "LGPD e o aviso de cookies",
     resumo: "Por que a sua página pergunta se a pessoa aceita os cookies e o que isso muda nos números da campanha.",
-    grupo: "Sua página",
+    grupo: "pagina",
     tempo: "2 minutos de leitura",
     secoes: [
       {
@@ -770,3 +783,12 @@ export const guias: Guia[] = [
 export function guiaPorSlug(slug: string) {
   return guias.find((g) => g.slug === slug);
 }
+
+/** O que a busca precisa de cada guia (só texto: vai para o navegador). */
+export const itensDaBusca = guias.map((g) => ({
+  slug: g.slug,
+  curto: g.curto,
+  resumo: g.resumo,
+  categoria: categoriaPorId(g.grupo).nome,
+  texto: `${g.titulo} ${palavrasDaBusca[g.slug]}`,
+}));
