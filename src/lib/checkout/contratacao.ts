@@ -21,6 +21,7 @@ import * as asaas from "./asaas";
 import { soDigitos } from "./campos";
 import { servicosDoLink } from "./catalogo";
 import { avisarContratacao, linkDoPainel } from "./painel";
+import { pontosDosTermos } from "./termos";
 import { hojeEmSaoPaulo, montarPedido, type Data, type Forma } from "./pedido";
 import { cartaoVazio, dadosVazios, validarDados, type Cartao, type Dados } from "./validacao";
 
@@ -249,7 +250,14 @@ export async function contratar(
       uf: d.uf,
       indicacao: d.indicacao,
     },
-    aceite: { em: new Date().toISOString(), ip, navegador: navegador.slice(0, 300), termos_versao: VERSAO_DOS_TERMOS },
+    aceite: {
+      em: new Date().toISOString(),
+      ip,
+      navegador: navegador.slice(0, 300),
+      termos_versao: VERSAO_DOS_TERMOS,
+      // Os mesmos pontos da janela de aceite que a pessoa leu.
+      pontos: pontosDosTermos(pedido, p.forma),
+    },
   });
 
   return respostaDaCobranca(cobranca, p.forma, pedido.totalHoje, p.parcelas, vencimento, proxima);

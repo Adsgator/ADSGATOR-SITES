@@ -67,7 +67,7 @@ export type AvisoDeContratacao = {
   asaas_cobranca: string;
   pago: boolean;
   dados: Record<string, string>;
-  aceite: { em: string; ip: string; navegador: string; termos_versao: string };
+  aceite: { em: string; ip: string; navegador: string; termos_versao: string; pontos: string[] };
 };
 
 export const avisarContratacao = (aviso: AvisoDeContratacao) => avisar("/api/checkout/contratacao", aviso);
