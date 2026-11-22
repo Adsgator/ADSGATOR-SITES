@@ -8,5 +8,10 @@ export const CHECKOUT_OFICIAL = "https://checkout.adsgator.com.br";
 export const enderecoDoCheckout =
   process.env.NODE_ENV === "development" ? "http://checkout.localhost:3005" : CHECKOUT_OFICIAL;
 
+/** A versão dos Termos de Serviço que o cliente aceita (a data da "Última
+ * atualização" de src/content/termos.mdx; o teste confere que batem). Fica
+ * registrada no painel com o aceite. */
+export const VERSAO_DOS_TERMOS = "2026-11-21";
+
 /** Mensagem pronta do WhatsApp para quem tem dúvida no checkout. */
 export const mensagemDoCheckout = "Olá! Estou na página de contratação da Adsgator e tenho uma dúvida.";

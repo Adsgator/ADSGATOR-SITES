@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   if (!pedido) return Response.json({ ok: false, erro: "Pedido inválido." }, { status: 400 });
 
   try {
-    const { status, corpo } = await contratar(pedido, ipDoComprador(request.headers));
+    const { status, corpo } = await contratar(pedido, ipDoComprador(request.headers), request.headers.get("user-agent") ?? "");
     return Response.json(corpo, { status });
   } catch (e) {
     // 400 do Asaas: cartão recusado ou dado que ele não aceitou; a mensagem dele

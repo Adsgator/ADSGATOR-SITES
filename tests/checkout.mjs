@@ -11,6 +11,10 @@
 // - a contratação de verdade no SANDBOX do Asaas (Pix e cartão em 12x), com o
 //   aviso "Ambiente de testes"; os clientes de teste levam "[TESTE]" e as
 //   cobranças são apagadas por tests/checkout-limpar.mjs;
+// - o link pelo código gerado no painel (os serviços vêm de lá; vencido e já
+//   contratado recusam), e o painel recebe a contratação com o aceite, deixa o
+//   cliente ativo e começa a Entrada (clientes "[TESTE] Checkout", apagados no
+//   fim; o painel precisa estar rodando em PAINEL_URL);
 // - fora do Google (noindex), nenhum pedido ao Google, nenhum cookie;
 // - um cartão só, o Resumo (sem a seção "O que foi combinado"), sem ícones, com
 //   a parcela da criação em destaque e a garantia de 7 dias; os seletores com o
@@ -20,8 +24,11 @@
 // Uso: node tests/checkout.mjs [checkout]
 //   padrão: http://checkout.localhost:3005
 
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { chromium } from "playwright-core";
+
+import { criarCliente, criarLink, limparPainel, umDoPainel } from "./painel-de-teste.mjs";
 
 // A chave do sandbox, para conferir no Asaas o que o checkout criou.
 createRequire(import.meta.url)("@next/env").loadEnvConfig(process.cwd(), false, { info() {}, error: console.error });
@@ -39,8 +46,19 @@ const limpo = (s) => s.replace(/\s/g, " ");
 
 const browser = await chromium.launch({ channel: "chrome" });
 try {
+  // Um contato no painel, com o Comercial andando; cada abertura usa um link novo.
+  const clienteDoPainel = await criarCliente("Contratação");
+  const codigo = (servicos, opcoes) => criarLink(clienteDoPainel, "contratacao", servicos, opcoes);
+  const abrir = async (servicos) => `${CHECKOUT}/${await codigo(servicos)}`;
+
+  // A versão dos Termos registrada com o aceite é a data da página dos Termos.
+  const versao = readFileSync("src/config/checkout.ts", "utf8").match(/VERSAO_DOS_TERMOS = "(\d{4})-(\d{2})-(\d{2})"/);
+  const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+  const dataDosTermos = versao && `${Number(versao[3])} de ${meses[Number(versao[2]) - 1]} de ${versao[1]}`;
+  check("a versão dos Termos do aceite é a da página", readFileSync("src/content/termos.mdx", "utf8").includes(`Última atualização: ${dataDosTermos}.`), dataDosTermos);
+
   // Cabeçalhos.
-  const r = await fetch(`${CHECKOUT}/?s=google-ads`);
+  const r = await fetch(await abrir(["google-ads"]));
   check("abre no endereço do checkout", r.status === 200, String(r.status));
   check("fora do Google (noindex)", /noindex/.test(r.headers.get("x-robots-tag") ?? ""));
   check("CSP sem endereços do Google", !/google/.test(r.headers.get("content-security-policy") ?? ""));
@@ -54,21 +72,41 @@ try {
   const enviar = (corpo) =>
     fetch(`${CHECKOUT}/contratar`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(corpo) })
       .then(async (x) => ({ status: x.status, j: await x.json() }));
-  const base = { servicos: ["google-ads"], forma: "cartao", parcelas: 1, semCnpj: true, dados: dadosOk, cartao: cartaoOk, aceite: true };
+  const base = { codigo: await codigo(["google-ads"]), forma: "cartao", parcelas: 1, semCnpj: true, dados: dadosOk, cartao: cartaoOk, aceite: true };
   const semAceite = await enviar({ ...base, aceite: false });
   check("servidor: sem o aceite dos Termos, recusa", semAceite.status === 400 && !semAceite.j.ok, JSON.stringify(semAceite.j));
-  const linkRuim = await enviar({ ...base, servicos: ["google-ads", "inventado"] });
-  check("servidor: serviço que não existe, recusa", linkRuim.status === 400, JSON.stringify(linkRuim.j));
+  const linkRuim = await enviar({ ...base, codigo: "ZZZZZZ", servicos: ["landing-page"] });
+  check("servidor: código que não existe, recusa (e ignora serviços vindos da tela)", linkRuim.status === 400, JSON.stringify(linkRuim.j));
+  const vencido = await enviar({ ...base, codigo: await codigo(["google-ads"], { diaGerado: new Date(Date.now() - 20 * 864e5).toISOString().slice(0, 10) }) });
+  check("servidor: link vencido, recusa", vencido.status === 410, JSON.stringify(vencido.j));
   const cpfRuim = await enviar({ ...base, dados: { ...dadosOk, cpf: "111.111.111-11" } });
   check("servidor: CPF errado, recusa com o campo", cpfRuim.status === 400 && cpfRuim.j.campos?.cpf, JSON.stringify(cpfRuim.j));
   const parcelasRuins = await enviar({ ...base, parcelas: 12 });
   check("servidor: mensalidade em 12x, recusa", parcelasRuins.status === 400, JSON.stringify(parcelasRuins.j));
-  const comPreco = await enviar({ ...base, servicos: ["landing-page"], valor: 1, totalHoje: 1, parcelas: 1 });
+  const codigoDaPagina = await codigo(["landing-page"]);
+  const comPreco = await enviar({ ...base, codigo: codigoDaPagina, valor: 1, totalHoje: 1, parcelas: 1 });
   check("servidor: preço vindo da tela é ignorado (cobra o do catálogo)", comPreco.j.ok && comPreco.j.valor === 160000, JSON.stringify(comPreco.j));
+  const deNovo = await enviar({ ...base, codigo: codigoDaPagina });
+  check("servidor: link já contratado, recusa", deNovo.status === 409, JSON.stringify(deNovo.j));
+
+  // No painel: a contratação com o aceite, o cliente ativo e a Entrada.
+  const noPainel = await umDoPainel(
+    `select k.situacao, k.aceite_ip, k.termos_versao, k.valor::text, c.situacao as cliente,
+            (select cp.situacao from public.cliente_processos cp join public.processos pr on pr.id = cp.processo_id
+              where cp.cliente_id = c.id and pr.slug = 'entrada' order by cp.iniciado_em desc limit 1) as entrada,
+            l.pago_em is not null as link_pago
+       from public.checkout_contratacoes k
+       join public.clientes c on c.id = k.cliente_id
+       join public.checkout_links l on l.id = k.link_id
+      where l.codigo = $1`,
+    [codigoDaPagina],
+  );
+  check("painel: a contratação chega com o aceite (IP e versão dos Termos)", noPainel?.situacao === "paga" && noPainel.aceite_ip && noPainel.termos_versao === versao?.slice(1).join("-") && noPainel.valor === "1600.00", JSON.stringify(noPainel));
+  check("painel: o cliente fica ativo, a Entrada começa e o link fica pago", noPainel?.cliente === "ativo" && noPainel.entrada === "andamento" && noPainel.link_pago, JSON.stringify(noPainel));
 
   // Só o Google Ads no cartão: 1ª mensalidade cobrada agora e a assinatura no
   // mesmo dia do mês seguinte (conferido direto no Asaas).
-  const soAds = await enviar(base);
+  const soAds = await enviar({ ...base, codigo: await codigo(["google-ads"]) });
   check("sandbox: Google Ads no cartão aprovado", soAds.j.ok && soAds.j.situacao === "aprovado", JSON.stringify(soAds.j));
   const [ano, mes, dia] = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date()).split("-").map(Number);
   const ultimo = new Date(Date.UTC(mes === 12 ? ano + 1 : ano, mes === 12 ? 1 : mes, 0)).getUTCDate();
@@ -99,7 +137,7 @@ try {
       check(`${rotulo}: link sem serviços`, (await p.locator("[data-link-vazio]").count()) === 1 && (await p.locator("#whatsapp").count()) === 0);
 
       // Só a página: cartão como referência, o Pix com a economia.
-      await p.goto(`${CHECKOUT}/?s=landing-page`, { waitUntil: "networkidle" });
+      await p.goto(await abrir(["landing-page"]), { waitUntil: "networkidle" });
       check(`${rotulo}: só o que veio no link`, (await p.locator("[data-servico]").count()) === 1);
       check(`${rotulo}: sem caixas para trocar serviço`, (await p.locator("[data-servicos] input").count()) === 0);
       check(`${rotulo}: cartão vem escolhido`, await p.locator('[data-forma="cartao"]').isChecked());
@@ -118,18 +156,18 @@ try {
       check(`${rotulo}: "Pagar no Pix" troca para o Pix`, (await p.locator('[data-forma="pix"]').isChecked()) && limpo(await total(p)) === "R$ 1.400,00", await total(p));
 
       // Página com manutenção: começa 30 dias depois da entrega.
-      await p.goto(`${CHECKOUT}/?s=landing-page,manutencao`, { waitUntil: "networkidle" });
+      await p.goto(await abrir(["landing-page", "manutencao"]), { waitUntil: "networkidle" });
       check(`${rotulo}: página com manutenção, hoje só a página`, limpo(await total(p)) === "R$ 1.600,00", await total(p));
       check(`${rotulo}: manutenção 30 dias depois da entrega`, /30 dias depois da entrega/.test(await p.locator("[data-resumo]").innerText()));
 
       // Site no combo.
-      await p.goto(`${CHECKOUT}/?s=google-ads,site-institucional`, { waitUntil: "networkidle" });
+      await p.goto(await abrir(["google-ads", "site-institucional"]), { waitUntil: "networkidle" });
       check(`${rotulo}: site no combo, cartão`, limpo(await total(p)) === "R$ 2.550,00", await total(p));
       await p.locator('[data-forma="pix"]').check();
       check(`${rotulo}: site no combo, Pix`, limpo(await total(p)) === "R$ 2.250,00", await total(p));
 
       // Só o Google Ads, e com a manutenção.
-      await p.goto(`${CHECKOUT}/?s=google-ads`, { waitUntil: "networkidle" });
+      await p.goto(await abrir(["google-ads"]), { waitUntil: "networkidle" });
       check(`${rotulo}: só o Google Ads`, limpo(await total(p)) === "R$ 500,00", await total(p));
       check(`${rotulo}: 1ª mensalidade`, /1ª mensalidade/.test(await p.locator("[data-resumo]").innerText()));
       check(`${rotulo}: no cartão, a 1ª é cobrada hoje`, /cobrada hoje no cartão/.test(await p.locator("[data-resumo]").innerText()));
@@ -138,12 +176,12 @@ try {
       await p.locator('[data-forma="cartao"]').check();
       check(`${rotulo}: mensalidade sem parcelas`, (await p.locator("#parcelas").count()) === 0);
       check(`${rotulo}: mensalidade sem destaque do Pix`, (await p.locator("[data-destaque-pix]").count()) === 0);
-      await p.goto(`${CHECKOUT}/?s=google-ads,manutencao`, { waitUntil: "networkidle" });
+      await p.goto(await abrir(["google-ads", "manutencao"]), { waitUntil: "networkidle" });
       check(`${rotulo}: manutenção incluída no Google Ads`, /Incluída/.test(await p.locator("[data-resumo]").innerText()));
       check(`${rotulo}: total sem a manutenção`, limpo(await total(p)) === "R$ 500,00", await total(p));
 
       // Combo.
-      await p.goto(`${CHECKOUT}/?s=google-ads,landing-page`, { waitUntil: "networkidle" });
+      await p.goto(await abrir(["google-ads", "landing-page"]), { waitUntil: "networkidle" });
       check(`${rotulo}: combo no cartão`, limpo(await total(p)) === "R$ 1.250,00", await total(p));
       const resumo = limpo(await p.locator("[data-resumo]").innerText());
       check(`${rotulo}: Google Ads começa na aprovação`, /aprovar a sua página/.test(resumo));
@@ -210,7 +248,7 @@ try {
       check(`${rotulo}: QR do Pix ou o link da cobrança`, temQr || (await p.getByRole("link", { name: "Abrir a cobrança" }).count()) === 1, temQr ? "QR" : "link");
 
       // Cartão: de novo, até o aprovado.
-      await p.goto(`${CHECKOUT}/?s=landing-page`, { waitUntil: "networkidle" });
+      await p.goto(await abrir(["landing-page"]), { waitUntil: "networkidle" });
       await p.locator('[data-forma="cartao"]').check();
       await p.locator("#whatsapp").fill("19999990000");
       await p.locator("#email").fill("teste@exemplo.com.br");
@@ -244,6 +282,7 @@ try {
   }
 } finally {
   await browser.close();
+  console.log(`(painel: ${await limparPainel()} cliente(s) de teste apagado(s))`);
 }
 console.log(falhas ? `\n${falhas} falha(s)` : "\nTudo certo");
 process.exit(falhas ? 1 : 0);

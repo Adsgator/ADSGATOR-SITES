@@ -1,19 +1,12 @@
-import { FormularioDoCheckout } from "@/components/checkout/formulario";
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
 import { ConteudoDaFaixa, Faixa } from "@/components/checkout/faixa";
 import { mensagemDoCheckout } from "@/config/checkout";
 import { linkWhatsApp } from "@/config/site";
-import { servicosDoLink } from "@/lib/checkout/catalogo";
 
-// O link traz os serviços fechados na proposta (?s=google-ads,landing-page) e
-// a tela mostra só eles (Lucas, 2026-11-21): para mudar, a pessoa fala com a
-// Adsgator, que manda um link novo.
+// O endereço do checkout sem o código do link: o link certo é gerado na ficha
+// do cliente, no painel, e abre em /<código> (src/app/checkout/[codigo]).
 
-export default async function PaginaDoCheckout({ searchParams }: PageProps<"/checkout">) {
-  const escolhidos = servicosDoLink((await searchParams).s);
-
-  if (escolhidos.length > 0) return <FormularioDoCheckout escolhidos={escolhidos} />;
-
+export default function PaginaDoCheckout() {
   return (
     <>
       <Faixa

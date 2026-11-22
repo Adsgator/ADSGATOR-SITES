@@ -26,13 +26,14 @@ function dataBr(iso: string) {
 const ordemDosCampos = ["cartao-numero", "cartao-nome", "cartao-validade", "cartao-codigo"];
 
 export function FormularioDaMensalidade({
-  token,
+  codigo,
   cliente,
   servico,
   datas,
   cabecalho,
 }: {
-  token: string;
+  /** O código do link gerado no painel. */
+  codigo: string;
   /** O título e o texto da faixa, conforme o serviço. */
   cabecalho: { titulo: React.ReactNode; texto: string };
   /** Nome do cliente no Asaas, para ele conferir que o link é dele. */
@@ -82,7 +83,7 @@ export function FormularioDaMensalidade({
       const r = await fetch("/mensalidade/pagar", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ token, forma, cartao: forma === "cartao" ? cartao : cartaoVazio }),
+        body: JSON.stringify({ codigo, forma, cartao: forma === "cartao" ? cartao : cartaoVazio }),
       });
       const j = (await r.json()) as RespostaDaContratacao;
       if (!j.ok) {

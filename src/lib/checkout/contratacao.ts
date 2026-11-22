@@ -15,14 +15,18 @@
 
 import { randomUUID } from "node:crypto";
 
+import { VERSAO_DOS_TERMOS } from "@/config/checkout";
+
 import * as asaas from "./asaas";
 import { soDigitos } from "./campos";
 import { servicosDoLink } from "./catalogo";
+import { avisarContratacao, linkDoPainel } from "./painel";
 import { hojeEmSaoPaulo, montarPedido, type Data, type Forma } from "./pedido";
 import { cartaoVazio, dadosVazios, validarDados, type Cartao, type Dados } from "./validacao";
 
 export type PedidoDeContratacao = {
-  servicos: string[];
+  /** O código do link gerado no painel: é dele que vêm os serviços. */
+  codigo: string;
   forma: Forma;
   parcelas: number;
   semCnpj: boolean;
@@ -74,13 +78,13 @@ function texto(valor: unknown, max = 200) {
 export function lerPedido(corpo: unknown): PedidoDeContratacao | null {
   if (!corpo || typeof corpo !== "object") return null;
   const c = corpo as Record<string, unknown>;
-  if (!Array.isArray(c.servicos) || (c.forma !== "pix" && c.forma !== "cartao")) return null;
+  if (typeof c.codigo !== "string" || (c.forma !== "pix" && c.forma !== "cartao")) return null;
   const d = (c.dados ?? {}) as Record<string, unknown>;
   const k = (c.cartao ?? {}) as Record<string, unknown>;
   const dados = Object.fromEntries(Object.keys(dadosVazios).map((campo) => [campo, texto(d[campo]).trim()])) as Dados;
   const cartao = Object.fromEntries(Object.keys(cartaoVazio).map((campo) => [campo, texto(k[campo]).trim()])) as Cartao;
   return {
-    servicos: c.servicos.map((s) => texto(s, 40)).slice(0, 10),
+    codigo: texto(c.codigo, 10).trim().toUpperCase(),
     forma: c.forma,
     parcelas: Number.isInteger(c.parcelas) ? (c.parcelas as number) : 1,
     semCnpj: c.semCnpj === true,
@@ -114,9 +118,18 @@ export const reaisDoAsaas = (centavos: number) => centavos / 100;
 export async function contratar(
   p: PedidoDeContratacao,
   ip: string,
+  navegador: string,
 ): Promise<{ status: number; corpo: RespostaDaContratacao }> {
-  const slugs = servicosDoLink(p.servicos.join(","));
-  if (slugs.length === 0 || slugs.length !== new Set(p.servicos).size)
+  // Os serviços vêm do link guardado no painel, nunca do navegador.
+  const link = await linkDoPainel(p.codigo);
+  if (!link || link.tipo !== "contratacao")
+    return { status: 400, corpo: { ok: false, erro: "Este link de contratação não é válido. Fale com a gente no WhatsApp." } };
+  if (!link.valido)
+    return { status: 410, corpo: { ok: false, erro: "Este link venceu. Fale com a gente no WhatsApp para receber um novo." } };
+  if (link.pago)
+    return { status: 409, corpo: { ok: false, erro: "Esta contratação já foi feita. Se precisar de algo, fale com a gente no WhatsApp." } };
+  const slugs = servicosDoLink(link.servicos.join(","));
+  if (slugs.length === 0)
     return { status: 400, corpo: { ok: false, erro: "Este link de contratação não é válido. Fale com a gente no WhatsApp." } };
   if (!p.aceite) return { status: 400, corpo: { ok: false, erro: "Para contratar, aceite os Termos de Serviço." } };
 
@@ -209,6 +222,35 @@ export async function contratar(
       cartao,
     });
   }
+
+  // O painel registra o cliente, o aceite e, se já pagou, começa a Entrada. Se
+  // ele não responder, a cobrança fica no Asaas e o erro no registro do servidor.
+  await avisarContratacao({
+    codigo: p.codigo,
+    servicos: slugs,
+    forma: p.forma,
+    parcelas: p.parcelas,
+    valor: reaisDoAsaas(pedido.totalHoje),
+    asaas_cliente: cliente,
+    asaas_cobranca: cobranca.id,
+    pago: SITUACOES_PAGAS.includes(cobranca.status),
+    dados: {
+      empresa: p.semCnpj ? "" : d.empresa,
+      documento,
+      nome: d.nome,
+      whatsapp: d.whatsapp,
+      email: d.email,
+      cep: d.cep,
+      endereco: d.endereco,
+      numero: d.numero,
+      complemento: d.complemento,
+      bairro: d.bairro,
+      cidade: d.cidade,
+      uf: d.uf,
+      indicacao: d.indicacao,
+    },
+    aceite: { em: new Date().toISOString(), ip, navegador: navegador.slice(0, 300), termos_versao: VERSAO_DOS_TERMOS },
+  });
 
   return respostaDaCobranca(cobranca, p.forma, pedido.totalHoje, p.parcelas, vencimento, proxima);
 }

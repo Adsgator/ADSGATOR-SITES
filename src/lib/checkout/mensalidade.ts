@@ -2,7 +2,9 @@
 // depois da entrega), no servidor. Decisões do Lucas (2026-11-21): a 1ª vence
 // em 3 dias a partir do dia em que o link foi gerado, e esse dia é o das
 // próximas; o cliente paga lendo o que contrata, e a assinatura nasce no
-// Asaas. Os Termos já foram aceitos na contratação.
+// Asaas. Os Termos já foram aceitos na contratação. O link é o código gerado
+// no painel (decisão 1 A, 2026-11-21): é de lá que vêm o cliente, o serviço e
+// o dia em que foi gerado.
 
 import * as asaas from "./asaas";
 import { soDigitos } from "./campos";
@@ -13,11 +15,24 @@ import {
   dataIso,
   mesmoDiaNoMesSeguinte,
   respostaDaCobranca,
+  SITUACOES_PAGAS,
   type RespostaDaContratacao,
 } from "./contratacao";
-import { linkVencido, lerLink, type DadosDoLink } from "./link-mensalidade";
+import { avisarMensalidade, linkDoPainel, type LinkDoPainel } from "./painel";
 import { DIAS_PARA_VENCER, hojeEmSaoPaulo, somarDias, type Data, type Forma } from "./pedido";
 import { cartaoVazio, validarCartao, type Cartao } from "./validacao";
+
+/** O que o link da mensalidade traz, montado a partir do painel. */
+export type DadosDoLink = {
+  /** Cliente no Asaas (cus_...). */
+  cliente: string;
+  /** Serviço mensal do catálogo (google-ads ou manutencao). */
+  servico: string;
+  /** Dia em que o link foi gerado (aaaa-mm-dd): é o dia das próximas. */
+  gerado: string;
+  /** O código do link. */
+  id: string;
+};
 
 function data(iso: string): Data {
   const [ano, mes, dia] = iso.split("-").map(Number);
@@ -45,11 +60,18 @@ export type SituacaoDoLink =
   | { tipo: "ativado"; link: DadosDoLink; pixPendente?: asaas.Cobranca }
   | { tipo: "pronto"; link: DadosDoLink; cliente: asaas.ClienteDoAsaas };
 
-/** Confere o link: assinatura, validade, cliente no Asaas e se já foi ativado. */
-export async function situacaoDoLink(token: string): Promise<SituacaoDoLink> {
-  const link = lerLink(token);
-  if (!link) return { tipo: "invalido" };
-  if (linkVencido(link, dataIso(hojeEmSaoPaulo()))) return { tipo: "vencido" };
+/** Confere o link: no painel (existe, é de mensalidade, vale), o cliente no
+ * Asaas e se a mensalidade já foi ativada. */
+export async function situacaoDoLink(codigo: string, jaLido?: LinkDoPainel | null): Promise<SituacaoDoLink> {
+  const doPainel = jaLido === undefined ? await linkDoPainel(codigo) : jaLido;
+  if (!doPainel || doPainel.tipo !== "mensalidade" || !doPainel.cliente.asaas_id) return { tipo: "invalido" };
+  if (!doPainel.valido && !doPainel.pago) return { tipo: "vencido" };
+  const link: DadosDoLink = {
+    cliente: doPainel.cliente.asaas_id,
+    servico: doPainel.servicos[0],
+    gerado: doPainel.dia_gerado,
+    id: codigo.toUpperCase(),
+  };
   const cliente = await asaas.clientePorId(link.cliente).catch(() => null);
   if (!cliente || cliente.deleted) return { tipo: "invalido" };
   const ref = referenciaDoLink(link);
@@ -61,17 +83,17 @@ export async function situacaoDoLink(token: string): Promise<SituacaoDoLink> {
   return { tipo: "ativado", link, pixPendente };
 }
 
-export type PedidoDaMensalidade = { token: string; forma: Forma; cartao: Cartao };
+export type PedidoDaMensalidade = { codigo: string; forma: Forma; cartao: Cartao };
 
 export function lerPedidoDaMensalidade(corpo: unknown): PedidoDaMensalidade | null {
   if (!corpo || typeof corpo !== "object") return null;
   const c = corpo as Record<string, unknown>;
-  if (typeof c.token !== "string" || (c.forma !== "pix" && c.forma !== "cartao")) return null;
+  if (typeof c.codigo !== "string" || (c.forma !== "pix" && c.forma !== "cartao")) return null;
   const k = (c.cartao ?? {}) as Record<string, unknown>;
   const cartao = Object.fromEntries(
     Object.keys(cartaoVazio).map((campo) => [campo, typeof k[campo] === "string" ? (k[campo] as string).slice(0, 100).trim() : ""]),
   ) as Cartao;
-  return { token: c.token.slice(0, 600), forma: c.forma, cartao };
+  return { codigo: c.codigo.slice(0, 10).trim().toUpperCase(), forma: c.forma, cartao };
 }
 
 const MENSAGENS: Record<Exclude<SituacaoDoLink["tipo"], "pronto">, { status: number; erro: string }> = {
@@ -84,7 +106,7 @@ export async function pagarMensalidade(
   p: PedidoDaMensalidade,
   ip: string,
 ): Promise<{ status: number; corpo: RespostaDaContratacao }> {
-  const situacao = await situacaoDoLink(p.token);
+  const situacao = await situacaoDoLink(p.codigo);
   // Voltou ao link depois de gerar o Pix: o mesmo Pix, para pagar.
   if (situacao.tipo === "ativado" && situacao.pixPendente && p.forma === "pix") {
     const c = situacao.pixPendente;
@@ -134,5 +156,7 @@ export async function pagarMensalidade(
     referencia: referenciaDoLink(link),
     cartao,
   });
+  // O painel marca o link (pago no cartão; no Pix, quando o webhook trouxer o pagamento).
+  await avisarMensalidade({ codigo: link.id, asaas_cobranca: cobranca.id, pago: SITUACOES_PAGAS.includes(cobranca.status) });
   return respostaDaCobranca(cobranca, p.forma, servico.preco[p.forma], 1, vencimento, datas.proximo);
 }

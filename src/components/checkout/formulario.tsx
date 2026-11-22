@@ -31,7 +31,7 @@ const ordemDosCampos = [
   "bairro", "cidade", "uf", "cartao-numero", "cartao-nome", "cartao-validade", "cartao-codigo",
 ];
 
-export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
+export function FormularioDoCheckout({ codigo, escolhidos }: { codigo: string; escolhidos: string[] }) {
   // O cartão vem escolhido, e o preço dele é a referência; o Pix aparece como
   // a forma mais barata (Lucas, 2026-11-21).
   const [forma, setForma] = useState<Forma>("cartao");
@@ -152,7 +152,7 @@ export function FormularioDoCheckout({ escolhidos }: { escolhidos: string[] }) {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          servicos: escolhidos,
+          codigo,
           forma,
           parcelas,
           semCnpj,

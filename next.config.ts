@@ -216,9 +216,10 @@ const nextConfig: NextConfig = {
         { source: "/", has: noCheckout, destination: "/checkout" },
         { source: "/consulta/:resto*", has: noCheckout, destination: "/checkout/consulta/:resto*" },
         { source: "/contratar", has: noCheckout, destination: "/checkout/contratar" },
-        { source: "/mensalidade", has: noCheckout, destination: "/checkout/mensalidade" },
         { source: "/mensalidade/pagar", has: noCheckout, destination: "/checkout/mensalidade/pagar" },
         { source: "/situacao/:cobranca", has: noCheckout, destination: "/checkout/situacao/:cobranca" },
+        // O link gerado no painel: checkout.adsgator.com.br/K7Q2PX.
+        { source: "/:codigo([A-Za-z0-9]{6})", has: noCheckout, destination: "/checkout/:codigo" },
       ],
       afterFiles: [
         {
