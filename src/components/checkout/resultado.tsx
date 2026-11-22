@@ -1,18 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckIcon, CopyIcon, ExternalLinkIcon } from "lucide-react";
+import { CheckIcon, ClockIcon, CopyIcon, ExternalLinkIcon } from "lucide-react";
 
+import { IconePix } from "@/components/icone-pix";
 import { linkWhatsApp, site } from "@/config/site";
 import type { RespostaDaContratacao } from "@/lib/checkout/contratacao";
 import { reais, valorDaParcela } from "@/lib/checkout/pedido";
 
-import { ConteudoDaFaixa, Faixa } from "./faixa";
 
-// Depois de pagar, na contratação e no link da mensalidade. A faixa dá o
-// resultado (confirmada, ativada, falta o Pix, em análise) e o cartão embaixo,
-// os detalhes: o que foi pago, a próxima cobrança e o que acontece agora
-// (Lucas, 2026-11-21). O Pix confere a cada 5 segundos se o pagamento caiu,
+// Depois de pagar, na contratação e no link da mensalidade. Sem a faixa verde:
+// fundo claro com o padrão da marca, o resultado em cima (confirmada, ativada,
+// falta o Pix, em análise) e o cartão embaixo com os detalhes: o que foi pago,
+// a próxima cobrança e o que acontece agora (Lucas, 2026-11-21). O Pix confere a cada 5 segundos se o pagamento caiu,
 // e a tela muda sozinha.
 
 type Resposta = Extract<RespostaDaContratacao, { ok: true }>;
@@ -142,13 +142,28 @@ export function TelaDoResultado({ resposta, contexto }: { resposta: Resposta; co
         ? `Cartão, em ${resposta.parcelas}x de ${reais(valorDaParcela(resposta.valor, resposta.parcelas))} sem juros`
         : "Cartão, à vista";
   const topo = cabecalho(situacao, resposta, contexto);
+  const icone =
+    situacao === "pix_pendente" ? (
+      <IconePix className="size-7" />
+    ) : situacao === "em_analise" ? (
+      <ClockIcon className="size-7 text-muted-foreground" aria-hidden="true" />
+    ) : (
+      <CheckIcon className="size-7 text-success" strokeWidth={2.5} aria-hidden="true" />
+    );
   const marca = resposta.forma === "pix" ? (pago ? "pix-pago" : "pix") : resposta.situacao === "aprovado" ? "cartao" : "cartao-analise";
 
   return (
-    <>
-      <Faixa rotulo={topo.rotulo} titulo={topo.titulo} texto={topo.texto} />
-      <ConteudoDaFaixa>
-        <div className="mx-auto max-w-xl rounded-2xl border bg-card p-6 text-[0.9375rem] shadow-sm sm:p-8" data-resultado={marca}>
+    <section className="bg-pattern-light">
+      <div className="mx-auto max-w-xl px-4 pt-12 pb-16 sm:pt-16 sm:pb-24">
+        <div className="text-center">
+          <span className="mx-auto flex size-14 items-center justify-center rounded-full border bg-card shadow-sm">{icone}</span>
+          <p className="mt-5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{topo.rotulo}</p>
+          <h1 className="mt-2 font-heading text-4xl leading-[1.05] tracking-tight text-balance sm:text-5xl" data-titulo>
+            {topo.titulo}
+          </h1>
+          <p className="mx-auto mt-4 max-w-md text-base leading-7 text-muted-foreground">{topo.texto}</p>
+        </div>
+        <div className="mt-8 rounded-2xl border bg-card p-6 text-[0.9375rem] shadow-sm sm:p-8" data-resultado={marca}>
           {resposta.forma === "pix" &&
             pixPendente &&
             (resposta.pix ? (
@@ -234,7 +249,7 @@ export function TelaDoResultado({ resposta, contexto }: { resposta: Resposta; co
             , no {site.whatsapp.exibicao}.
           </p>
         </div>
-      </ConteudoDaFaixa>
-    </>
+      </div>
+    </section>
   );
 }
