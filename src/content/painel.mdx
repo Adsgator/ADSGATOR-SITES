@@ -1,46 +1,62 @@
-{/* Página do Painel Adsgator, aprovada pelo Lucas em 2026-11-23: a página
-inicial do app no Google Cloud (verificação da marca). Precisa descrever o app,
-ser pública e ter os links da Privacidade e dos Termos (developers.google.com,
-"Submit for brand verification"). Ao mudar o que o painel lê do Google, mudar
-também a seção "Painel Adsgator e dados do Google" da Privacidade. */}
+{/* Página do Painel Adsgator: a página inicial do app no Google Cloud
+(verificação da marca). Primeira versão aprovada pelo Lucas em 2026-11-23; esta,
+também aprovada por ele em 2026-11-23, depois de a verificação apontar que a
+página não dizia por que o app pede acesso à conta Google (ajuda do Google Cloud,
+"App Homepage": descrever o app, explicar para que pede os dados do Google, sem
+login, com o link da política de privacidade igual ao da tela de consentimento).
+Ao mudar o que o painel lê do Google, mudar também /painel/privacidade e a seção
+"Painel Adsgator e dados do Google" da Privacidade geral. */}
 
 # Painel Adsgator
 
-O Painel Adsgator é o sistema interno da Adsgator, agência de Google Ads e
-landing pages para negócios locais. É nele que a Adsgator acompanha cada
-cliente: as etapas de cada projeto, os resultados das campanhas e a
-conferência das páginas no ar.
+O Painel Adsgator é a ferramenta interna da Adsgator, agência de Google Ads e
+landing pages para negócios locais, para acompanhar as campanhas de Google Ads
+que ela gerencia para os clientes.
+
+## Para que serve
+
+- Mostrar os resultados das campanhas de cada cliente (impressões, cliques,
+  custo e contatos) e avisar quando uma campanha para ou um anúncio é
+  reprovado.
+- Preparar a revisão semanal das campanhas e o resumo do mês que o cliente
+  recebe.
+- Fazer o diagnóstico de novos clientes com o Planejador de palavras-chave: o
+  que as pessoas buscam e quantas vezes por mês, em cada cidade.
+- Mostrar as visitas e os toques no WhatsApp das páginas dos clientes, pelo
+  Google Analytics.
+
+## Por que ele pede acesso à conta Google
+
+O painel usa a conta Google da própria Adsgator, a que administra as contas de
+Google Ads dos clientes com a permissão deles. Ao entrar com essa conta, ele
+pede três permissões:
+
+- **Google Ads:** para ler os números, as campanhas, os anúncios e o histórico
+  das contas que a Adsgator administra, e para consultar o Planejador de
+  palavras-chave. O painel só lê. Ele não cria nem altera campanhas, anúncios,
+  orçamentos ou lances.
+- **Google Analytics (somente leitura):** para ler as visitas e os toques no
+  WhatsApp das páginas dos clientes.
+- **Google Cloud:** exigida pelo Google para o painel usar essas APIs pelo
+  projeto dele no Google Cloud.
+
+Esses dados são usados só para as funções acima.
 
 ## Quem usa
 
-Só a equipe da Adsgator, com login e verificação em duas etapas. Clientes e
-visitantes não acessam o painel.
+É uma ferramenta de trabalho da equipe da Adsgator. Os clientes recebem os
+resultados no resumo do mês, sem precisar usar o painel.
 
-## O que ele faz com o Google
+## O que ele não faz
 
-Com a conta Google da Adsgator, que gerencia as contas de Google Ads dos
-clientes com a permissão deles, o painel:
+- Não altera nada nas contas do Google.
+- Não vende os dados do Google e não os usa para anúncios.
+- Não gera imagens nem outro conteúdo a partir dos dados do Google, e não usa
+  esses dados para treinar modelos de IA.
 
-- lê os números das campanhas (impressões, cliques, custo e contatos), a
-  situação das campanhas e dos anúncios e o histórico de alterações, para
-  mostrar os resultados, preparar a revisão semanal e o resumo do mês do
-  cliente e avisar quando algo para;
-- lê no Google Analytics as visitas e os toques no WhatsApp das páginas dos
-  clientes;
-- consulta o Planejador de palavras-chave do Google Ads para o diagnóstico de
-  novos clientes: o que as pessoas buscam e quantas vezes por mês, em cada
-  cidade.
+## Privacidade
 
-## O painel só lê
+Como os dados do Google são acessados, usados, guardados, protegidos e
+apagados: [Política de Privacidade do Painel Adsgator](/painel/privacidade).
 
-Ele não cria nem altera campanhas, anúncios, orçamentos ou lances. As mudanças
-nas contas são feitas pela Adsgator, direto no Google Ads.
-
-## Os dados
-
-Os dados do Google são usados só para essas funções. Eles não são vendidos nem
-usados para anúncios. Os detalhes estão na [Política de
-Privacidade](/privacidade#painel-adsgator-e-dados-do-google).
-
-[Política de Privacidade](/privacidade) · [Termos](/termos) ·
-[contato@adsgator.com.br](mailto:contato@adsgator.com.br)
+[Termos](/termos) · [contato@adsgator.com.br](mailto:contato@adsgator.com.br)

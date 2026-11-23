@@ -12,12 +12,13 @@ function check(nome, ok, detalhe = "") {
   if (!ok) falhas++;
 }
 
-// /painel: a página do app no Google Cloud (verificação da marca), no mesmo
-// componente, sem o resumo em cartão.
+// /painel e /painel/privacidade: a página e a política do app no Google Cloud
+// (verificação da marca), no mesmo componente, sem o resumo em cartão.
 const paginas = [
   { caminho: "/termos", secoes: 18, assunto: "os Termos de Serviço", alvo: "Reembolso" },
   { caminho: "/privacidade", secoes: 11, assunto: "a Política de Privacidade", alvo: "Seus direitos" },
-  { caminho: "/painel", secoes: 4, assunto: "o Painel Adsgator", alvo: "Quem usa", semResumo: true },
+  { caminho: "/painel", secoes: 5, assunto: "o Painel Adsgator", alvo: "Para que serve", semResumo: true },
+  { caminho: "/painel/privacidade", secoes: 8, assunto: "a Política de Privacidade do Painel Adsgator", alvo: "Dados do Google que o painel acessa", semResumo: true },
 ];
 const telas = [
   { nome: "notebook", width: 1366, height: 768 },
