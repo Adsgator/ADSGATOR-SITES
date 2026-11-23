@@ -66,7 +66,7 @@ const cabecalhosDaMensalidade: Record<string, { titulo: React.ReactNode; texto: 
 
 const avisos: Record<string, { titulo: string; texto: string }> = {
   invalido: { titulo: "Este link não é válido", texto: "Fale com a gente no WhatsApp para receber o link certo." },
-  vencido: { titulo: "Este link venceu", texto: "Os links valem 15 dias. Fale com a gente no WhatsApp para receber um novo." },
+  vencido: { titulo: "Este link venceu", texto: "Fale com a gente no WhatsApp para receber um novo." },
   contratado: {
     titulo: "Esta contratação já foi feita",
     texto: "Não precisa fazer mais nada. Se quiser mudar algo, fale com a gente no WhatsApp.",
