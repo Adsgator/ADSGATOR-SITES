@@ -12,9 +12,12 @@ function check(nome, ok, detalhe = "") {
   if (!ok) falhas++;
 }
 
+// /painel: a página do app no Google Cloud (verificação da marca), no mesmo
+// componente, sem o resumo em cartão.
 const paginas = [
   { caminho: "/termos", secoes: 18, assunto: "os Termos de Serviço", alvo: "Reembolso" },
-  { caminho: "/privacidade", secoes: 10, assunto: "a Política de Privacidade", alvo: "Seus direitos" },
+  { caminho: "/privacidade", secoes: 11, assunto: "a Política de Privacidade", alvo: "Seus direitos" },
+  { caminho: "/painel", secoes: 4, assunto: "o Painel Adsgator", alvo: "Quem usa", semResumo: true },
 ];
 const telas = [
   { nome: "notebook", width: 1366, height: 768 },
@@ -24,7 +27,7 @@ const telas = [
 const browser = await chromium.launch({ channel: "chrome" });
 try {
   for (const tela of telas) {
-    for (const { caminho, secoes, assunto, alvo } of paginas) {
+    for (const { caminho, secoes, assunto, alvo, semResumo } of paginas) {
       const rotulo = `${tela.nome}, ${caminho}`;
       const page = await browser.newPage({ viewport: { width: tela.width, height: tela.height } });
       const erros = [];
@@ -32,6 +35,10 @@ try {
       page.on("pageerror", (e) => erros.push(e.message));
       await page.goto(BASE + caminho, { waitUntil: "networkidle" });
       await page.waitForTimeout(500);
+      // O aviso de cookies cobre o canto de baixo até a escolha (e o fim do
+      // sumário no notebook): o teste recusa, como um visitante.
+      const aviso = page.locator("[data-aviso-cookies]");
+      if (await aviso.isVisible()) await aviso.getByRole("button", { name: "Recusar" }).click();
 
       const celular = tela.width < 1024;
       const nav = celular ? 'nav[aria-label="Nesta página, no celular"]' : 'nav[aria-label="Nesta página"]';
@@ -71,7 +78,7 @@ try {
       }));
       check(
         `${rotulo}: o resumo em cartão, a dúvida pelo WhatsApp com a mensagem pronta e sem sobra lateral`,
-        fim.resumo && fim.whats.includes(assunto) && fim.sobra === 0,
+        (semResumo || fim.resumo) && fim.whats.includes(assunto) && fim.sobra === 0,
         `resumo ${fim.resumo}, sobra ${fim.sobra}px`,
       );
       check(`${rotulo}: console sem erros`, erros.length === 0, erros.join(" | ").slice(0, 300));

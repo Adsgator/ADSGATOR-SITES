@@ -1,7 +1,7 @@
 {/* Política de Privacidade, aprovada pelo Lucas e publicada em 2026-10-06.
 Atualizada em 2026-11-11, aprovada por ele: as mensagens do WhatsApp chegam ao
 painel pela YCloud e o Claude (Anthropic) ajuda no atendimento (plano do
-sistema do painel, Fase 3). O aviso por e-mail aos clientes (seção 10) fica
+sistema do painel, Fase 3). O aviso por e-mail aos clientes (seção "Mudanças nesta política") fica
 para quando a agência estiver completa, com todas as mudanças de uma vez
 (decisão dele, 2026-11-11).
 Atualizada em 2026-11-20, aprovada por ele: as fontes da Adobe Fonts (Fase 1B).
@@ -12,12 +12,18 @@ site faz. Desde 2026-11-20 (pedido do Lucas), o site mede com o GTM
 antes disso.
 Atualizada de novo em 2026-11-20, aprovada por ele: a medição com permissão
 (GTM, Analytics e Google Ads), o aviso de cookies e o resumo no começo.
+Atualizada em 2026-11-23, aprovada por ele: a seção "Painel Adsgator e dados do
+Google" e a linha dela no resumo, para a verificação da marca do app no Google
+Cloud (a política precisa dizer como o app acessa, usa, guarda e compartilha os
+dados do Google; developers.google.com, "Submit for brand verification"). A
+opção de treinar a IA está desligada na conta do Claude dele (confirmado por
+ele em 2026-11-23): se mudar, mudar a frase sobre treinar modelos de IA.
 Ao mudar: destacar o que mudou com <mark> num branch para o Lucas revisar;
 publicar sem os destaques e com a data nova. */}
 
 # Política de Privacidade
 
-Última atualização: 20 de novembro de 2026.
+Última atualização: 23 de novembro de 2026.
 
 Esta política explica quais dados pessoais a Adsgator usa, para quê, com quem
 eles são compartilhados e como você exerce os seus direitos, conforme a [Lei
@@ -32,6 +38,9 @@ Geral de Proteção de Dados
 - **Quem é cliente ou chama a Adsgator:** os dados ficam num painel interno,
   com login e acesso restrito.
 - **Sem venda de dados:** a Adsgator não vende nem aluga dados pessoais.
+- **Painel e Google:** o painel interno só lê os números do Google Ads e do
+  Analytics das contas que a Adsgator gerencia, sem vender nem usar para
+  anúncios.
 - **Serviços usados:** só os necessários para funcionar, como a hospedagem,
   os pagamentos e o atendimento, listados abaixo.
 - **Seus direitos:** você pode pedir acesso, correção ou exclusão dos seus
@@ -147,7 +156,40 @@ Nas landing pages e nas contas do Google dos clientes, quem decide sobre os
 dados dos visitantes e dos clientes deles é o próprio cliente. A Adsgator atua
 a pedido dele, por exemplo ao configurar conversões e remarketing.
 
-## 6. Dados fora do Brasil
+## 6. Painel Adsgator e dados do Google
+
+O [Painel Adsgator](/painel) é o sistema interno da Adsgator. Ele se conecta às
+APIs do Google com o login da própria Adsgator e acessa:
+
+- **Google Ads**, nas contas dos clientes que a Adsgator gerencia: os números
+  das campanhas (impressões, cliques, custo e conversões, por dia, hora,
+  aparelho, cidade, palavra-chave e termo de pesquisa), as configurações das
+  campanhas, os anúncios e a situação de aprovação, as listas de palavras
+  negativas e o histórico de alterações, com o e-mail de quem alterou. Também
+  consulta o Planejador de palavras-chave, que mostra quantas buscas um termo
+  tem por mês.
+- **Google Analytics**, nas propriedades das páginas dos clientes: as visitas e
+  os toques no WhatsApp por dia, em números reunidos.
+
+**Para quê:** mostrar os resultados no painel, preparar a revisão das
+campanhas, o resumo do mês enviado ao cliente e o diagnóstico de novos
+clientes, e avisar de problemas. O painel só lê e não altera nada nas contas.
+
+**Onde fica:** no banco de dados do painel (Supabase), com acesso restrito,
+pelo prazo de [Por quanto tempo](#por-quanto-tempo). O login do Google fica só
+no computador da Adsgator.
+
+**Com quem é compartilhado:** o resumo do mês vai ao próprio cliente. O Claude
+(Anthropic) lê os números para preparar as análises, que a Adsgator revisa.
+Fora isso, nada é compartilhado. Os dados do Google não são vendidos, não são
+usados para anúncios e não são usados para treinar modelos de IA de uso geral.
+
+O uso e a transferência das informações recebidas das APIs do Google seguem a
+[Política de Dados do Usuário dos Serviços de API do
+Google](https://developers.google.com/terms/api-services-user-data-policy),
+incluindo os requisitos de Uso Limitado.
+
+## 7. Dados fora do Brasil
 
 Alguns dos [serviços que tratam dados para a
 Adsgator](#servicos-que-tratam-dados-para-a-adsgator) guardam dados em
@@ -156,20 +198,20 @@ Singapura e na União Europeia, para as mesmas finalidades desta política e pel
 descrito em [Por quanto tempo](#por-quanto-tempo). Para saber mais, escreva
 para [contato@adsgator.com.br](mailto:contato@adsgator.com.br).
 
-## 7. Por quanto tempo
+## 8. Por quanto tempo
 
 Os dados de clientes ficam guardados enquanto durar o contrato e, depois,
 por até 5 anos, para cumprir obrigações legais e defender direitos. Depois
 disso, são apagados ou anonimizados. Os dados técnicos de acesso ao site
 ficam com a hospedagem, pelo prazo dela.
 
-## 8. Segurança
+## 9. Segurança
 
 A Adsgator adota medidas para proteger os dados contra acesso não autorizado,
 perda ou uso indevido, como o painel interno com login e acesso restrito e a
 conexão segura (HTTPS) no site e no painel.
 
-## 9. Seus direitos
+## 10. Seus direitos
 
 Você pode pedir à Adsgator, a qualquer momento e sem custo:
 
@@ -193,7 +235,7 @@ acesso são dados de forma simplificada na hora ou, se você pedir uma
 declaração completa, em até 15 dias. Você também pode reclamar à ANPD ou aos
 órgãos de defesa do consumidor.
 
-## 10. Mudanças nesta política
+## 11. Mudanças nesta política
 
 Esta política muda quando a Adsgator mudar a forma de usar os dados (por
 exemplo, se o site passar a medir visitas). A versão em vigor fica sempre nesta
