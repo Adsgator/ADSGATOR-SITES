@@ -164,7 +164,7 @@ const perguntas = [
   {
     pergunta: "Quanto custa?",
     resposta:
-      "Um valor fixo por mês, igual para todos. Para quem tem o Google Ads com a Adsgator e a página feita por ela, já vem incluída. Te passo tudo na conversa.",
+      "Um valor por mês. Para quem tem o Google Ads com a Adsgator e a página feita por ela, já vem incluída. Te passo tudo na conversa.",
   },
   {
     pergunta: "Tem fidelidade?",

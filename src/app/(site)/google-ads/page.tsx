@@ -194,7 +194,7 @@ const perguntas = [
   {
     pergunta: "Quanto custa?",
     resposta:
-      "A gestão tem preço fixo, igual para todos, sem taxa de criação. A verba do Google sai do diagnóstico, para a sua região. Te passo tudo na conversa, com o porquê de cada parte.",
+      "A gestão é um valor por mês, sem taxa de criação. A verba do Google sai do diagnóstico, para a sua região. Te passo tudo na conversa, com o porquê de cada parte, e depois uma proposta completa.",
   },
   { pergunta: "Quem paga a verba do Google?", resposta: "Você, direto ao Google, na sua conta. A verba não passa pela Adsgator." },
   { pergunta: "Tem fidelidade?", resposta: "Não. Cancele quando quiser e volte quando quiser." },

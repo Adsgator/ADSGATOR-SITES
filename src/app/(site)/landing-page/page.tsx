@@ -179,7 +179,7 @@ const perguntas = [
   {
     pergunta: "Quanto custa?",
     resposta:
-      "A página tem preço fixo, igual para todos, pago uma vez. Quem contrata também o Google Ads tem desconto na página. Te passo tudo na conversa.",
+      "A página é paga uma vez, no cartão em até 12 vezes ou no Pix com desconto. Quem contrata também o Google Ads tem desconto na página. Te passo tudo na conversa.",
   },
   {
     pergunta: "A página é minha?",
