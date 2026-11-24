@@ -513,6 +513,14 @@ details[open]::details-content {
     background-repeat: no-repeat;
     animation: marca-texto 700ms var(--ease-out) 350ms both;
   }
+  /* O fundo de holograma do valor a confirmar (valor-conhecido.tsx). */
+  .holograma {
+    background-color: color-mix(in oklab, var(--brand) 6%, transparent);
+    background-image:
+      repeating-linear-gradient(to bottom, color-mix(in oklab, var(--brand) 9%, transparent) 0 1px, transparent 1px 5px),
+      linear-gradient(100deg, color-mix(in oklab, var(--brand) 12%, transparent), transparent 55%, color-mix(in oklab, var(--brand) 9%, transparent));
+    box-shadow: inset 0 0 24px color-mix(in oklab, var(--brand) 10%, transparent);
+  }
   .cursor-clica {
     animation: cursor-clica 420ms var(--ease-out) both;
   }

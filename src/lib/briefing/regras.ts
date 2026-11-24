@@ -3,17 +3,21 @@
 // o que conta como respondido, a porcentagem e a resposta em texto. Nada de
 // conteúdo de cliente: as perguntas chegam de fora.
 
+import type { IconeDoNegocio } from "@/lib/briefing/icones";
+
 export type TipoDePergunta =
   | "texto"
   | "longo"
   | "escolha"
   | "multipla"
   | "confirmar"
+  | "endereco"
   | "etiquetas"
   | "detalhes"
   | "horarios"
   | "redes"
   | "duvidas"
+  | "cores"
   | "estilo";
 
 /** A pergunta só aparece quando todas as condições valem. */
@@ -35,7 +39,19 @@ export type Papel =
   | "clientes"
   | "duvidas"
   | "historia"
+  | "principal"
+  | "passos"
+  | "numeros"
+  | "elogio"
   | "estilo"
+  | "cores"
+  | "sensacao"
+  | "facilita"
+  | "diferente"
+  | "redes"
+  | "registro"
+  | "preco"
+  | "dominio"
   | "site"
   | "cidades"
   | "procuram"
@@ -56,9 +72,15 @@ export type Pergunta = {
   nada?: string;
   se?: Condicao[];
   opcoes?: string[];
+  /** O exemplo de cada campo, quando a pergunta tem vários. */
+  exemplos?: Record<string, string>;
+  /** Como a pergunta das cores é respondida. */
+  modo?: "exatas" | "logo" | "combinacoes";
   /** As opções são as respostas destas perguntas (das que aparecem). */
   opcoesDe?: string[];
   max?: number;
+  /** Sugere a cidade do cliente e as vizinhas de verdade (src/lib/regiao.ts). */
+  sugereRegiao?: true;
   /** Deixa escrever uma opção que não está na lista. */
   outra?: string;
   /** Para confirmar o que já se sabe. */
@@ -96,6 +118,10 @@ export type Briefing = {
   segmento: string;
   secoes: string[];
   perguntas: Pergunta[];
+  /** A cidade do cadastro. */
+  cidade?: { nome: string; uf: string };
+  /** O ícone do negócio, no desenho da página. */
+  icone?: IconeDoNegocio;
   /** A pasta do cliente no Drive, para o material (logo, fotos). */
   pastaDoMaterial?: string;
   /** O que já veio do briefing da página, para o desenho do anúncio. */
@@ -113,6 +139,14 @@ export const HORARIOS_INICIAIS: Horario[] = [
   { dias: DE_SEGUNDA_A_SEXTA, aberto: false, de: "08:00", ate: "18:00" },
   { dias: "Sábado", aberto: false, de: "08:00", ate: "12:00" },
   { dias: "Domingo", aberto: false, de: "08:00", ate: "12:00" },
+];
+
+const PARTES_DO_ENDERECO: [string, string][] = [
+  ["rua", "a rua"],
+  ["numero", "o número"],
+  ["bairro", "o bairro"],
+  ["cidade", "a cidade"],
+  ["uf", "o estado"],
 ];
 
 export const HORA_MARCADA = "Só com hora marcada";
@@ -198,6 +232,10 @@ export function problema(p: Pergunta, briefing: Briefing, respostas: Respostas):
       const existe = marcada && (!p.opcoesDe || opcoesDa(p, briefing, respostas).includes(marcada));
       return existe ? null : "Escolha uma opção para continuar.";
     }
+    case "cores":
+      // O código que a gente não reconhece vale também: chega do jeito que foi escrito.
+      if (p.modo === "exatas") return cheio(r?.valor) ? null : "Escreva ou cole pelo menos uma cor.";
+      return r?.opcoes?.length ? null : "Escolha pelo menos uma cor.";
     case "multipla":
     case "estilo":
       return r?.opcoes?.length ? null : "Escolha pelo menos uma opção.";
@@ -205,6 +243,14 @@ export function problema(p: Pergunta, briefing: Briefing, respostas: Respostas):
       return r?.opcoes?.length ? null : "Adicione pelo menos uma.";
     case "confirmar":
       return r?.opcoes?.includes("sim") || cheio(r?.valor) ? null : "Confirme ou escreva o certo para continuar.";
+    case "endereco": {
+      if (r?.opcoes?.includes("sim")) return null;
+      if (!r?.opcoes?.includes("outro")) return "Confirme ou escreva o certo para continuar.";
+      const i = r.itens ?? {};
+      if ((i.cep ?? "").replace(/\D/g, "").length !== 8) return "Falta o CEP. Se não souber, toque em Não sei o CEP.";
+      const falta = PARTES_DO_ENDERECO.find(([chave]) => !cheio(i[chave]));
+      return falta ? `Falta ${falta[1]}.` : null;
+    }
     case "detalhes": {
       const opcoes = opcoesDa(p, briefing, respostas);
       // Antes de a pessoa escolher os itens, ainda não há o que contar.
@@ -225,6 +271,14 @@ export function problema(p: Pergunta, briefing: Briefing, respostas: Respostas):
   }
 }
 
+/** A cidade para sugerir a região: a do endereço que a pessoa escreveu ou a do cadastro. */
+export function cidadeDe(briefing: Briefing, respostas: Respostas) {
+  const p = briefing.perguntas.find((x) => x.tipo === "endereco");
+  const r = p && respostas[p.id];
+  const i = r?.opcoes?.includes("outro") ? r.itens : undefined;
+  return i?.cidade && i.uf ? { nome: i.cidade, uf: i.uf } : briefing.cidade;
+}
+
 export const respondida = (p: Pergunta, briefing: Briefing, respostas: Respostas) =>
   problema(p, briefing, respostas) === null;
 
@@ -243,6 +297,15 @@ export function emTexto(p: Pergunta, briefing: Briefing, respostas: Respostas): 
   switch (p.tipo) {
     case "confirmar":
       return [(r.opcoes?.includes("sim") ? p.valorConhecido : r.valor?.trim()) ?? ""];
+    case "endereco": {
+      if (r.opcoes?.includes("sim")) return [p.valorConhecido ?? ""];
+      const { rua, numero, complemento, bairro, cidade, uf, cep, referencia } = itens;
+      return [
+        [rua, numero, complemento].filter(cheio).join(", "),
+        `${bairro}, ${cidade}, ${uf}, CEP ${cep}`,
+        ...(cheio(referencia) ? [referencia] : []),
+      ];
+    }
     case "detalhes":
       return opcoesDa(p, briefing, respostas).map((o) => `${o} · ${itens[o].trim()}`);
     case "redes":
@@ -250,6 +313,8 @@ export function emTexto(p: Pergunta, briefing: Briefing, respostas: Respostas): 
       return Object.entries(itens)
         .filter(([, v]) => cheio(v))
         .map(([k, v]) => `${k} · ${v.trim()}`);
+    case "cores":
+      return cheio(r.valor) ? [r.valor!.trim()] : [(r.opcoes ?? []).join(", ")];
     case "horarios":
       return [...textoDosHorarios(r.horarios ?? []), ...(r.opcoes ?? [])];
     case "multipla":

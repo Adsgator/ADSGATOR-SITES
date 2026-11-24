@@ -1,15 +1,17 @@
+import type { Exemplo } from "@/lib/briefing/amostra-preenchida";
 import type { Respostas } from "@/lib/briefing/regras";
 import type { Colados } from "@/lib/briefing/sinais";
 
 // Onde a amostra guarda as respostas (só neste navegador). Na versão final, ficam no
 // painel, e este arquivo sai.
 
-export type Guardado = { respostas: Respostas; enviado: boolean; colados: Colados };
+export type Guardado = { respostas: Respostas; enviado: boolean; colados: Colados; materialMandado?: boolean };
 
 const chaveDe = (slug: string) => `amostra-briefing:${slug}`;
 
-export function lerAmostra(slug: string): Guardado {
-  const vazio: Guardado = { respostas: {}, enviado: false, colados: {} };
+/** Sem nada guardado, o exemplo preenchido (quando tem) ou o vazio. */
+export function lerAmostra(slug: string, exemplo?: Exemplo): Guardado {
+  const vazio: Guardado = { enviado: false, ...(exemplo ?? { respostas: {}, colados: {} }) };
   try {
     const texto = localStorage.getItem(chaveDe(slug));
     return texto ? { ...vazio, ...(JSON.parse(texto) as Partial<Guardado>) } : vazio;

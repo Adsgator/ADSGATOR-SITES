@@ -123,15 +123,15 @@ for (const [nome, opcoes] of [
 
   const vistas = await ateORevisao(pg, {
     "Como você atende?": ["Por vídeo ou telefone"],
-    "Quem você defende?": ["O trabalhador"],
+    "No dia a dia, quem você costuma defender?": ["O trabalhador"],
     "Você já tem um endereço de site?": ["Já tenho"],
   });
   console.log(`   ${vistas.length} perguntas`);
-  check("no máximo 25 telas de pergunta", vistas.length <= 25, vistas.length);
+  check("no máximo 32 telas de pergunta", vistas.length <= 32, vistas.length);
   check("só por vídeo, não pergunta o endereço", !vistas.includes("O escritório fica aqui?"));
-  check("por vídeo, pergunta de onde são", vistas.includes("Por vídeo, você atende quem é de onde?"));
+  check("por vídeo, pergunta de onde são", vistas.includes("Por vídeo, você atende pessoas de quais lugares?"));
   check("trabalhador, não pergunta de empresa", !vistas.some((v) => /empresa/.test(v)));
-  check("tem domínio, pergunta qual", vistas.includes("Qual é o endereço?"));
+  check("tem domínio, pergunta qual", vistas.includes("Qual é o endereço do seu site?"));
   check("tem domínio, não sugere outro", !vistas.includes("Que tal este endereço?"));
   check("100%", (await pg.locator("[data-porcento]").getAttribute("data-porcento")) === "100");
   if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${pg.foto}-revisao.png`, fullPage: true });
@@ -152,10 +152,45 @@ for (const [nome, opcoes] of [
     await tela(pg);
   }
   await pg.getByRole("button", { name: "Enviar as respostas" }).click();
-  check("envia", (await tela(pg)) === "fim");
-  check("a pasta do material abre em outra aba", (await pg.locator("[data-material] a").getAttribute("target")) === "_blank");
-  await pg.waitForTimeout(1500);
+  check("depois de enviar, pede o material", (await tela(pg)) === "material");
+  check("com o que a pessoa marcou", /O logo/.test(await pg.locator("[data-material]").innerText()));
+  check("a pasta abre em outra aba", (await pg.locator("[data-material] a[target]").getAttribute("target")) === "_blank");
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${pg.foto}-material.png`, fullPage: true });
+  await pg.reload();
+  check("sem mandar, o link volta para o material", (await tela(pg)) === "material");
+  await pg.getByRole("button", { name: "Vou colocar depois" }).click();
+  check("deixar para depois vai ao fim", (await tela(pg)) === "fim");
+  check("e o fim lembra que falta", await pg.locator("[data-falta-material]").isVisible());
+  await pg.getByRole("button", { name: "Mandar agora" }).click();
+  check("dá para mandar dali", (await tela(pg)) === "material");
+  await pg.getByRole("button", { name: "Já coloquei tudo" }).click();
+  check("mandado, o fim não cobra", (await tela(pg)) === "fim" && (await pg.locator("[data-falta-material]").count()) === 0);
+  await pg.waitForTimeout(3200);
   if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${pg.foto}-fim.png`, fullPage: true });
+  await pg.locator("[data-cena-final]").evaluate((e) => e.scrollIntoView({ block: "center" }));
+  const etapas = new Set();
+  const inicioDaCena = Date.now();
+  const posicoes = [];
+  while (!etapas.has("conversa") && Date.now() - inicioDaCena < 45000) {
+    const etapa = await pg.locator("[data-cena-final]").getAttribute("data-cena-final");
+    if (etapa === "passeando") {
+      posicoes.push(await pg.locator("[data-cena-final] [data-janela] > div").evaluate((e) => new DOMMatrix(getComputedStyle(e).transform).m42));
+      if (FOTOS && posicoes.length === 12) await pg.locator("[data-cena-final]").screenshot({ path: `${FOTOS}/${pg.foto}-cena-passeando.png` });
+    }
+    etapas.add(etapa);
+    await pg.waitForTimeout(150);
+  }
+  check("a cena passeia, volta e clica, nessa ordem", JSON.stringify([...etapas].filter((e) => e !== "pronta")) === JSON.stringify(["passeando", "voltando", "indo", "clique", "conversa"]), [...etapas].join(" "));
+  const passos = posicoes.slice(1).map((y, k) => posicoes[k] - y);
+  const maior = Math.max(...passos);
+  check("a rolagem é contínua, sem pulo", passos.every((p) => p >= -1) && maior > 0 && maior < Math.abs(posicoes.at(-1)) * 0.12, `${Math.round(Math.abs(posicoes.at(-1)))}px, maior passo ${Math.round(maior)}px`);
+  await pg.waitForSelector('[data-mensagens="4"]', { timeout: 15000 });
+  await pg.waitForTimeout(700);
+  check("a conversa tem 4 mensagens", (await pg.locator("[data-conversa] p").count()) === 4);
+  check("e usa o que a pessoa contou", (await pg.locator("[data-conversa]").innerText()).includes(LONGO.slice(0, 40)));
+  if (FOTOS) await pg.locator("[data-cena-final]").screenshot({ path: `${FOTOS}/${pg.foto}-cena-conversa.png` });
+  await pg.waitForSelector('[data-cena-final="pronta"]', { timeout: 9000 });
+  check("recomeça sozinha, sem botão", (await pg.getByRole("button", { name: "Ver de novo" }).count()) === 0);
   await pg.reload();
   check("depois de enviado, abre no fim", (await tela(pg)) === "fim");
   check("sem erro no console", pg.erros.length === 0, pg.erros[0]?.slice(0, 160));
@@ -257,7 +292,7 @@ for (const [slug, maximo, minimo] of [["trabalhista-ads", 9, 7], ["adestramento-
   await pg.getByRole("button", { name: "Começar" }).click();
   const vistas = await ateORevisao(pg);
   check(`${slug}: entre ${minimo} e ${maximo} perguntas`, vistas.length >= minimo && vistas.length <= maximo, vistas.length);
-  check(`${slug}: nunca anunciou, não pergunta como foi`, !vistas.includes("Como foi essa experiência?"));
+  check(`${slug}: nunca anunciou, não pergunta como foi`, !vistas.includes("Conta para a gente como foi essa experiência."));
   check(`${slug}: não pergunta a verba`, !vistas.some((v) => /verba|investir/i.test(v)));
   check(
     `${slug}: o que já veio do da página não repete`,
@@ -266,7 +301,9 @@ for (const [slug, maximo, minimo] of [["trabalhista-ads", 9, 7], ["adestramento-
   await pg.getByRole("button", { name: "Enviar as respostas" }).click();
   check(`${slug}: envia`, (await tela(pg)) === "fim");
   check(`${slug}: sem a pasta do material`, (await pg.locator("[data-material]").count()) === 0);
-  await pg.waitForTimeout(1500);
+  await pg.locator("[data-cena-final]").evaluate((e) => e.scrollIntoView({ block: "center" }));
+  await pg.waitForSelector("[data-conversa]", { timeout: 30000 });
+  check(`${slug}: a conversa abre no fim`, true);
   if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${pg.foto}-fim.png`, fullPage: true });
   check(`${slug}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 160));
   await pg.context().close();
@@ -357,6 +394,132 @@ for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
   await pg.context().close();
 }
 
+console.log("\n# O visual muda com as escolhas");
+for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
+  const pg = await nova(opcoes);
+  const f = nome === "celular" ? "cel" : "pc";
+  await pg.goto(`${SITE}/forms/amostra/adestramento`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  await ateORevisao(pg, {}, (v) => v.at(-1) === "Tem algum curso ou certificado para mostrar?");
+  if ((await tela(pg)) === "passo") await continuar(pg);
+  await tela(pg);
+  const alvo = pg.locator(nome === "celular" ? "[data-ao-vivo] > div" : "aside [data-rascunho]");
+  const cor = () => alvo.evaluate((e) => getComputedStyle(e).backgroundColor);
+  check(`${nome}: o desenho está à vista na pergunta do estilo`, await alvo.isVisible());
+  const fundos = new Set([await cor()]);
+  for (const estilo of ["Elegante", "Divertido", "Tecnológico", "Luxuoso", "Jovem", "Forte"]) {
+    await pg.getByRole("checkbox", { name: estilo }).click();
+    await pg.waitForTimeout(1100);
+    fundos.add(await cor());
+    if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${f}-estilo-${estilo}.png` });
+    await pg.getByRole("checkbox", { name: estilo }).click();
+  }
+  check(`${nome}: cada estilo muda o desenho`, fundos.size === 7, fundos.size);
+  if (nome === "celular") {
+    await pg.getByRole("checkbox", { name: "Forte" }).scrollIntoViewIfNeeded();
+    const caixa = await alvo.boundingBox();
+    check("celular: o desenho acompanha a rolagem", caixa.y >= 60 && caixa.y < 200, Math.round(caixa.y));
+  }
+  await pg.getByRole("checkbox", { name: "Acolhedor" }).click();
+  await continuar(pg);
+  await tela(pg);
+  await pg.getByRole("radio", { name: "Ainda não tenho" }).click();
+  await pg.waitForTimeout(1300);
+  const antes = await cor();
+  await pg.getByRole("radio", { name: "Preto e dourado" }).click();
+  await pg.waitForTimeout(1000);
+  check(`${nome}: a combinação muda as cores`, antes !== (await cor()), `${antes} / ${await cor()}`);
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${f}-cores.png` });
+  await pg.getByRole("radio", { name: "Verde-petróleo" }).click();
+  await continuar(pg);
+  await tela(pg);
+  for (const s of ["Ousadia", "Alegria", "Confiança"]) await pg.getByRole("checkbox", { name: s }).click();
+  await pg.waitForTimeout(900);
+  check(
+    `${nome}: a frase resume o visual`,
+    (await pg.locator("[data-frase-do-visual]:visible").first().innerText()) === "Acolhedor, nas cores verde-petróleo, passando ousadia, alegria e confiança",
+    await pg.locator("[data-frase-do-visual]:visible").first().innerText(),
+  );
+  check(`${nome}: as sensações entram no desenho`, (await pg.locator("[data-sensacoes]:visible").first().getAttribute("data-sensacoes")) === "Ousadia,Alegria,Confiança");
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${f}-sensacao.png` });
+  check(`${nome}: sem rolagem lateral`, (await pg.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0);
+  check(`${nome}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 200));
+  await pg.context().close();
+}
+
+console.log("\n# As outras formas de dar a cor");
+{
+  const pg = await nova(CELULAR);
+  await pg.goto(`${SITE}/forms/amostra/trabalhista`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  await ateORevisao(pg, {}, (v) => v.at(-1) === "Você já tem as cores da sua marca?");
+  await tela(pg);
+  check("sabe as cores, pede as exatas", (await titulo(pg).innerText()).trim() === "Quais são as suas cores?");
+  await continuar(pg);
+  check("vazio não passa", /pelo menos uma cor/.test(await pg.locator("[data-erro]").last().innerText()));
+  const campo = pg.getByLabel("Quais são as suas cores?", { exact: true }).last();
+  const lidas = async () => (await pg.locator("[data-reconhecidas] li").allInnerTexts()).map((x) => x.match(/#[0-9A-F]{6}/i)?.[0].toLowerCase());
+  for (const [texto, esperadas] of [
+    ["#8A1C5B", ["#8a1c5b"]],
+    ["8a1c5b", ["#8a1c5b"]],
+    ["#abc", ["#aabbcc"]],
+    ["RGB 20, 35, 74", ["#14234a"]],
+    ["rgb(20,35,74)", ["#14234a"]],
+    ["R 20 G 35 B 74", ["#14234a"]],
+    ["CMYK 0, 100, 0, 0", ["#ff00ff"]],
+    ["C0 M100 Y0 K0", ["#ff00ff"]],
+    ["azul-marinho e dourado", ["#14234a", "#b8913c"]],
+    ["Azul claro com cinza", ["#5aa9dc", "#6b7280"]],
+    ["principal #8A1C5B, apoio rgb(20,35,74) e CMYK 0 0 0 100", ["#8a1c5b", "#14234a", "#000000"]],
+    ["Pantone 186 C", []],
+  ]) {
+    await campo.fill(texto);
+    await pg.waitForTimeout(450);
+    check(`entende "${texto}"`, JSON.stringify(await lidas()) === JSON.stringify(esperadas), (await lidas()).join(" "));
+  }
+  check("o que não entende, avisa que chega igual", await pg.getByText("chega para a gente do jeito").isVisible());
+  await campo.fill("#8A1C5B e RGB 20, 35, 74");
+  await pg.waitForTimeout(400);
+  await pg.locator('[data-reconhecidas] input[type="color"]').first().fill("#0f766e");
+  await pg.waitForTimeout(400);
+  check("ajustar a cor muda o texto e mantém a outra", (await campo.inputValue()) === "#0f766e e RGB 20, 35, 74", await campo.inputValue());
+  await pg.waitForTimeout(700);
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/cel-cores-exatas.png` });
+  await pg.getByRole("button", { name: "Voltar" }).click();
+  await tela(pg);
+  await pg.getByRole("radio", { name: "Tenho, estão no meu logo" }).click();
+  await pg.waitForTimeout(1300);
+  check("está no logo, pede as do logo", (await titulo(pg).innerText()).trim() === "Quais cores aparecem no seu logo?");
+  // Um logo de mentira, desenhado na hora: vinho com um pouco de dourado, em fundo branco.
+  const logo = await pg.evaluate(() => {
+    const c = document.createElement("canvas");
+    c.width = c.height = 400;
+    const x = c.getContext("2d");
+    x.fillStyle = "#ffffff";
+    x.fillRect(0, 0, 400, 400);
+    x.fillStyle = "#7a1030";
+    x.fillRect(60, 60, 280, 180);
+    x.fillStyle = "#c9a24e";
+    x.fillRect(60, 270, 280, 60);
+    return c.toDataURL("image/png").split(",")[1];
+  });
+  const saiu = [];
+  pg.on("request", (q) => q.method() !== "GET" && saiu.push(q.url()));
+  await pg.locator("[data-imagem-do-logo]").setInputFiles({ name: "logo.png", mimeType: "image/png", buffer: Buffer.from(logo, "base64") });
+  await pg.waitForSelector("[data-reconhecidas] li");
+  await pg.waitForTimeout(900);
+  const doLogo = (await pg.locator("[data-reconhecidas] li").allInnerTexts()).map((t) => t.match(/#[0-9A-F]{6}/i)[0].toLowerCase());
+  check("as cores saem do logo, sem o branco", JSON.stringify(doLogo) === JSON.stringify(["#7a1030", "#c9a24e"]), doLogo.join(" "));
+  check("e a imagem não sai do aparelho", saiu.length === 0, saiu[0]);
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/cel-cores-imagem.png`, fullPage: true });
+  for (let i = 0; i < 2; i++) await pg.getByRole("button", { name: /^Tirar a cor/ }).first().click();
+  await pg.waitForTimeout(500);
+  for (const c of ["Vinho", "Dourado"]) await pg.getByRole("checkbox", { name: c, exact: true }).click();
+  await pg.waitForTimeout(900);
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/cel-cores-logo.png` });
+  await pg.context().close();
+}
+
 console.log("\n# Resposta que chegou pronta");
 {
   const pg = await nova({ permissions: ["clipboard-read", "clipboard-write"] });
@@ -369,7 +532,7 @@ console.log("\n# Resposta que chegou pronta");
     await pg.locator("form textarea").last().click();
     await pg.keyboard.press("ControlOrMeta+v");
   };
-  await ateORevisao(pg, { "Como você atende?": ["Por vídeo ou telefone"] }, (v) => v.at(-1) === "Qual deles você mais quer atender?");
+  await ateORevisao(pg, { "Como você atende?": ["Por vídeo ou telefone"] }, (v) => v.at(-1) === "O que facilita a vida de quem fecha com você?");
   if ((await tela(pg)) === "passo") await continuar(pg);
   await tela(pg);
   await colar(); // a primeira mensagem, colada
@@ -388,6 +551,246 @@ console.log("\n# Resposta que chegou pronta");
   check("colada e reescrita não fica", (await sinal("quem_quer")) === "", await sinal("quem_quer"));
   check("curta fica marcada", (await sinal("elogio")) === "curta", await sinal("elogio"));
   if (FOTOS) await pg.screenshot({ path: `${FOTOS}/pc-agencia.png`, fullPage: true });
+  await pg.context().close();
+}
+
+console.log("\n# O endereço");
+{
+  const pg = await nova(CELULAR);
+  await pg.goto(`${SITE}/forms/amostra/trabalhista`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  await ateORevisao(pg, { "Como você atende?": ["No escritório"] }, (v) => v.at(-1) === "Como você atende?");
+  await tela(pg);
+  check("chegou ao endereço", (await titulo(pg).innerText()).trim() === "O escritório fica aqui?");
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/cel-holograma.png` });
+  await pg.getByRole("radio", { name: "É outro endereço" }).click();
+  await continuar(pg);
+  check("sem CEP não passa", /Falta o CEP/.test(await pg.locator("[data-erro]").last().innerText()));
+  // Um CEP público de verdade (a praça da Sé, em São Paulo).
+  await pg.locator('[data-campo="cep"]').fill("01001000");
+  await pg.waitForFunction(() => document.querySelector('[data-campo="rua"]')?.value, null, { timeout: 12000 });
+  const valor = (c) => pg.locator(`[data-campo="${c}"]`).inputValue();
+  check("o CEP preenche a rua, o bairro e a cidade", /Sé/.test(await valor("rua")) && (await valor("bairro")) === "Sé" && (await valor("cidade")) === "São Paulo", `${await valor("rua")} / ${await valor("bairro")} / ${await valor("cidade")}`);
+  await pg.waitForTimeout(400);
+  check("e o cursor vai para o número", (await pg.evaluate(() => document.activeElement?.getAttribute("data-campo"))) === "numero");
+  await continuar(pg);
+  check("sem número não passa", /Falta o número/.test(await pg.locator("[data-erro]").last().innerText()));
+  await pg.locator('[data-campo="numero"]').fill("100");
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/cel-endereco.png`, fullPage: true });
+  await pg.getByRole("button", { name: "Não sei o CEP" }).click();
+  await pg.locator("[data-endereco] select").selectOption("SP");
+  await pg.locator('[data-campo="cidade"]').fill("São Paulo");
+  await pg.locator('[data-campo="rua"]').fill("Avenida Paulista");
+  await pg.getByRole("button", { name: "Procurar o CEP" }).click();
+  await pg.waitForSelector('ul[aria-label="Endereços encontrados"] button', { timeout: 12000 });
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/cel-endereco-rua.png`, fullPage: true });
+  await pg.locator('ul[aria-label="Endereços encontrados"] button').first().click();
+  await pg.waitForTimeout(400);
+  check("sem o CEP, acha pela rua", /^013\d{2}-\d{3}$/.test(await valor("cep")) && /Paulista/.test(await valor("rua")), `${await valor("cep")} ${await valor("rua")}`);
+  check("sem rolagem lateral", (await pg.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0);
+  await pg.locator('[data-campo="numero"]').fill("1000");
+  await continuar(pg);
+  await tela(pg);
+  await pg.goto(`${SITE}/forms/amostra/trabalhista/agencia`);
+  const linhas = await pg.locator('[data-resposta="endereco"]').innerText();
+  check("chega por partes, com o CEP", /Avenida Paulista, 1000/.test(linhas) && /CEP 013\d{2}-\d{3}/.test(linhas), linhas.split("\n").slice(1).join(" | "));
+  for (const ruim of ["/forms/consulta/cep/123", "/forms/consulta/cep/abc", "/forms/consulta/cep?uf=SP&cidade=S&rua=X", "/forms/consulta/cep?uf=SP&cidade=../../x&rua=../y"]) {
+    check(`consulta errada é recusada (${ruim})`, (await pg.request.get(`${SITE}${ruim}`)).status() === 400);
+  }
+  check("o checkout continua achando o CEP", (await pg.request.get("http://checkout.localhost:3005/consulta/cep/01001000")).status() === 200);
+  await pg.context().close();
+}
+
+console.log("\n# As cidades da região");
+{
+  const pg = await nova(CELULAR);
+  await pg.goto(`${SITE}/forms/amostra/adestramento`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  await ateORevisao(pg, { "Onde acontecem as aulas?": ["Na casa do cliente"] }, (v) => v.at(-1) === "Onde acontecem as aulas?");
+  await tela(pg);
+  await pg.waitForSelector('[data-sugestoes] >> text="Toda a região de Campinas"', { timeout: 15000 });
+  const sugeridas = await pg.locator("[data-sugestoes] button").allInnerTexts();
+  check("sugere a cidade, a região e as vizinhas de verdade", sugeridas[0] === "Campinas" && sugeridas.includes("Americana") && !sugeridas.some((x) => /Jardim|Zona/.test(x)), sugeridas.join(", "));
+  await pg.getByRole("button", { name: /Ver as outras/ }).click();
+  check("as outras aparecem", (await pg.locator("[data-sugestoes] button").allInnerTexts()).includes("Vinhedo"));
+  await pg.getByRole("button", { name: "Vinhedo", exact: true }).click();
+  await pg.getByLabel("Cidade, bairro ou estado", { exact: true }).fill("Cambuí, Taquaral");
+  await pg.getByLabel("Cidade, bairro ou estado", { exact: true }).press("Enter");
+  check("e dá para escrever o bairro", (await pg.getByRole("button", { name: "Tirar Taquaral" }).count()) === 1 && (await pg.getByRole("button", { name: "Tirar Vinhedo" }).count()) === 1);
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/cel-cidades.png`, fullPage: true });
+  for (const ruim of ["uf=XX1&cidade=Campinas", "uf=SP&cidade=", "uf=SP&cidade=../../x"]) {
+    check(`consulta errada é recusada (${ruim})`, (await pg.request.get(`${SITE}/forms/consulta/regiao?${ruim}`)).status() === 400);
+  }
+  check("cidade que não existe, 404", (await pg.request.get(`${SITE}/forms/consulta/regiao?uf=SP&cidade=Lugar Nenhum`)).status() === 404);
+  await pg.context().close();
+
+  // Com outro endereço, a região muda junto.
+  const pg2 = await nova(CELULAR);
+  await pg2.goto(`${SITE}/forms/amostra/trabalhista`);
+  await pg2.getByRole("button", { name: "Começar" }).click();
+  await ateORevisao(pg2, { "Como você atende?": ["No escritório", "Por vídeo ou telefone"] }, (v) => v.at(-1) === "Como você atende?");
+  await tela(pg2);
+  await pg2.getByRole("radio", { name: "É outro endereço" }).click();
+  await pg2.locator('[data-campo="cep"]').fill("01001000");
+  await pg2.waitForFunction(() => document.querySelector('[data-campo="cidade"]')?.value, null, { timeout: 12000 });
+  const cidade = await pg2.locator('[data-campo="cidade"]').inputValue();
+  for (const [c, v] of [["rua", "Rua de teste"], ["numero", "1"], ["bairro", "Centro"]]) await pg2.locator(`[data-campo="${c}"]`).fill(v);
+  await continuar(pg2);
+  await tela(pg2);
+  await pg2.waitForSelector(`[data-sugestoes] >> text="${cidade}"`, { timeout: 15000 });
+  check("com outro endereço, sugere a região dele", !(await pg2.locator("[data-sugestoes] button").allInnerTexts()).includes("Campinas"), `${cidade}: ${(await pg2.locator("[data-sugestoes] button").allInnerTexts()).slice(0, 4).join(", ")}`);
+  await pg2.context().close();
+}
+
+console.log("\n# Preenchido");
+for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
+  const f = nome === "celular" ? "cel" : "pc";
+  const pg = await nova(opcoes);
+  for (const slug of ["trabalhista", "adestramento", "trabalhista-ads", "adestramento-ads"]) {
+    await pg.goto(`${SITE}/forms/amostra/${slug}?preenchido=1`);
+    check(`${nome}, ${slug}: volta com tudo respondido`, (await tela(pg)) === "volta" && /(\d+) de \1/.test(await pg.locator("main").innerText()), (await pg.locator("main").innerText()).match(/\d+ de \d+/)?.[0]);
+    if (FOTOS) {
+      await pg.locator("[data-olho]").click();
+      await pg.waitForTimeout(1200);
+      await pg.screenshot({ path: `${FOTOS}/ex-${f}-${slug}-desenho.png` });
+      await pg.locator("[data-ver-desenho] [data-rascunho]").screenshot({ path: `${FOTOS}/ex-${f}-${slug}-inteiro.png` });
+    }
+    if (!slug.endsWith("-ads")) {
+      // Tudo o que a pessoa contou aparece no desenho, parte por parte.
+      if (!(await pg.locator("[data-ver-desenho]").count())) await pg.locator("[data-olho]").click();
+      await pg.waitForTimeout(1300);
+      const desenho = pg.locator("[data-ver-desenho] [data-rascunho]");
+      const vazias = await desenho.locator('[data-ativa="false"]').evaluateAll((l) => l.map((e) => e.getAttribute("data-parte")));
+      check(`${nome}, ${slug}: nenhuma parte vazia no desenho`, vazias.length === 0, vazias.join(" "));
+      const texto = await desenho.innerText();
+      const esperados =
+        slug === "trabalhista"
+          ? ["helenapradoadvocacia.com.br", "Helena Prado Advocacia", "Verbas rescisórias", "refaço a conta", "Rescisão indireta", "9 anos", "4,9", "Explico sem juridiquês", "me mandaram embora", "Você me conta o que aconteceu", "áudio toda sexta", "outro advogado sumia", "motorista a vida toda", "Quanto tempo demora?", "Rua das Acácias", "Horários da semana", "Instagram", "OAB/SP 000.000"]
+          : ["rafaadestramento.com.br", "Comportamento", "Primeiro entendo o porquê", "7 anos", "Parcela no cartão", "Tem medo de tudo", "Visito a casa", "Não treino o cão longe do dono", "Três pessoas me falaram", "Cão adulto ainda aprende?", "Valinhos", "TikTok"];
+      const faltam = esperados.filter((e) => !texto.includes(e));
+      check(`${nome}, ${slug}: o desenho traz o que a pessoa contou (${esperados.length} conferidos)`, faltam.length === 0, faltam.join(" | "));
+      if (FOTOS) await pg.screenshot({ path: `${FOTOS}/ex-${f}-${slug}-olho.png` });
+    }
+    await pg.goto(`${SITE}/forms/amostra/${slug}?preenchido=1&ir=fim`);
+    await pg.waitForSelector("[data-cena-final]");
+    await pg.waitForTimeout(900);
+    if (FOTOS) await pg.screenshot({ path: `${FOTOS}/ex-${f}-${slug}-fim.png`, fullPage: true });
+    await pg.locator("[data-cena-final]").evaluate((e) => e.scrollIntoView({ block: "center" }));
+    if (slug === "trabalhista") {
+      await pg.waitForSelector('[data-cena-final="passeando"]', { timeout: 40000 });
+      await pg.waitForTimeout(1200);
+      if (FOTOS) await pg.locator("[data-cena-final]").screenshot({ path: `${FOTOS}/ex-${f}-${slug}-passeando.png` });
+      await pg.waitForSelector('[data-mensagens="4"]', { timeout: 40000 });
+    }
+    await pg.goto(`${SITE}/forms/amostra/${slug}?preenchido=1&ir=revisao`);
+    check(`${nome}, ${slug}: a revisão deixa enviar`, await pg.getByRole("button", { name: "Enviar as respostas" }).waitFor({ timeout: 8000 }).then(() => true, () => false));
+  }
+  await pg.goto(`${SITE}/forms/amostra/adestramento/agencia?preenchido=1`);
+  const naAgencia = await pg.locator("[data-desenho-da-agencia]").innerText();
+  check(`${nome}: a agência vê a página que se montou`, /Não treino o cão longe do dono/.test(naAgencia) && /Natural e divertido, nas cores verde-petróleo/.test(naAgencia));
+  check(`${nome}: a agência, sem rolagem lateral`, (await pg.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0);
+  check(`${nome}: a colada do exemplo fica marcada`, (await pg.locator('[data-resposta="elogio"]').getAttribute("data-sinal")) === "colada");
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/ex-${f}-agencia.png`, fullPage: true });
+  await pg.goto(`${SITE}/forms/amostra/adestramento`);
+  check(`${nome}: o exemplo não mexe no que a pessoa respondeu`, (await tela(pg)) === "abertura");
+  check(`${nome}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 200));
+  await pg.context().close();
+}
+
+console.log("\n# Nada estoura a caixa");
+for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
+  const pg = await nova(opcoes);
+  for (const slug of ["trabalhista", "adestramento", "adestramento-ads"]) {
+    for (const [tipo, texto] of [
+      ["sem espaço", "j".repeat(90) + "f".repeat(260)],
+      ["longo", "Uma explicação bem comprida, contada com calma. ".repeat(40).trim()],
+    ]) {
+      await pg.goto(`${SITE}/forms/amostra/${slug}?preenchido=1`);
+      await tela(pg);
+      // O exemplo, com todos os textos trocados (as opções que a pessoa acrescenta também).
+      await pg.evaluate(([s, txt]) => {
+        const g = JSON.parse(localStorage.getItem(`amostra-briefing:${s}-exemplo`));
+        for (const [id, r] of Object.entries(g.respostas)) {
+          if (["estilo", "sensacao", "cores_tem", "cores_logo", "cores_novas", "atende", "lado", "preco", "dominio", "horarios", "responde"].includes(id)) continue;
+          if (r.opcoes?.includes("sim")) Object.assign(r, { opcoes: ["outro"], valor: txt });
+          if (r.valor) r.valor = txt;
+          if (r.itens && id !== "detalhes") for (const k of Object.keys(r.itens)) r.itens[k] = k === "uf" ? "SP" : k === "cep" ? "01001-000" : txt;
+        }
+        // Um serviço com nome enorme, que também é o principal.
+        const lista = g.respostas.areas_trabalhador ?? g.respostas.servicos;
+        lista.opcoes = [txt.slice(0, 280), ...lista.opcoes.slice(1)];
+        if (g.respostas.principal) g.respostas.principal.opcoes = [txt.slice(0, 280)];
+        if (g.respostas.detalhes) g.respostas.detalhes.itens = Object.fromEntries(lista.opcoes.map((o) => [o, txt]));
+        for (const id of ["facilita", "quem_quer", "procuram", "nao_quer", "cidades"]) if (g.respostas[id]?.opcoes) g.respostas[id].opcoes = [txt.slice(0, 280), ...g.respostas[id].opcoes.slice(1)];
+        localStorage.setItem(`amostra-briefing:${s}`, JSON.stringify({ ...g, enviado: false }));
+      }, [slug, texto]);
+      const fora = async (raiz) =>
+        pg.locator(raiz).first().evaluate((r) => {
+          const ruins = [];
+          const limite = r.getBoundingClientRect();
+          const anda = document.createTreeWalker(r, NodeFilter.SHOW_TEXT);
+          while (anda.nextNode()) {
+            const n = anda.currentNode;
+            if (!n.textContent.trim()) continue;
+            // A caixa que segura o texto: o primeiro pai que é bloco, ou que corta o que sobra.
+            let pai = n.parentElement;
+            while (pai !== r && getComputedStyle(pai).display.startsWith("inline")) pai = pai.parentElement;
+            if (["hidden", "clip"].includes(getComputedStyle(pai).overflowX)) {
+              if (pai.getBoundingClientRect().right > limite.right + 1) ruins.push(`caixa ${n.textContent.slice(0, 14)}`);
+              continue;
+            }
+            const alcance = document.createRange();
+            alcance.selectNodeContents(n);
+            const caixa = pai.getBoundingClientRect();
+            for (const q of alcance.getClientRects()) {
+              if (q.width && (q.right > caixa.right + 8 || q.right > limite.right + 1)) {
+                ruins.push(`${n.textContent.slice(0, 14)} +${Math.round(q.right - Math.min(caixa.right, limite.right))}`);
+                break;
+              }
+            }
+          }
+          return ruins;
+        });
+      await pg.goto(`${SITE}/forms/amostra/${slug}`);
+      await tela(pg);
+      await pg.locator("[data-olho]").click();
+      await pg.waitForTimeout(1300);
+      const noOlho = await fora("[data-ver-desenho] [data-rascunho]");
+      check(`${nome}, ${slug}, ${tipo}: o desenho`, noOlho.length === 0, noOlho.slice(0, 4).join(" | "));
+      if (FOTOS && tipo === "sem espaço") await pg.screenshot({ path: `${FOTOS}/estouro-${nome}-${slug}.png` });
+      await pg.goto(`${SITE}/forms/amostra/${slug}/agencia`);
+      await pg.waitForSelector("[data-desenho-da-agencia]");
+      const naAgencia = await fora("main");
+      check(`${nome}, ${slug}, ${tipo}: a agência`, naAgencia.length === 0 && (await pg.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0, naAgencia.slice(0, 4).join(" | "));
+      await pg.goto(`${SITE}/forms/amostra/${slug}?ir=fim`);
+      await pg.waitForSelector("[data-cena-final]");
+      await pg.waitForTimeout(900);
+      const noFim = await fora("[data-cena-final] [data-rascunho]");
+      check(`${nome}, ${slug}, ${tipo}: o fim`, noFim.length === 0 && (await pg.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0, noFim.slice(0, 4).join(" | "));
+      await pg.goto(`${SITE}/forms/amostra/${slug}?ir=revisao`);
+      await tela(pg);
+      const naRevisao = await fora("main");
+      check(`${nome}, ${slug}, ${tipo}: a revisão`, naRevisao.length === 0 && (await pg.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0, naRevisao.slice(0, 4).join(" | "));
+    }
+  }
+  await pg.context().close();
+}
+
+console.log("\n# Texto grande");
+{
+  const pg = await nova(CELULAR);
+  const GRANDE = "Uma história comprida, contada com calma, do jeito dela. ".repeat(300).trim(); // perto de 17 mil letras
+  await pg.goto(`${SITE}/forms/amostra/trabalhista`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  await ateORevisao(pg, {}, (v) => v.at(-1) === "O que facilita a vida de quem fecha com você?");
+  if ((await tela(pg)) === "passo") await continuar(pg);
+  await tela(pg);
+  await pg.locator("form textarea").last().fill(GRANDE);
+  await continuar(pg);
+  await tela(pg);
+  await pg.goto(`${SITE}/forms/amostra/trabalhista/agencia`);
+  const chegou = await pg.locator('[data-resposta="quem_chega"]').innerText();
+  check("a resposta grande chega inteira", chegou.includes(GRANDE), `${GRANDE.length} letras`);
   await pg.context().close();
 }
 

@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { createElement, useEffect, useRef, useState } from "react";
 import { CheckIcon, PlusIcon, XIcon } from "lucide-react";
 
 import { CampoDosHorarios } from "@/components/briefing/horarios";
-import { estilos } from "@/lib/briefing/estilos";
+import { SugestoesDaRegiao } from "@/components/briefing/cidades";
+import { CampoDasCores } from "@/components/briefing/cores";
+import { CampoDoEndereco } from "@/components/briefing/endereco";
+import { ValorConhecido } from "@/components/briefing/valor-conhecido";
+import { TopoDaPagina } from "@/components/briefing/topo-da-pagina";
+import { iconeDaOpcao } from "@/lib/briefing/icones";
+import { estilos, falasDaSensacao, temaDe } from "@/lib/briefing/temas";
 import {
+  cidadeDe,
   opcoesDa,
   type Briefing,
   type Pergunta,
@@ -49,18 +56,23 @@ function Opcao({
   bloqueada,
   papel,
   onClick,
+  explica,
   children,
 }: {
   marcada: boolean;
   bloqueada?: boolean;
   papel: "radio" | "checkbox";
   onClick: () => void;
-  children: React.ReactNode;
+  /** Uma linha embaixo da opção, para quem está escolhendo. */
+  explica?: string;
+  children: string;
 }) {
+  const icone = iconeDaOpcao(children);
   return (
     <button
       type="button"
       role={papel}
+      aria-label={children}
       aria-checked={marcada}
       disabled={bloqueada}
       onClick={onClick}
@@ -81,9 +93,16 @@ function Opcao({
       >
         {marcada && <CheckIcon className="size-3.5" strokeWidth={3} />}
       </span>
-      <span className="min-w-0 flex-1 break-words">{children}</span>
-      {/* O cursor da marca clica na opção escolhida. */}
-      {marcada && <span aria-hidden="true" className="brand-cursor cursor-clica mr-1 h-5 shrink-0 text-ink" />}
+      <span className="min-w-0 flex-1 leading-tight [overflow-wrap:anywhere]">
+        {children}
+        {explica && <span className="mt-0.5 block text-sm text-muted-foreground">{explica}</span>}
+      </span>
+      {/* O cursor da marca clica na opção escolhida, no lugar do ícone dela. */}
+      {marcada ? (
+        <span aria-hidden="true" className="brand-cursor cursor-clica mr-1 h-5 shrink-0 text-ink" />
+      ) : (
+        icone && createElement(icone, { className: "size-5 shrink-0 text-muted-foreground/70", "aria-hidden": true })
+      )}
     </button>
   );
 }
@@ -110,7 +129,7 @@ function Adicionar({ rotulo, aoAdicionar }: { rotulo: string; aoAdicionar: (text
         onBlur={adicionar}
         aria-label={rotulo}
         placeholder={rotulo}
-        maxLength={120}
+        maxLength={300}
         enterKeyHint="done"
         className={cn(estiloDoCampo, "h-13")}
       />
@@ -135,7 +154,7 @@ function Texto({ p, respostas, mudar, comErro }: PropsDoCampo) {
       value={respostas[p.id]?.valor ?? ""}
       onChange={(e) => mudar({ valor: e.target.value })}
       placeholder={p.exemplo}
-      maxLength={300}
+      maxLength={1000}
       enterKeyHint="next"
       className={cn(estiloDoCampo, "h-14")}
     />
@@ -150,7 +169,7 @@ function Longo({ p, respostas, mudar, comErro }: PropsDoCampo) {
       valor={respostas[p.id]?.valor ?? ""}
       onChange={(e) => mudar({ valor: e.target.value })}
       placeholder={p.exemplo ?? "Conte do seu jeito"}
-      maxLength={5000}
+      maxLength={20000}
       rows={4}
     />
   );
@@ -195,6 +214,7 @@ function Multipla({ p, briefing, respostas, mudar }: PropsDoCampo) {
             marcada={marcadas.includes(o)}
             bloqueada={cheia && !marcadas.includes(o)}
             onClick={() => trocar(o)}
+            explica={p.papel === "sensacao" ? falasDaSensacao[o] : undefined}
           >
             {o}
           </Opcao>
@@ -219,18 +239,17 @@ function Confirmar({ p, respostas, mudar, escolheu, comErro }: PropsDoCampo) {
   const outro = r?.opcoes?.includes("outro") ?? false;
   return (
     <div className="space-y-2.5">
-      <p className="rounded-xl border-l-4 border-brand bg-card px-5 py-4 font-heading text-xl lining-nums break-words sm:text-2xl">
-        {p.valorConhecido}
-      </p>
+      <ValorConhecido>{p.valorConhecido}</ValorConhecido>
       <div role="radiogroup" aria-label={p.titulo} className="space-y-2.5">
         <Opcao papel="radio" marcada={r?.opcoes?.includes("sim") ?? false} onClick={() => escolheu({ opcoes: ["sim"] })}>
           Sim, é isso mesmo
         </Opcao>
-        <Opcao papel="radio" marcada={outro} onClick={() => mudar({ opcoes: ["outro"], valor: r?.valor ?? "" })}>
+        <Opcao papel="radio" marcada={outro} onClick={() => mudar({ opcoes: ["outro"], valor: r?.valor ?? "", itens: r?.itens })}>
           {p.rotuloDoOutro ?? "É outro"}
         </Opcao>
       </div>
-      {outro && (
+      {outro && p.tipo === "endereco" && <CampoDoEndereco r={r} mudar={mudar} />}
+      {outro && p.tipo !== "endereco" && (
         <input
           autoFocus
           aria-label={p.rotuloDoOutro ?? "Escreva o certo"}
@@ -238,7 +257,7 @@ function Confirmar({ p, respostas, mudar, escolheu, comErro }: PropsDoCampo) {
           value={r?.valor ?? ""}
           onChange={(e) => mudar({ opcoes: ["outro"], valor: e.target.value })}
           placeholder={p.exemplo}
-          maxLength={300}
+          maxLength={1000}
           enterKeyHint="next"
           className={cn(estiloDoCampo, "h-14")}
         />
@@ -247,9 +266,8 @@ function Confirmar({ p, respostas, mudar, escolheu, comErro }: PropsDoCampo) {
   );
 }
 
-function Etiquetas({ p, respostas, mudar }: PropsDoCampo) {
+function Etiquetas({ p, briefing, respostas, mudar }: PropsDoCampo) {
   const marcadas = respostas[p.id]?.opcoes ?? [];
-  const sugestoes = (p.opcoes ?? []).filter((o) => !marcadas.includes(o));
   const adicionar = (texto: string) => {
     const novas = texto.split(/[,;\n]/).map((t) => t.trim());
     const unicas = [...new Set(novas)].filter((t) => t && !marcadas.includes(t));
@@ -260,7 +278,7 @@ function Etiquetas({ p, respostas, mudar }: PropsDoCampo) {
       {marcadas.length > 0 && (
         <ul className="flex flex-wrap gap-2">
           {marcadas.map((o) => (
-            <li key={o} className="inline-flex min-h-11 items-center gap-1 rounded-full bg-ink pr-1 pl-4 text-sm text-paper">
+            <li key={o} className="inline-flex min-h-11 max-w-full items-center gap-1 rounded-3xl bg-ink py-1 pr-1 pl-4 text-sm [overflow-wrap:anywhere] text-paper">
               {o}
               <button
                 type="button"
@@ -274,21 +292,12 @@ function Etiquetas({ p, respostas, mudar }: PropsDoCampo) {
           ))}
         </ul>
       )}
-      {sugestoes.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {sugestoes.map((o) => (
-            <button
-              key={o}
-              type="button"
-              onClick={() => adicionar(o)}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-dashed border-ring px-4 text-sm hover:border-solid hover:bg-card"
-            >
-              <PlusIcon className="size-3.5" aria-hidden="true" />
-              {o}
-            </button>
-          ))}
-        </div>
-      )}
+      <SugestoesDaRegiao
+        cidade={p.sugereRegiao ? cidadeDe(briefing, respostas) : undefined}
+        marcadas={marcadas}
+        extras={p.opcoes ?? []}
+        aoTocar={adicionar}
+      />
       <Adicionar rotulo="Cidade, bairro ou estado" aoAdicionar={adicionar} />
     </div>
   );
@@ -300,7 +309,7 @@ function Detalhes({ p, briefing, respostas, mudar }: PropsDoCampo) {
     <div className="space-y-5">
       {opcoesDa(p, briefing, respostas).map((o) => (
         <label key={o} className="block space-y-2">
-          <span className="flex items-center gap-2 font-medium">
+          <span className="flex items-center gap-2 font-medium [overflow-wrap:anywhere]">
             <span
               className={cn(
                 "flex size-5 shrink-0 items-center justify-center rounded-full transition-colors",
@@ -315,8 +324,8 @@ function Detalhes({ p, briefing, respostas, mudar }: PropsDoCampo) {
           <TextoLongo
             valor={itens[o] ?? ""}
             onChange={(e) => mudar({ itens: { ...itens, [o]: e.target.value } })}
-            placeholder="O que é e para quem serve"
-            maxLength={2000}
+            placeholder={p.exemplos?.[o] ?? "O que é e para quem serve"}
+            maxLength={10000}
             rows={2}
           />
         </label>
@@ -348,8 +357,8 @@ function Redes({ p, respostas, mudar }: PropsDoCampo) {
           <input
             value={itens[o] ?? ""}
             onChange={(e) => mudar({ itens: { ...itens, [o]: e.target.value } })}
-            placeholder={exemplosDeRede[o]}
-            maxLength={300}
+            placeholder={p.exemplos?.[o] ?? exemplosDeRede[o]}
+            maxLength={1000}
             autoCapitalize="none"
             className={cn(estiloDoCampo, "h-13")}
           />
@@ -394,7 +403,7 @@ function Duvidas({ p, respostas, mudar }: PropsDoCampo) {
                   valor={itens[d] ?? ""}
                   onChange={(e) => mudar({ itens: { ...itens, [d]: e.target.value } })}
                   placeholder="O que você responde"
-                  maxLength={2000}
+                  maxLength={10000}
                   rows={2}
                 />
               </div>
@@ -416,7 +425,8 @@ function Duvidas({ p, respostas, mudar }: PropsDoCampo) {
   );
 }
 
-function Estilos({ p, respostas, mudar }: PropsDoCampo) {
+/** Cada estilo é um topo de página em miniatura, com a composição, a letra e as cores dele. */
+function Estilos({ p, briefing, respostas, mudar }: PropsDoCampo) {
   const marcadas = respostas[p.id]?.opcoes ?? [];
   const cheia = Boolean(p.max && marcadas.length >= p.max);
   return (
@@ -434,20 +444,18 @@ function Estilos({ p, respostas, mudar }: PropsDoCampo) {
               disabled={cheia && !marcada}
               onClick={() => mudar({ opcoes: marcada ? marcadas.filter((x) => x !== e.nome) : [...marcadas, e.nome] })}
               className={cn(
-                "relative overflow-hidden rounded-xl border-2 text-left transition-all duration-200 outline-none focus-visible:ring-3 focus-visible:ring-ring/40 active:scale-[0.98] disabled:opacity-40",
+                "relative overflow-hidden rounded-xl border-2 bg-card text-left transition-all duration-200 outline-none focus-visible:ring-3 focus-visible:ring-ring/40 active:scale-[0.98] disabled:opacity-40",
                 marcada ? "border-ink shadow-lg" : "border-transparent hover:border-ring/50",
               )}
             >
-              <span className="block space-y-2.5 p-4" style={{ background: e.fundo, color: e.tinta }}>
-                <span
-                  className={cn("flex h-5 items-center leading-none", e.maiusculas ? "text-sm tracking-widest uppercase" : "text-lg")}
-                  style={{ fontFamily: e.fonte }}
-                >
-                  {e.nome}
+              <span className="block h-28 overflow-hidden" aria-hidden="true" style={{ background: e.fundo }}>
+                <span className="block w-[160%] origin-top-left scale-[0.625]">
+                  <TopoDaPagina tema={temaDe([e.nome])} titulo={e.nome} comBotao={false} icone={briefing.icone} className="min-h-45" />
                 </span>
-                <span className="block h-1.5 w-3/4 rounded-full bg-current opacity-20" />
-                <span className="block h-1.5 w-1/2 rounded-full bg-current opacity-20" />
-                <span className="block h-5 w-16" style={{ background: e.destaque, borderRadius: e.raio }} />
+              </span>
+              <span className="block px-3 py-2.5 leading-tight">
+                <span className="block text-sm font-medium">{e.nome}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">{e.fala}</span>
               </span>
               {marcada && (
                 <CheckIcon
@@ -465,17 +473,23 @@ function Estilos({ p, respostas, mudar }: PropsDoCampo) {
   );
 }
 
+function Cores({ p, respostas, mudar }: PropsDoCampo) {
+  return <CampoDasCores p={p} r={respostas[p.id]} mudar={mudar} />;
+}
+
 const porTipo = {
   texto: Texto,
   longo: Longo,
   escolha: Escolha,
   multipla: Multipla,
   confirmar: Confirmar,
+  endereco: Confirmar,
   etiquetas: Etiquetas,
   detalhes: Detalhes,
   horarios: Horarios,
   redes: Redes,
   duvidas: Duvidas,
+  cores: Cores,
   estilo: Estilos,
 } satisfies Record<Pergunta["tipo"], React.ComponentType<PropsDoCampo>>;
 

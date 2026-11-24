@@ -121,7 +121,7 @@ function DiasDiferentes({ linha, mudar }: { linha: Horario; mudar: (h: Partial<H
           const d = diferentes.find((x) => x.dia === dia)!;
           return (
             <Abre key={dia}>
-              <div className="rounded-xl border-l-4 border-brand bg-brand/10 p-3" data-dia-diferente={dia}>
+              <div className="rounded-xl bg-brand/15 p-3" data-dia-diferente={dia}>
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-medium">
                     {dia} <span className="font-normal text-muted-foreground">é diferente</span>

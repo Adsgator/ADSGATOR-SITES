@@ -5,6 +5,9 @@ import { briefingsDaAmostra } from "@/lib/briefing/amostra";
 
 // O começo da amostra do briefing: só no `next dev`, nunca publicada.
 
+const cheio = "inline-flex min-h-11 items-center rounded-full bg-brand px-5 text-brand-foreground";
+const contorno = "inline-flex min-h-11 items-center rounded-full border border-input px-5 hover:bg-muted";
+
 export default function InicioDaAmostra() {
   if (process.env.NODE_ENV !== "development") notFound();
   return (
@@ -19,20 +22,35 @@ export default function InicioDaAmostra() {
           <li key={b.slug} className="rounded-2xl border bg-card p-5">
             <p className="text-sm text-muted-foreground">{b.tipo === "pagina" ? "Página" : "Google Ads"}</p>
             <h2 className="font-heading text-xl">{b.segmento}</h2>
-            <div className="mt-4 flex flex-wrap gap-2 text-sm font-medium">
-              <a href={`/forms/amostra/${b.slug}`} className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 text-brand-foreground">
+            <p className="mt-4 text-sm font-medium">Já preenchido</p>
+            <div className="mt-2 flex flex-wrap gap-2 text-sm font-medium">
+              <a href={`/forms/amostra/${b.slug}?preenchido=1&ir=fim`} className={cheio}>
+                O fim
+              </a>
+              <a href={`/forms/amostra/${b.slug}?preenchido=1&ir=revisao`} className={contorno}>
+                A revisão
+              </a>
+              {b.pastaDoMaterial && (
+                <a href={`/forms/amostra/${b.slug}?preenchido=1&ir=material`} className={contorno}>
+                  O material
+                </a>
+              )}
+              <a href={`/forms/amostra/${b.slug}?preenchido=1`} className={contorno}>
+                Quem volta
+              </a>
+              <a href={`/forms/amostra/${b.slug}/agencia?preenchido=1`} className={contorno}>
+                Como você vai ver
+              </a>
+            </div>
+            <p className="mt-5 text-sm font-medium">Do zero</p>
+            <div className="mt-2 flex flex-wrap gap-2 text-sm font-medium">
+              <a href={`/forms/amostra/${b.slug}`} className={cheio}>
                 Abrir
               </a>
-              <a
-                href={`/forms/amostra/${b.slug}?aparelho=outro`}
-                className="inline-flex min-h-11 items-center rounded-full border border-input px-5 hover:bg-muted"
-              >
-                Como se fosse outro aparelho
+              <a href={`/forms/amostra/${b.slug}?aparelho=outro`} className={contorno}>
+                Outro aparelho
               </a>
-              <a
-                href={`/forms/amostra/${b.slug}/agencia`}
-                className="inline-flex min-h-11 items-center rounded-full border border-input px-5 hover:bg-muted"
-              >
+              <a href={`/forms/amostra/${b.slug}/agencia`} className={contorno}>
                 Como você vai ver
               </a>
             </div>

@@ -87,7 +87,7 @@ export function RascunhoDoAnuncio({ blocos, className }: { blocos: BlocosDoAnunc
       aria-hidden="true"
       data-rascunho
       className={cn(
-        "space-y-3 overflow-hidden rounded-2xl border bg-[#fcfbf8] p-4 text-ink shadow-[0_30px_60px_-35px_rgb(31_39_27/0.6)]",
+        "space-y-3 overflow-hidden rounded-2xl border [overflow-wrap:anywhere] bg-[#fcfbf8] p-4 text-ink shadow-[0_30px_60px_-35px_rgb(31_39_27/0.6)]",
         className,
       )}
     >
@@ -102,7 +102,7 @@ export function RascunhoDoAnuncio({ blocos, className }: { blocos: BlocosDoAnunc
       <Parte ativa={Boolean(titulo)} vazio="o seu anúncio" className="space-y-2 rounded-xl border border-ink/10 bg-white p-3.5">
         <p className="text-[0.65rem] font-semibold">Patrocinado</p>
         <p className="truncate text-[0.7rem] opacity-70">{site ?? "seu site"}</p>
-        <p className="text-base leading-snug font-medium text-balance text-[#1a4fa3]">
+        <p className="line-clamp-3 text-base leading-snug font-medium text-balance text-[#1a4fa3]">
           {titulo}
           {(cidades?.[0] ?? nome) && ` · ${cidades?.[0] ?? nome}`}
         </p>
@@ -111,18 +111,18 @@ export function RascunhoDoAnuncio({ blocos, className }: { blocos: BlocosDoAnunc
         {(servicos?.length ?? 0) > 1 && (
           <p className="flex flex-wrap gap-x-3 gap-y-1 pt-1 text-[0.65rem] text-[#1a4fa3]">
             {servicos!.slice(1, 4).map((s) => (
-              <span key={s}>{s}</span>
+              <span key={s} className="line-clamp-1">{s}</span>
             ))}
           </p>
         )}
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1.5 text-[0.65rem] font-semibold">
+        <span data-botao-do-desenho className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1.5 text-[0.65rem] font-semibold">
           <IconeWhatsApp className="size-3" />
           Chamar no WhatsApp
         </span>
       </Parte>
       <Parte ativa={Boolean(cidades?.length)} vazio="onde aparece" className="flex items-start gap-2 text-[0.7rem]">
         <MapPinIcon className="mt-px size-3.5 shrink-0" />
-        <span className="line-clamp-2">{cidades?.join(", ")}</span>
+        <span className="line-clamp-2 min-w-0">{cidades?.join(", ")}</span>
       </Parte>
       <Parte ativa={Boolean(bloqueadas?.length)} vazio="o que fica de fora" className="space-y-1.5 rounded-xl bg-ink/5 p-3">
         {bloqueadas?.slice(0, 3).map((b) => (

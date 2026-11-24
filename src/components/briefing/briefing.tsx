@@ -8,7 +8,9 @@ import { BrandLogo } from "@/components/brand";
 import { CampoDaPergunta } from "@/components/briefing/campos";
 import { Desenho, desenhoDe, LegendaDoDesenho } from "@/components/briefing/desenho";
 import { Olho } from "@/components/briefing/olho";
-import { Abertura, Fim, OutroAparelho, Passo, Revisao, Volta } from "@/components/briefing/telas";
+import { blocosDasRespostas } from "@/components/briefing/rascunho-da-pagina";
+import { TopoDaPagina } from "@/components/briefing/topo-da-pagina";
+import { Abertura, Fim, Material, OutroAparelho, Passo, Revisao, Volta } from "@/components/briefing/telas";
 import { Eyebrow } from "@/components/eyebrow";
 import { FundoVivo } from "@/components/fundo-vivo";
 import {
@@ -17,10 +19,13 @@ import {
   respondida,
   visiveis,
   type Briefing,
+  type Papel,
   type Resposta,
   type Respostas,
 } from "@/lib/briefing/regras";
-import { guardarAmostra, lerAmostra } from "@/lib/briefing/guardado-da-amostra";
+import type { Exemplo } from "@/lib/briefing/amostra-preenchida";
+import { guardarAmostra, lerAmostra, type Guardado } from "@/lib/briefing/guardado-da-amostra";
+import { fraseDoVisual, temaDe } from "@/lib/briefing/temas";
 import { MINIMO_COLADO, type Colados } from "@/lib/briefing/sinais";
 import { cn } from "@/lib/utils";
 
@@ -32,22 +37,31 @@ import { cn } from "@/lib/utils";
 // final, ficam no painel (plano geral, Parte 5, decisão 1 A).
 
 type Tela =
-  | { tipo: "aparelho" | "abertura" | "volta" | "revisao" | "fim" }
+  | { tipo: "aparelho" | "abertura" | "volta" | "revisao" | "material" | "fim" }
   | { tipo: "pergunta"; id: string; daRevisao?: boolean }
   | { tipo: "passo"; secao: number };
 
 const semAssinatura = () => () => {};
 
 /** Só depois de montar no navegador, porque o começo depende do que está guardado nele. */
-export function BriefingDaAmostra(props: { briefing: Briefing; outroAparelho: boolean }) {
+type Comeco = "normal" | "aparelho" | "revisao" | "material" | "fim";
+
+export function BriefingDaAmostra(props: { briefing: Briefing; comeco: Comeco; exemplo?: Exemplo }) {
   const noNavegador = useSyncExternalStore(semAssinatura, () => true, () => false);
   return noNavegador ? <Player {...props} /> : <div className="min-h-dvh" />;
 }
 
-function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho: boolean }) {
-  const [guardado] = useState(() => lerAmostra(briefing.slug));
+function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Comeco; exemplo?: Exemplo }) {
+  // O exemplo preenchido recomeça inteiro a cada vez que abre.
+  const [guardado] = useState(() =>
+    exemplo ? { ...exemplo, enviado: false, materialMandado: false } : lerAmostra(briefing.slug),
+  );
+  useEffect(() => {
+    if (exemplo) guardarAmostra(briefing.slug, { ...exemplo, enviado: false });
+  }, [briefing.slug, exemplo]);
   const [respostas, setRespostas] = useState(guardado.respostas);
   const [enviado, setEnviado] = useState(guardado.enviado);
+  const [materialMandado, setMaterialMandado] = useState(guardado.materialMandado ?? false);
   const [colados, setColados] = useState<Colados>(guardado.colados);
   const [salvo, setSalvo] = useState(false);
   const [vendo, setVendo] = useState(false);
@@ -55,25 +69,25 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
   const [erro, setErro] = useState<string | null>(null);
   const [direcao, setDirecao] = useState(1);
   const [tela, setTela] = useState<Tela>(() => {
-    if (outroAparelho) return { tipo: "aparelho" };
-    return inicio(guardado.enviado, guardado.respostas);
+    if (comeco !== "normal") return { tipo: comeco };
+    return inicio(guardado, briefing);
   });
   const espera = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const lista = visiveis(briefing, respostas);
   const { feitas, total, porcento } = progresso(briefing, respostas);
 
-  function guardar(novas: Respostas, mais: { enviado?: boolean; colados?: Colados } = {}) {
+  function guardar(novas: Respostas, mais: { enviado?: boolean; colados?: Colados; materialMandado?: boolean } = {}) {
     setRespostas(novas);
-    setSalvo(guardarAmostra(briefing.slug, { respostas: novas, enviado, colados, ...mais }));
+    setSalvo(guardarAmostra(briefing.slug, { respostas: novas, enviado, colados, materialMandado, ...mais }));
   }
 
   /** Um texto longo chegou de uma vez (sinais.ts). */
   function chegouDeUmaVez(id: string, texto: string) {
     if (texto.trim().length < MINIMO_COLADO || colados[id]?.includes(texto)) return;
-    const novos = { ...colados, [id]: [...(colados[id] ?? []), texto.slice(0, 5000)].slice(-5) };
+    const novos = { ...colados, [id]: [...(colados[id] ?? []), texto.slice(0, 20000)].slice(-5) };
     setColados(novos);
-    guardarAmostra(briefing.slug, { respostas, enviado, colados: novos });
+    guardarAmostra(briefing.slug, { respostas, enviado, colados: novos, materialMandado });
   }
 
   function ir(destino: Tela, sentido = 1) {
@@ -159,6 +173,8 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
     espera.current = setTimeout(() => seguinte(id, novas, daRevisao), 560);
   }
 
+  // Nas primeiras respostas, o lugar do Salvo conta para que serve o olho.
+  const convidar = tela.tipo === "pergunta" && !jaViu && feitas >= 1 && feitas <= 3;
   const emPergunta = tela.tipo === "pergunta" && pergunta;
   const chave = tela.tipo === "pergunta" ? `pergunta-${tela.id}` : tela.tipo === "passo" ? `passo-${tela.secao}` : tela.tipo;
 
@@ -167,7 +183,7 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      {tela.tipo !== "abertura" && tela.tipo !== "fim" && tela.tipo !== "aparelho" && (
+      {!["abertura", "fim", "aparelho", "material"].includes(tela.tipo) && (
         <header
           className={cn(
             "sticky top-0 z-20 border-b bg-background/95 text-foreground backdrop-blur transition-colors duration-300",
@@ -179,18 +195,20 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
             <BrandLogo className="h-5 w-[108px] sm:h-6 sm:w-[130px]" />
             <div className="flex items-center gap-3">
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-live="polite">
-                {salvo && (
-                  <>
-                    <CloudCheckIcon className="size-4" aria-hidden="true" />
-                    Salvo
-                  </>
+                {convidar ? (
+                  <span className="lg:hidden" data-convite-do-olho>
+                    veja como está ficando
+                  </span>
+                ) : (
+                  salvo && (
+                    <>
+                      <CloudCheckIcon className="size-4" aria-hidden="true" />
+                      Salvo
+                    </>
+                  )
                 )}
               </p>
-              <Olho
-                feitas={feitas}
-                convidar={tela.tipo === "pergunta" && !jaViu && feitas >= 1 && feitas <= 3}
-                aoAbrir={verDesenho}
-              />
+              <Olho feitas={feitas} aoAbrir={verDesenho} />
             </div>
           </div>
           <div
@@ -235,7 +253,7 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
           data-tela={tela.tipo}
         >
           {tela.tipo === "aparelho" && (
-            <OutroAparelho aoConfirmar={() => ir(inicio(enviado, respostas))} />
+            <OutroAparelho aoConfirmar={() => ir(inicio({ enviado, respostas, materialMandado }, briefing))} />
           )}
           {tela.tipo === "abertura" && (
             <Abertura briefing={briefing} aoComecar={() => (feitas ? continuar() : ir({ tipo: "pergunta", id: lista[0].id }))} />
@@ -276,11 +294,29 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
               aoEnviar={() => {
                 setEnviado(true);
                 guardar(respostas, { enviado: true });
+                ir({ tipo: briefing.pastaDoMaterial ? "material" : "fim" });
+              }}
+            />
+          )}
+          {tela.tipo === "material" && (
+            <Material
+              briefing={briefing}
+              respostas={respostas}
+              aoTerminar={(mandou) => {
+                setMaterialMandado(mandou);
+                guardar(respostas, { enviado: true, materialMandado: mandou });
                 ir({ tipo: "fim" });
               }}
             />
           )}
-          {tela.tipo === "fim" && <Fim briefing={briefing} respostas={respostas} />}
+          {tela.tipo === "fim" && (
+            <Fim
+              briefing={briefing}
+              respostas={respostas}
+              faltaMaterial={Boolean(briefing.pastaDoMaterial) && !materialMandado}
+              aoMandar={() => ir({ tipo: "material" }, -1)}
+            />
+          )}
 
           {emPergunta && (
             <FundoVivo className="flex flex-1 flex-col [&>div:first-child]:opacity-40 sm:[&>div:first-child]:opacity-80" aria-label={pergunta.titulo}>
@@ -322,6 +358,7 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
                       transition={{ delay: 0.22, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                       className="mt-7 sm:mt-9"
                     >
+                      {pergunta.papel && AO_VIVO.includes(pergunta.papel) && <AoVivo briefing={briefing} respostas={respostas} />}
                       <CampoDaPergunta
                         p={pergunta}
                         briefing={briefing}
@@ -352,9 +389,9 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
                     </p>
                   </div>
                   <aside className="hidden lg:block" aria-hidden="true">
-                    <div className="sticky top-32">
-                      <Desenho desenho={desenhoDe(briefing, respostas)} />
-                      <LegendaDoDesenho tipo={briefing.tipo} />
+                    <div className="sticky top-28">
+                      <Desenho desenho={desenhoDe(briefing, respostas)} foco={pergunta.papel} janela />
+                      <LegendaDoDesenho tipo={briefing.tipo} desenho={desenhoDe(briefing, respostas)} />
                     </div>
                   </aside>
                 </div>
@@ -394,10 +431,39 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
         {vendo && (
           <VerDesenho aoFechar={() => window.history.back()}>
             <Desenho desenho={desenhoDe(briefing, respostas)} />
-            <LegendaDoDesenho tipo={briefing.tipo} />
+            <LegendaDoDesenho tipo={briefing.tipo} desenho={desenhoDe(briefing, respostas)} />
           </VerDesenho>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+/** As perguntas do visual: no celular, o topo da página acompanha a escolha na hora. */
+const AO_VIVO: Papel[] = ["estilo", "cores", "sensacao"];
+
+function AoVivo({ briefing, respostas }: { briefing: Briefing; respostas: Respostas }) {
+  const b = blocosDasRespostas(briefing, respostas);
+  const frase = fraseDoVisual(b.estilos, b.cores, b.sensacoes);
+  return (
+    <div
+      className="sticky top-[5.1rem] z-10 mb-5 overflow-hidden rounded-xl border border-ink/10 shadow-xl lg:hidden"
+      aria-hidden="true"
+      data-ao-vivo
+    >
+      <TopoDaPagina
+        tema={temaDe(b.estilos, b.cores)}
+        titulo={b.principal ?? b.servicos?.[0] ?? b.nome ?? "Sua página"}
+        comBotao
+        icone={b.icone}
+        sensacoes={b.sensacoes}
+        compacto
+      />
+      {frase && (
+        <p key={frase} className="char-in block! bg-card px-4 py-2 text-center text-sm leading-snug text-balance" data-frase-do-visual>
+          {frase}
+        </p>
+      )}
     </div>
   );
 }
@@ -467,8 +533,9 @@ function VerDesenho({ aoFechar, children }: { aoFechar: () => void; children: Re
   );
 }
 
-function inicio(enviado: boolean, respostas: Respostas): Tela {
-  if (enviado) return { tipo: "fim" };
+/** Enviado sem o material, a pessoa volta direto para mandar. */
+function inicio({ enviado, respostas, materialMandado }: Pick<Guardado, "enviado" | "respostas" | "materialMandado">, briefing: Briefing): Tela {
+  if (enviado) return { tipo: briefing.pastaDoMaterial && !materialMandado ? "material" : "fim" };
   return { tipo: Object.keys(respostas).length ? "volta" : "abertura" };
 }
 
