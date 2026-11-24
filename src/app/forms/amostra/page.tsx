@@ -20,6 +20,9 @@ export default function InicioDaAmostra() {
         Negócios inventados. As respostas ficam só neste navegador.
       </p>
       <Zerar />
+      <a href="/forms/amostra/mockup" className={`${contorno} mt-3 text-sm font-medium`}>
+        As duas composições novas
+      </a>
       <ul className="mt-8 space-y-4">
         {briefingsDaAmostra.map((b) => (
           <li key={b.slug} className="rounded-2xl border bg-card p-5">
