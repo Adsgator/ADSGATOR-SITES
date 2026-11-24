@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { blocosDasRespostas, RascunhoDaPagina, type Blocos, type Passeio } from "@/components/briefing/rascunho-da-pagina";
 import { blocosDoAnuncio, RascunhoDoAnuncio, type BlocosDoAnuncio } from "@/components/briefing/rascunho-do-anuncio";
 import type { Briefing, Papel, Respostas } from "@/lib/briefing/regras";
-import { fraseDoVisual } from "@/lib/briefing/temas";
+import { encontroDosEstilos, fraseDoVisual } from "@/lib/briefing/temas";
 import { cn } from "@/lib/utils";
 
 // O desenho que acompanha as respostas: a página ou o anúncio, conforme o briefing.
@@ -22,6 +22,7 @@ export function Desenho({
   desenho,
   foco,
   passeio,
+  refinado,
   janela,
   altura,
   className,
@@ -30,6 +31,7 @@ export function Desenho({
   /** A parte que está sendo respondida (a página rola até ela). */
   foco?: Papel;
   passeio?: Passeio;
+  refinado?: boolean;
   /** A página numa janela de altura fixa. O anúncio cabe inteiro e não precisa. */
   janela?: boolean;
   /** A altura da janela (classes), quando não é a de sempre. */
@@ -37,7 +39,7 @@ export function Desenho({
   className?: string;
 }) {
   return desenho.tipo === "pagina" ? (
-    <RascunhoDaPagina blocos={desenho.blocos} foco={foco} passeio={passeio} janela={janela} altura={altura} className={className} />
+    <RascunhoDaPagina blocos={desenho.blocos} foco={foco} passeio={passeio} refinado={refinado} janela={janela} altura={altura} className={className} />
   ) : (
     <RascunhoDoAnuncio blocos={desenho.blocos} className={cn(altura, className)} />
   );
@@ -47,6 +49,7 @@ export function Desenho({
 export function LegendaDoDesenho({ tipo, desenho }: { tipo: Briefing["tipo"]; desenho?: BlocosDoDesenho }) {
   const frase =
     desenho?.tipo === "pagina" ? fraseDoVisual(desenho.blocos.estilos, desenho.blocos.cores, desenho.blocos.sensacoes) : "";
+  const encontro = desenho?.tipo === "pagina" ? encontroDosEstilos(desenho.blocos.estilos) : "";
   return (
     <>
       {frase && (
@@ -56,9 +59,9 @@ export function LegendaDoDesenho({ tipo, desenho }: { tipo: Briefing["tipo"]; de
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 0.45 }}
           className="mt-4 text-center font-heading text-base leading-snug text-balance"
-          data-frase-do-visual
         >
-          {frase}
+          <span data-frase-do-visual>{frase}</span>
+          {encontro && <span className="mt-1 block font-sans text-sm text-muted-foreground">{encontro}</span>}
         </motion.p>
       )}
       <p className={cn("text-center text-xs text-balance text-muted-foreground", frase ? "mt-2" : "mt-4")}>

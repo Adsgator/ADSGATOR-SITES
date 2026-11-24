@@ -180,7 +180,7 @@ for (const [nome, opcoes] of [
     etapas.add(etapa);
     await pg.waitForTimeout(150);
   }
-  check("a cena passeia, volta e clica, nessa ordem", JSON.stringify([...etapas].filter((e) => e !== "pronta")) === JSON.stringify(["passeando", "voltando", "indo", "clique", "conversa"]), [...etapas].join(" "));
+  check("a cena passeia, volta e clica, nessa ordem", JSON.stringify([...etapas].filter((e) => e !== "pronta")) === JSON.stringify(["refinando", "passeando", "voltando", "indo", "clique", "conversa"]), [...etapas].join(" "));
   const passos = posicoes.slice(1).map((y, k) => posicoes[k] - y);
   const maior = Math.max(...passos);
   check("a rolagem é contínua, sem pulo", passos.every((p) => p >= -1) && maior > 0 && maior < Math.abs(posicoes.at(-1)) * 0.12, `${Math.round(Math.abs(posicoes.at(-1)))}px, maior passo ${Math.round(maior)}px`);
@@ -444,6 +444,67 @@ for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
   if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${f}-sensacao.png` });
   check(`${nome}: sem rolagem lateral`, (await pg.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0);
   check(`${nome}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 200));
+  await pg.context().close();
+}
+
+console.log("\n# As combinações");
+{
+  const pg = await nova({});
+  await pg.goto(`${SITE}/forms/amostra/adestramento`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  await ateORevisao(pg, {}, (v) => v.at(-1) === "Tem algum curso ou certificado para mostrar?");
+  if ((await tela(pg)) === "passo") await continuar(pg);
+  await tela(pg);
+  const estilo = (n) => pg.locator("form").last().getByRole("checkbox", { name: n, exact: true });
+  await estilo("Luxuoso").click();
+  check("o que não combina fica bloqueado, com o motivo", (await estilo("Divertido").isDisabled()) && /Não combina com luxuoso/.test(await estilo("Divertido").innerText()));
+  await estilo("Luxuoso").click();
+  check("e libera quando desmarca", await estilo("Divertido").isEnabled());
+
+  // A mesma dupla, em qualquer ordem, dá o mesmo desenho.
+  const aparencia = () =>
+    pg.locator("aside [data-rascunho]").evaluate((r) => {
+      const c = getComputedStyle(r);
+      const t = r.querySelector("[data-botao-do-desenho]");
+      return [c.backgroundColor, c.color, getComputedStyle(t).backgroundColor, getComputedStyle(t).borderRadius].join(" ");
+    });
+  const escolher = async (nomes) => {
+    for (const n of nomes) await estilo(n).click();
+    await pg.waitForTimeout(1200);
+    const a = await aparencia();
+    for (const n of nomes) await estilo(n).click();
+    return a;
+  };
+  check("a ordem da escolha não muda o resultado", (await escolher(["Minimalista", "Divertido"])) === (await escolher(["Divertido", "Minimalista"])));
+
+  // A alegria fala a linguagem do estilo.
+  await estilo("Minimalista").click();
+  await estilo("Divertido").click();
+  await pg.waitForTimeout(400);
+  check("o encontro aparece em palavras", await pg.locator("aside").getByText("Pouca coisa na tela, com um detalhe que surpreende").isVisible());
+  const linguagens = {};
+  for (const [duplas, rotulo] of [[["Rústico"], "Rústico"], [["Minimalista"], "Minimalista"], [["Divertido"], "Divertido"], [["Elegante"], "Elegante"], [["Natural"], "Natural"], [["Rústico", "Divertido"], "Rústico com divertido"], [["Elegante", "Divertido"], "Elegante com divertido"]]) {
+    await pg.evaluate(([s, e]) => {
+      const g = JSON.parse(localStorage.getItem(`amostra-briefing:${s}`));
+      g.respostas.estilo = { opcoes: e };
+      g.respostas.sensacao = { opcoes: ["Alegria", "Confiança"] };
+      localStorage.setItem(`amostra-briefing:${s}`, JSON.stringify(g));
+    }, ["adestramento", duplas]);
+    await pg.goto(`${SITE}/forms/amostra/adestramento`);
+    await tela(pg);
+    await pg.locator("[data-olho]").click();
+    await pg.waitForTimeout(1300);
+    const topo = pg.locator("[data-ver-desenho] [data-sensacoes]").first();
+    linguagens[rotulo] = [await topo.getAttribute("data-linguagem"), await topo.locator("> span").count()].join(" ");
+    if (FOTOS) await pg.locator("[data-ver-desenho] [data-rascunho]").screenshot({ path: `${FOTOS}/combo-${rotulo}.png` });
+  }
+  check(
+    "a mesma alegria sai diferente em cada estilo",
+    linguagens["Rústico"].startsWith("artesanal/artesanal") && linguagens["Rústico com divertido"].startsWith("artesanal/ludica") && linguagens["Elegante com divertido"].startsWith("classica/ludica") && linguagens["Minimalista"].startsWith("geometrica") && linguagens["Divertido"].startsWith("ludica") && linguagens["Elegante"].startsWith("classica") && linguagens["Natural"].startsWith("organica"),
+    Object.entries(linguagens).map((x) => x.join(": ")).join(", "),
+  );
+  check("e na quantidade que o estilo aceita", Number(linguagens["Minimalista"].split(" ")[1]) < Number(linguagens["Divertido"].split(" ")[1]));
+  check("sem erro no console", pg.erros.length === 0, pg.erros[0]?.slice(0, 200));
   await pg.context().close();
 }
 

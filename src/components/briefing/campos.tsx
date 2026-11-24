@@ -10,7 +10,7 @@ import { CampoDoEndereco } from "@/components/briefing/endereco";
 import { ValorConhecido } from "@/components/briefing/valor-conhecido";
 import { TopoDaPagina } from "@/components/briefing/topo-da-pagina";
 import { iconeDaOpcao } from "@/lib/briefing/icones";
-import { estilos, falasDaSensacao, temaDe } from "@/lib/briefing/temas";
+import { estilos, falasDaSensacao, opostoMarcado, temaDe } from "@/lib/briefing/temas";
 import {
   cidadeDe,
   opcoesDa,
@@ -212,9 +212,9 @@ function Multipla({ p, briefing, respostas, mudar }: PropsDoCampo) {
             key={o}
             papel="checkbox"
             marcada={marcadas.includes(o)}
-            bloqueada={cheia && !marcadas.includes(o)}
+            bloqueada={!marcadas.includes(o) && (cheia || Boolean(opostoMarcado(o, marcadas)))}
             onClick={() => trocar(o)}
-            explica={p.papel === "sensacao" ? falasDaSensacao[o] : undefined}
+            explica={p.papel !== "sensacao" ? undefined : opostoMarcado(o, marcadas) ? `Não combina com ${opostoMarcado(o, marcadas)?.toLowerCase()}` : falasDaSensacao[o]}
           >
             {o}
           </Opcao>
@@ -434,6 +434,7 @@ function Estilos({ p, briefing, respostas, mudar }: PropsDoCampo) {
       <div role="group" aria-label={p.titulo} className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {estilos.map((e) => {
           const marcada = marcadas.includes(e.nome);
+          const oposto = marcada ? undefined : opostoMarcado(e.nome, marcadas);
           return (
             <button
               key={e.nome}
@@ -441,7 +442,7 @@ function Estilos({ p, briefing, respostas, mudar }: PropsDoCampo) {
               role="checkbox"
               aria-checked={marcada}
               aria-label={e.nome}
-              disabled={cheia && !marcada}
+              disabled={(cheia && !marcada) || Boolean(oposto)}
               onClick={() => mudar({ opcoes: marcada ? marcadas.filter((x) => x !== e.nome) : [...marcadas, e.nome] })}
               className={cn(
                 "relative overflow-hidden rounded-xl border-2 bg-card text-left transition-all duration-200 outline-none focus-visible:ring-3 focus-visible:ring-ring/40 active:scale-[0.98] disabled:opacity-40",
@@ -455,7 +456,7 @@ function Estilos({ p, briefing, respostas, mudar }: PropsDoCampo) {
               </span>
               <span className="block px-3 py-2.5 leading-tight">
                 <span className="block text-sm font-medium">{e.nome}</span>
-                <span className="mt-0.5 block text-xs text-muted-foreground">{e.fala}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">{oposto ? `Não combina com ${oposto.toLowerCase()}` : e.fala}</span>
               </span>
               {marcada && (
                 <CheckIcon

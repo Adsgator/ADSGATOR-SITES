@@ -1,5 +1,7 @@
 import {
   BookOpenIcon,
+  FeatherIcon,
+  SunriseIcon,
   BuildingIcon,
   CameraIcon,
   CarIcon,
@@ -54,6 +56,8 @@ const porOpcao: Record<string, LucideIcon> = {
   Calma: WavesIcon,
   Energia: ZapIcon,
   Alegria: LaughIcon,
+  Leveza: FeatherIcon,
+  Inspiração: SunriseIcon,
   Cuidado: HeartIcon,
   Exclusividade: GemIcon,
   Clareza: LightbulbIcon,

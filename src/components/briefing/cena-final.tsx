@@ -16,11 +16,12 @@ import { fraseDoVisual } from "@/lib/briefing/temas";
 
 export type Mensagem = { de: "cliente" | "negocio"; texto: string };
 
-type Etapa = "pronta" | "passeando" | "voltando" | "indo" | "clique" | "conversa" | "saindo";
+type Etapa = "pronta" | "refinando" | "passeando" | "voltando" | "indo" | "clique" | "conversa" | "saindo";
 
 /** Quanto cada etapa dura. A conversa depende das mensagens. */
 const TEMPOS: Record<Exclude<Etapa, "conversa">, number> = {
-  pronta: 2200,
+  pronta: 1700,
+  refinando: 3200,
   passeando: 11500,
   voltando: 3000,
   indo: 1500,
@@ -28,7 +29,8 @@ const TEMPOS: Record<Exclude<Etapa, "conversa">, number> = {
   saindo: 1100,
 };
 const SEGUINTE: Record<Etapa, Etapa> = {
-  pronta: "passeando",
+  pronta: "refinando",
+  refinando: "passeando",
   passeando: "voltando",
   voltando: "indo",
   indo: "clique",
@@ -54,7 +56,7 @@ export function CenaFinal({ desenho, nome, mensagens }: { desenho: BlocosDoDesen
     if (!aVista) return;
     const falta = etapa === "conversa" && chegaram < mensagens.length;
     // O anúncio cabe inteiro na tela: não tem por onde passear.
-    const parada = desenho.tipo === "google_ads" && (etapa === "passeando" || etapa === "voltando");
+    const parada = desenho.tipo === "google_ads" && ["refinando", "passeando", "voltando"].includes(etapa);
     const ms = etapa !== "conversa" ? (parada ? 300 : TEMPOS[etapa]) : falta ? (chegaram === 0 ? 900 : 1600) : PAUSA;
     const t = setTimeout(() => {
       if (falta) return setChegaram(chegaram + 1);
@@ -79,7 +81,29 @@ export function CenaFinal({ desenho, nome, mensagens }: { desenho: BlocosDoDesen
         <div aria-hidden="true" className="pointer-events-none absolute -inset-10 rounded-full bg-brand/15 blur-3xl" />
         <BumerangueFrame>
           <div ref={caixa} className="relative overflow-hidden rounded-2xl shadow-2xl">
-            <Desenho desenho={desenho} passeio={etapa === "passeando" ? DESCER : SUBIR} janela altura="h-[30rem] sm:h-[33rem]" />
+            <Desenho desenho={desenho} passeio={etapa === "passeando" ? DESCER : SUBIR} refinado={etapa !== "pronta"} janela altura="h-[30rem] sm:h-[33rem]" />
+            {/* O toque da Adsgator: a luz passa e a página ganha o acabamento. */}
+            <AnimatePresence>
+              {etapa === "refinando" && desenho.tipo === "pagina" && (
+                <motion.div key="toque" exit={{ opacity: 0 }} transition={{ duration: 0.6 }} className="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
+                  <motion.span
+                    initial={{ y: "-60%" }}
+                    animate={{ y: "260%" }}
+                    transition={{ duration: 2.4, ease: [0.45, 0, 0.35, 1] }}
+                    className="absolute inset-x-0 h-2/5 bg-linear-to-b from-transparent via-brand/40 to-transparent"
+                  />
+                  <motion.span
+                    initial={{ opacity: 0, y: 14, scale: 0.92 }}
+                    animate={{ opacity: [0, 1, 1, 0], y: [14, 0, 0, -8], scale: 1 }}
+                    transition={{ duration: 3, times: [0, 0.2, 0.78, 1] }}
+                    className="absolute inset-x-0 bottom-5 mx-auto flex w-fit items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper shadow-xl"
+                  >
+                    <span className="brand-cursor h-5 text-brand" />
+                    O toque da Adsgator
+                  </motion.span>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <AnimatePresence>
               {(etapa === "indo" || etapa === "clique") && (
                 <motion.span

@@ -84,7 +84,7 @@ export function VisaoDaAgencia({ briefing, exemplo }: { briefing: Briefing; exem
       <aside className="lg:sticky lg:top-6" data-desenho-da-agencia>
         <p className="mb-3 text-sm font-medium">{briefing.tipo === "pagina" ? "A página que se montou" : "O anúncio que se montou"}</p>
         <div className="max-h-[75vh] overflow-y-auto overscroll-contain rounded-2xl">
-          <Desenho desenho={desenho} />
+          <Desenho desenho={desenho} refinado />
         </div>
         {desenho.tipo === "pagina" && (
           <p className="mt-4 text-center font-heading text-lg leading-snug text-balance">

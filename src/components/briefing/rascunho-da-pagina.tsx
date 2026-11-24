@@ -109,6 +109,9 @@ function Parte({
   ativa,
   tema,
   planta,
+  refinado,
+  nome,
+  faixa,
   children,
 }: {
   papel: Papel[];
@@ -118,11 +121,38 @@ function Parte({
   tema: Tema;
   /** O esqueleto que aparece antes da resposta. */
   planta: React.ReactNode;
+  refinado?: boolean;
+  /** O título da seção, quando a página está refinada. */
+  nome?: string;
+  /** Seção com o fundo de apoio, quando a página está refinada. */
+  faixa?: boolean;
   children: React.ReactNode;
 }) {
   const emFoco = foco !== undefined && papel.includes(foco);
   return (
-    <section className="relative px-4 py-3.5" data-parte={papel[0]} data-ativa={ativa} data-em-foco={emFoco || undefined}>
+    <section
+      className={cn("relative transition-all duration-700", refinado ? "px-5 py-6" : "px-4 py-3.5")}
+      style={{ background: refinado && faixa ? `color-mix(in oklab, ${tema.apoio} 45%, ${tema.fundo})` : undefined }}
+      data-parte={papel[0]}
+      data-ativa={ativa}
+      data-em-foco={emFoco || undefined}
+    >
+      {refinado && nome && ativa && (
+        <motion.div
+          initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.8 }}
+          className="mb-3 space-y-1.5"
+        >
+          <p
+            className={cn("text-[0.95rem] leading-tight", tema.maiusculas && "uppercase", tema.italico && "italic")}
+            style={{ fontFamily: tema.fonte, fontWeight: tema.peso }}
+          >
+            {nome}
+          </p>
+          <span className="block h-0.5 w-7" style={{ background: tema.destaque, borderRadius: tema.raio }} />
+        </motion.div>
+      )}
       {emFoco && (
         <motion.span
           initial={{ opacity: 0 }}
@@ -180,6 +210,7 @@ export function RascunhoDaPagina({
   blocos,
   foco,
   passeio,
+  refinado,
   janela,
   altura = "h-[25rem]",
   className,
@@ -189,6 +220,8 @@ export function RascunhoDaPagina({
   foco?: Papel;
   /** A página rola devagar até o fim ou de volta ao topo (no lugar do foco). */
   passeio?: Passeio;
+  /** Depois do toque da Adsgator: respiro, luz, títulos e rodapé. */
+  refinado?: boolean;
   /** Mostra a página numa janela, que rola até a parte em foco. */
   janela?: boolean;
   altura?: string;
@@ -196,7 +229,12 @@ export function RascunhoDaPagina({
 }) {
   const tema = temaDe(blocos.estilos, blocos.cores);
   const { tinta } = tema;
-  const cartao = { borderRadius: tema.raio, background: tema.apoio };
+  const cartao: React.CSSProperties = {
+    borderRadius: tema.raio,
+    background: tema.apoio,
+    ...(refinado && { boxShadow: `0 10px 22px -16px color-mix(in oklab, ${tema.tinta} 70%, transparent), inset 0 0 0 1px color-mix(in oklab, ${tema.tinta} 7%, transparent)` }),
+  };
+  const reto = tema.raio === "0rem";
   const titulo = { fontFamily: tema.fonte, fontWeight: tema.peso, fontStyle: tema.italico ? "italic" : undefined };
   const Icone = blocos.icone ? iconesDoNegocio[blocos.icone] : undefined;
   const servicos = blocos.servicos ?? [];
@@ -274,11 +312,12 @@ export function RascunhoDaPagina({
               comBotao={Boolean(blocos.whatsapp)}
               icone={blocos.icone}
               sensacoes={blocos.sensacoes}
+              refinado={refinado}
             />
           </div>
 
           <Parte
-            papel={["numeros"]}
+            papel={["numeros"]} refinado={refinado} faixa
             foco={foco}
             rotulo="os seus números"
             ativa={Boolean(blocos.numeros)}
@@ -298,7 +337,7 @@ export function RascunhoDaPagina({
           </Parte>
 
           <Parte
-            papel={["servicos", "principal"]}
+            papel={["servicos", "principal"]} refinado={refinado} nome="O que eu faço"
             foco={foco}
             rotulo="o que você oferece"
             ativa={ordenados.length > 0}
@@ -330,7 +369,7 @@ export function RascunhoDaPagina({
           </Parte>
 
           {(blocos.preco || pergunta("preco")) && (
-            <Parte papel={["preco"]} foco={foco} rotulo="os valores" ativa={Boolean(blocos.preco)} tema={tema} planta={<Traco largura="55%" cor={tinta} forte />}>
+            <Parte papel={["preco"]} refinado={refinado} nome="Valores" foco={foco} rotulo="os valores" ativa={Boolean(blocos.preco)} tema={tema} planta={<Traco largura="55%" cor={tinta} forte />}>
               <p className="line-clamp-3 px-3 py-2.5 text-[0.66rem] leading-snug" style={cartao}>
                 {blocos.preco && trecho(blocos.preco, 140)}
               </p>
@@ -339,7 +378,7 @@ export function RascunhoDaPagina({
 
           {pergunta("facilita") && (
             <Parte
-              papel={["facilita"]}
+              papel={["facilita"]} refinado={refinado}
               foco={foco}
               rotulo="as facilidades"
               ativa={Boolean(blocos.facilita?.length)}
@@ -358,7 +397,7 @@ export function RascunhoDaPagina({
           )}
 
           <Parte
-            papel={["clientes"]}
+            papel={["clientes"]} refinado={refinado} faixa
             foco={foco}
             rotulo="para quem é"
             ativa={Boolean(blocos.clientes?.length)}
@@ -380,7 +419,7 @@ export function RascunhoDaPagina({
                   <li
                     key={c}
                     className="border px-2 py-1 text-[0.6rem]"
-                    style={{ borderRadius: tema.raio === "0" ? "0" : "999px", borderColor: tema.destaque }}
+                    style={{ borderRadius: reto ? "0" : "999px", borderColor: tema.destaque }}
                   >
                     {trecho(c, 60)}
                   </li>
@@ -390,7 +429,7 @@ export function RascunhoDaPagina({
           </Parte>
 
           <Parte
-            papel={["passos"]}
+            papel={["passos"]} refinado={refinado} nome="Como funciona"
             foco={foco}
             rotulo="como funciona"
             ativa={Boolean(blocos.passos)}
@@ -402,7 +441,7 @@ export function RascunhoDaPagina({
                 <li key={i} className="flex items-start gap-2 text-[0.64rem] leading-snug">
                   <span
                     className="flex size-4.5 shrink-0 items-center justify-center text-[0.56rem] font-bold"
-                    style={{ background: tema.destaque, color: tema.sobre, borderRadius: tema.raio === "0" ? "0" : "999px" }}
+                    style={{ background: tema.destaque, color: tema.sobre, borderRadius: reto ? "0" : "999px" }}
                   >
                     {i + 1}
                   </span>
@@ -414,7 +453,7 @@ export function RascunhoDaPagina({
 
           {pergunta("diferente") && (
             <Parte
-              papel={["diferente"]}
+              papel={["diferente"]} refinado={refinado}
               foco={foco}
               rotulo="o seu diferencial"
               ativa={Boolean(blocos.diferente)}
@@ -435,7 +474,7 @@ export function RascunhoDaPagina({
           )}
 
           <Parte
-            papel={["elogio"]}
+            papel={["elogio"]} refinado={refinado} nome="O que dizem" faixa
             foco={foco}
             rotulo="o que falam de você"
             ativa={Boolean(blocos.elogio)}
@@ -451,7 +490,7 @@ export function RascunhoDaPagina({
           </Parte>
 
           <Parte
-            papel={["historia"]}
+            papel={["historia"]} refinado={refinado} nome="Quem está por trás"
             foco={foco}
             rotulo="a sua história"
             ativa={Boolean(blocos.historia)}
@@ -469,14 +508,14 @@ export function RascunhoDaPagina({
             <div className="flex items-start gap-3">
               <span
                 className="mt-0.5 size-9 shrink-0"
-                style={{ borderRadius: tema.raio === "0" ? "0" : "999px", background: `linear-gradient(150deg, ${tema.apoio}, ${tema.destaque})` }}
+                style={{ borderRadius: reto ? "0" : "999px", background: `linear-gradient(150deg, ${tema.apoio}, ${tema.destaque})` }}
               />
               <p className="line-clamp-4 min-w-0 text-[0.64rem] leading-relaxed">{blocos.historia && trecho(blocos.historia, 170)}</p>
             </div>
           </Parte>
 
           <Parte
-            papel={["duvidas"]}
+            papel={["duvidas"]} refinado={refinado} nome="Dúvidas de sempre" faixa
             foco={foco}
             rotulo="as dúvidas respondidas"
             ativa={Boolean(blocos.duvidas?.length)}
@@ -499,7 +538,7 @@ export function RascunhoDaPagina({
           </Parte>
 
           <Parte
-            papel={["lugar", "horarios", "redes", "registro"]}
+            papel={["lugar", "horarios", "redes", "registro"]} refinado={refinado} nome="Onde e quando"
             foco={foco}
             rotulo="onde e quando"
             ativa={Boolean(blocos.lugar || blocos.horarios || blocos.redes?.length || blocos.registro)}

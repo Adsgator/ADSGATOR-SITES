@@ -3,7 +3,8 @@
 import { MessageCircleIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-import { EfeitosDaSensacao, Retrato, TexturaDoFundo } from "@/components/briefing/arte";
+import { Retrato, TexturaDoFundo } from "@/components/briefing/arte";
+import { EfeitosDaSensacao } from "@/components/briefing/efeitos";
 import type { IconeDoNegocio } from "@/lib/briefing/icones";
 import type { Tema } from "@/lib/briefing/temas";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ export function TopoDaPagina({
   icone,
   sensacoes = [],
   compacto,
+  refinado,
   className,
 }: {
   tema: Tema;
@@ -39,6 +41,8 @@ export function TopoDaPagina({
   sensacoes?: string[];
   /** Baixo o bastante para acompanhar a rolagem no celular. */
   compacto?: boolean;
+  /** Depois do toque da Adsgator (o fim do briefing). */
+  refinado?: boolean;
   className?: string;
 }) {
   const ousada = sensacoes.includes("Ousadia");
@@ -87,13 +91,23 @@ export function TopoDaPagina({
       {comBotao && (
         <span
           data-botao-do-desenho
-          className="mt-1 inline-flex w-fit items-center gap-1.5 px-2.5 py-1.5 text-[0.6rem] font-semibold whitespace-nowrap shadow-sm transition-all duration-700"
+          className={cn(
+            "relative mt-1 inline-flex w-fit items-center gap-1.5 overflow-hidden font-semibold whitespace-nowrap transition-all duration-700",
+            refinado ? "px-4 py-2 text-[0.7rem] shadow-lg" : "px-2.5 py-1.5 text-[0.6rem] shadow-sm",
+          )}
           style={{
             background: cheio ? tema.sobre : tema.destaque,
             color: cheio ? tema.destaque : tema.sobre,
             borderRadius: tema.raio,
           }}
         >
+          {refinado && (
+            <motion.span
+              animate={{ x: ["-150%", "420%"] }}
+              transition={{ duration: 1.3, repeat: Infinity, repeatDelay: 2.2, ease: "easeInOut" }}
+              className="absolute inset-y-0 left-0 w-1/3 -skew-x-12 bg-white/35"
+            />
+          )}
           <MessageCircleIcon className="size-3" />
           Chamar no WhatsApp
         </span>
@@ -103,11 +117,17 @@ export function TopoDaPagina({
 
   return (
     <div
-      className={cn("relative isolate overflow-hidden px-4 transition-colors duration-700", clara && !compacto ? "py-7" : compacto ? "py-4" : "py-5", className)}
+      className={cn("relative isolate overflow-hidden px-4 transition-colors duration-700", refinado ? "py-9" : clara && !compacto ? "py-7" : compacto ? "py-4" : "py-5", className)}
       style={{ background: cheio ? tema.destaque : tema.fundo }}
     >
-      <TexturaDoFundo textura={tema.textura} cor={cheio ? tema.sobre : tema.tinta} />
-      <EfeitosDaSensacao camada="fundo" sensacoes={sensacoes} compacto={compacto} tema={cheio ? { ...tema, fundo: tema.destaque, destaque: tema.sobre, tinta: tema.sobre } : tema} />
+      <TexturaDoFundo textura={tema.textura} cor={cheio ? tema.sobre : tema.textura === "manchas" ? tema.destaque : tema.tinta} />
+      {refinado && (
+        <span
+          className="pointer-events-none absolute inset-0"
+          style={{ background: `radial-gradient(ellipse at 78% 12%, color-mix(in oklab, ${tema.destaque} 20%, transparent), transparent 58%), linear-gradient(to bottom, transparent 70%, color-mix(in oklab, ${tema.apoio} 55%, transparent))` }}
+        />
+      )}
+      <EfeitosDaSensacao camada="fundo" sensacoes={sensacoes} compacto={compacto} inicial={titulo[0]} tema={cheio ? { ...tema, fundo: tema.destaque, destaque: tema.sobre, tinta: tema.sobre } : tema} />
       {centro && (
         <div className={cn("relative flex items-center", compacto ? "justify-center gap-5" : "flex-col gap-3")}>
           <Retrato tema={tema} icone={icone} className={compacto ? "h-24 w-20 shrink-0" : "h-24 w-20"} />

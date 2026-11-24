@@ -25,7 +25,7 @@ import {
 } from "@/lib/briefing/regras";
 import type { Exemplo } from "@/lib/briefing/amostra-preenchida";
 import { guardarAmostra, lerAmostra, type Guardado } from "@/lib/briefing/guardado-da-amostra";
-import { fraseDoVisual, temaDe } from "@/lib/briefing/temas";
+import { encontroDosEstilos, fraseDoVisual, temaDe } from "@/lib/briefing/temas";
 import { MINIMO_COLADO, type Colados } from "@/lib/briefing/sinais";
 import { cn } from "@/lib/utils";
 
@@ -182,7 +182,7 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
   if (tela.tipo === "pergunta" && !pergunta) return <SemPergunta aoContinuar={continuar} />;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-background">
+    <div className="flex min-h-dvh flex-col overflow-x-clip bg-background">
       {!["abertura", "fim", "aparelho", "material"].includes(tela.tipo) && (
         <header
           className={cn(
@@ -445,6 +445,7 @@ const AO_VIVO: Papel[] = ["estilo", "cores", "sensacao"];
 function AoVivo({ briefing, respostas }: { briefing: Briefing; respostas: Respostas }) {
   const b = blocosDasRespostas(briefing, respostas);
   const frase = fraseDoVisual(b.estilos, b.cores, b.sensacoes);
+  const encontro = encontroDosEstilos(b.estilos);
   return (
     <div
       className="sticky top-[5.1rem] z-10 mb-5 overflow-hidden rounded-xl border border-ink/10 shadow-xl lg:hidden"
@@ -460,8 +461,9 @@ function AoVivo({ briefing, respostas }: { briefing: Briefing; respostas: Respos
         compacto
       />
       {frase && (
-        <p key={frase} className="char-in block! bg-card px-4 py-2 text-center text-sm leading-snug text-balance" data-frase-do-visual>
-          {frase}
+        <p key={frase} className="char-in block! bg-card px-4 py-2 text-center text-sm leading-snug text-balance">
+          <span data-frase-do-visual>{frase}</span>
+          {encontro && <span className="block text-xs text-muted-foreground">{encontro}</span>}
         </p>
       )}
     </div>

@@ -1,14 +1,10 @@
 "use client";
 
-import { createElement } from "react";
-import { motion } from "motion/react";
-
-import { iconeDaOpcao, iconesDoNegocio, type IconeDoNegocio } from "@/lib/briefing/icones";
+import { iconesDoNegocio, type IconeDoNegocio } from "@/lib/briefing/icones";
 import type { Foto, Tema, Textura } from "@/lib/briefing/temas";
 import { cn } from "@/lib/utils";
 
-// As artes do desenho da página: a foto no formato do estilo, a textura de fundo e o
-// efeito de cada sensação.
+// As artes do desenho da página: a foto no formato do estilo e a textura de fundo.
 
 const formatos: Record<Foto, React.CSSProperties> = {
   arco: { borderRadius: "999px 999px 0 0" },
@@ -83,6 +79,14 @@ export function TexturaDoFundo({ textura, cor }: { textura: Textura; cor: string
         : `radial-gradient(circle at 20% 10%, ${cor}, transparent 42%)`,
       opacity: 0.16,
     },
+    pontilhado: {
+      backgroundImage: `repeating-linear-gradient(0deg, ${cor} 0 0.5px, transparent 0.5px 7px), repeating-linear-gradient(3deg, ${cor} 0 0.5px, transparent 0.5px 23px)`,
+      opacity: 0.16,
+    },
+    manchas: {
+      backgroundImage: `radial-gradient(circle at 12% 20%, ${cor}, transparent 32%), radial-gradient(circle at 88% 8%, ${cor}, transparent 38%), radial-gradient(circle at 70% 90%, ${cor}, transparent 34%)`,
+      opacity: 0.18,
+    },
     raios: { backgroundImage: `repeating-linear-gradient(115deg, ${cor} 0 3px, transparent 3px 18px)`, opacity: 0.12 },
   };
   return (
@@ -94,147 +98,3 @@ export function TexturaDoFundo({ textura, cor }: { textura: Textura; cor: string
 }
 
 const ehHex = (cor: string) => cor.startsWith("#");
-
-const repete = (duracao: number) => ({ duration: duracao, repeat: Infinity, ease: "easeInOut" as const });
-
-/** O efeito de cada sensação em cima do topo da página. */
-function Efeito({ sensacao, tema, compacto }: { sensacao: string; tema: Tema; compacto?: boolean }) {
-  // Com o texto à esquerda, o selo fica no canto da foto, para não cobrir o título.
-  const lugarDoSelo = tema.topo === "centro" ? "left-3" : "right-2";
-  const icone = iconeDaOpcao(sensacao);
-  switch (sensacao) {
-    case "Confiança":
-    case "Cuidado":
-      return icone ? (
-        <motion.span
-          initial={{ scale: 0, rotate: -30 }}
-          animate={{ scale: [1, 1.12, 1], rotate: 0 }}
-          transition={{ scale: repete(2.6), rotate: { duration: 0.5 } }}
-          className={cn("absolute flex size-8 items-center justify-center rounded-full shadow-lg", lugarDoSelo, sensacao === "Confiança" ? (compacto ? "top-2" : "top-9") : compacto ? "top-12" : "top-19")}
-          style={{ background: tema.fundo, color: tema.destaque, boxShadow: `0 0 0 1.5px ${tema.destaque}` }}
-        >
-          {createElement(icone, { className: "size-4" })}
-        </motion.span>
-      ) : null;
-    case "Acolhimento":
-      return (
-        <motion.span
-          animate={{ scale: [1, 1.18, 1], opacity: [0.5, 0.8, 0.5] }}
-          transition={repete(4.5)}
-          className="absolute -top-10 left-1/2 size-56 -translate-x-1/2 rounded-full blur-2xl"
-          style={{ background: `radial-gradient(circle, color-mix(in oklab, ${tema.destaque} 60%, #ffd9a0), transparent 68%)` }}
-        />
-      );
-    case "Profissionalismo":
-      return (
-        <span className="absolute inset-x-3 inset-y-2">
-          {[0, 1].map((i) => (
-            <span key={i} className="absolute inset-y-0 w-px opacity-25" style={{ background: tema.tinta, left: i ? "100%" : 0 }} />
-          ))}
-          <span className="absolute inset-x-0 bottom-0 h-px opacity-25" style={{ background: tema.tinta }} />
-          <motion.span
-            animate={{ scaleX: [0, 1] }}
-            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-x-0 bottom-0 h-0.5 origin-left"
-            style={{ background: tema.destaque }}
-          />
-        </span>
-      );
-    case "Calma":
-      return (
-        <>
-          {[0, 1, 2].map((i) => (
-            <motion.span
-              key={i}
-              animate={{ x: ["-6%", "6%", "-6%"] }}
-              transition={repete(7 + i * 2)}
-              className="absolute -inset-x-8 h-10 rounded-[50%]"
-              style={{ bottom: -14 - i * 7, background: tema.apoio, opacity: 0.75 - i * 0.18 }}
-            />
-          ))}
-        </>
-      );
-    case "Energia":
-      return (
-        <span className="absolute inset-0 overflow-hidden">
-          {[0, 1, 2].map((i) => (
-            <motion.span
-              key={i}
-              animate={{ x: ["-120%", "420%"] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "linear", delay: i * 0.6 }}
-              className="absolute -top-6 h-[130%] w-6 -skew-x-[24deg]"
-              style={{ background: tema.destaque, opacity: 0.16 }}
-            />
-          ))}
-        </span>
-      );
-    case "Alegria":
-      return (
-        <>
-          {[8, 24, 41, 58, 74, 90].map((x, i) => (
-            <motion.span
-              key={x}
-              animate={{ y: [0, -9, 0], rotate: [0, 40, 0] }}
-              transition={{ ...repete(2 + (i % 3) * 0.5), delay: i * 0.2 }}
-              className={cn("absolute size-2.5", i % 2 ? "rounded-full" : "rounded-[3px]")}
-              style={{ left: `${x}%`, top: `${i % 2 ? 80 + ((i * 7) % 12) : 24 + ((i * 5) % 14)}%`, background: i % 3 ? tema.destaque : tema.tinta, opacity: 0.65 }}
-            />
-          ))}
-        </>
-      );
-    case "Exclusividade":
-      return (
-        <motion.span
-          initial={{ opacity: 0, scale: 1.06 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7 }}
-          className="absolute inset-2 border"
-          style={{ borderColor: tema.destaque, outline: `1px solid ${tema.destaque}`, outlineOffset: "-5px", opacity: 0.9 }}
-        />
-      );
-    case "Clareza":
-      return (
-        <motion.span
-          animate={{ opacity: [0.55, 0.85, 0.55] }}
-          transition={repete(5)}
-          className="absolute inset-x-0 -top-6 h-40"
-          style={{ background: `radial-gradient(ellipse at 50% 0, ${tema.escuro ? tema.apoio : "#ffffff"}, transparent 70%)` }}
-        />
-      );
-    case "Ousadia":
-      return (
-        <motion.span
-          initial={{ scale: 0 }}
-          animate={{ scale: 1, rotate: [0, 10, 0] }}
-          transition={{ scale: { type: "spring", stiffness: 160, damping: 14 }, rotate: repete(6) }}
-          className="absolute -top-14 -right-16 size-36 rounded-[38%_62%_55%_45%]"
-          style={{ background: tema.destaque, opacity: 0.55 }}
-        />
-      );
-    default:
-      return null;
-  }
-}
-
-/** Os selos ficam na frente, para a foto não os cobrir. */
-const NA_FRENTE = ["Confiança", "Cuidado"];
-
-export function EfeitosDaSensacao({
-  sensacoes,
-  tema,
-  compacto,
-  camada,
-}: {
-  sensacoes: string[];
-  tema: Tema;
-  compacto?: boolean;
-  camada: "fundo" | "frente";
-}) {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" data-sensacoes={camada === "fundo" ? sensacoes.join(",") : undefined}>
-      {sensacoes.filter((s) => NA_FRENTE.includes(s) === (camada === "frente")).map((s) => (
-        <Efeito key={s} sensacao={s} tema={tema} compacto={compacto} />
-      ))}
-    </div>
-  );
-}
