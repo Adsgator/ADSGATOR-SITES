@@ -131,6 +131,10 @@ const cspAjuda = [
 const noCheckout = [{ type: "host" as const, value: "checkout\\..+" }];
 
 const nextConfig: NextConfig = {
+  // O `next dev` aberto no celular, pelo endereço do computador na rede de casa.
+  allowedDevOrigins: ["192.168.*.*"],
+  // O botão do Next no canto cobria o Voltar do briefing no celular.
+  devIndicators: false,
   poweredByHeader: false,
   async headers() {
     return [
