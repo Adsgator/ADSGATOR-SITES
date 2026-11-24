@@ -47,10 +47,15 @@ async function responder(pg, escolhas = {}) {
     await area.locator("textarea").first().fill(LONGO);
   } else if (await area.locator("textarea").count()) {
     for (const c of await area.locator("textarea").all()) await c.fill(LONGO);
-  } else if (await area.locator('input[aria-label="Cidade, bairro ou estado"]').count()) {
-    const campo = area.locator('input[aria-label="Cidade, bairro ou estado"]');
-    await campo.fill("Cidade do Teste");
-    await campo.press("Enter");
+  } else if (await area.locator('[data-campo="cep"]').count()) {
+    // Um CEP público de verdade (a praça da Sé, em São Paulo).
+    await area.locator('[data-campo="cep"]').fill("01001000");
+    await area.locator('[data-campo="numero"]').fill("1");
+  } else if (await area.getByRole("button", { name: "Adicionar" }).count()) {
+    for (const texto of ["Um do teste", "Outro do teste"]) {
+      await area.locator("input").last().fill(texto);
+      await area.locator("input").last().press("Enter");
+    }
   } else {
     await area.locator("input").first().fill("@teste");
   }
@@ -80,6 +85,7 @@ async function ateORevisao(pg, escolhas = {}, parar = () => false) {
       }
       const largura = await pg.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       if (largura > 0) check(`sem rolagem lateral em "${(await titulo(pg).innerText()).trim()}"`, false, `${largura}px`);
+      await pg.aoVer?.((await titulo(pg).innerText()).trim());
       vistas.push(await avancar(pg, escolhas));
     }
   }
@@ -375,6 +381,47 @@ for (const [nome, opcoes] of [["celular, animações reduzidas", { ...CELULAR, r
   await pg.getByRole("button", { name: "Pronto" }).last().click();
   check(`${nome}: e volta à revisão com eles`, (await tela(pg)) === "revisao" && /Domingo/.test(await pg.locator('[data-revisao="responde"]').innerText()));
   check(`${nome}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 160));
+  await pg.context().close();
+}
+
+console.log("\n# O padrão, sem adaptação");
+for (const [slug, minimo, maximo] of [["padrao", 28, 34], ["padrao-ads", 12, 13], ["padrao-ads-pagina", 8, 8]]) {
+  const pg = await nova(CELULAR);
+  pg.foto = slug;
+  await pg.goto(`${SITE}/forms/amostra/${slug}`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  const textos = [];
+  pg.aoVer = async () => textos.push(await pg.locator("form").last().innerText());
+  const vistas = await ateORevisao(pg, { "Como você atende?": ["No meu endereço", "Vou até o cliente"] });
+  console.log(`   ${vistas.length} perguntas`);
+  check(`${slug}: entre ${minimo} e ${maximo} perguntas`, vistas.length >= minimo && vistas.length <= maximo, vistas.length);
+  check(`${slug}: nada que um conselho limita`, textos.length > 0 && !textos.some((t) => /grátis|gratuit|sem custo|parcela|desconto|promoção|preço|Pessoas atendidas|Nota no Google|Depoimentos/i.test(t)));
+  check(`${slug}: chega inteiro à revisão`, (await pg.getByText("Ainda sem resposta").count()) === 0 && (await pg.getByRole("button", { name: "Enviar as respostas" }).count()) === 1);
+  if (slug === "padrao") check("padrao: o endereço é pedido direto", vistas.includes("Qual é o endereço?"));
+  check(`${slug}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 160));
+  await pg.context().close();
+}
+
+console.log("\n# OAB, nomes e fotos");
+{
+  const pg = await nova(CELULAR);
+  const textos = {};
+  await pg.goto(`${SITE}/forms/amostra/trabalhista`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  pg.aoVer = async (t) => (textos[t] = await pg.locator("form").last().innerText());
+  await ateORevisao(pg, { "Como você atende?": ["Por vídeo ou telefone"], "No dia a dia, quem você costuma defender?": ["O trabalhador"] });
+  const tudo = Object.values(textos).join(" ");
+  check("OAB: sem gratuidade nem pagamento", !/sem custo|grátis|gratuit|parcela/i.test(tudo));
+  check("OAB: sem quantidade de clientes, nota nem depoimento para publicar", !/Pessoas atendidas|Nota no Google|Depoimentos de clientes/.test(tudo));
+  for (const t of ["O que a pessoa costuma escrever na primeira mensagem?", "Lembra de um cliente que você adorou atender? Conta como foi.", "O que os seus clientes mais falam do seu atendimento?"])
+    check(`sem nomes em "${t}"`, /sem nomes/.test(textos[t] ?? ""));
+  check("a pergunta do principal, com o texto novo", "Qual desses casos você busca atender mais?" in textos);
+  await pg.goto(`${SITE}/forms/amostra/trabalhista/agencia?preenchido=1`);
+  check("sem foto nenhuma, a agência é avisada", await pg.locator("[data-sem-fotos]").waitFor({ timeout: 8000 }).then(() => true, () => false));
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/sem-fotos.png` });
+  await pg.goto(`${SITE}/forms/amostra/adestramento/agencia?preenchido=1`);
+  await pg.locator("[data-resposta]").first().waitFor();
+  check("com foto, não avisa", (await pg.locator("[data-sem-fotos]").count()) === 0);
   await pg.context().close();
 }
 
@@ -830,7 +877,7 @@ for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
       const texto = await desenho.innerText();
       const esperados =
         slug === "trabalhista"
-          ? ["helenapradoadvocacia.com.br", "Helena Prado Advocacia", "Verbas rescisórias", "refaço a conta", "Rescisão indireta", "9 anos", "4,9", "Explico sem juridiquês", "me mandaram embora", "Você me conta o que aconteceu", "áudio toda sexta", "outro advogado sumia", "motorista a vida toda", "Quanto tempo demora?", "Rua das Acácias", "Horários da semana", "Instagram", "OAB/SP 000.000"]
+          ? ["helenapradoadvocacia.com.br", "Helena Prado Advocacia", "Verbas rescisórias", "refaço a conta", "Rescisão indireta", "9 anos", "Explico sem juridiquês", "me mandaram embora", "Você me conta o que aconteceu", "áudio toda sexta", "outro advogado sumia", "motorista a vida toda", "Quanto tempo demora?", "Rua das Acácias", "Horários da semana", "Instagram", "OAB/SP 000.000"]
           : ["rafaadestramento.com.br", "Comportamento", "Primeiro entendo o porquê", "7 anos", "Parcela no cartão", "Tem medo de tudo", "Visito a casa", "Não treino o cão longe do dono", "Três pessoas me falaram", "Cão adulto ainda aprende?", "Valinhos", "TikTok"];
       const faltam = esperados.filter((e) => !texto.includes(e));
       check(`${nome}, ${slug}: o desenho traz o que a pessoa contou (${esperados.length} conferidos)`, faltam.length === 0, faltam.join(" | "));

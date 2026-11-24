@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BrandLogo } from "@/components/brand";
 import { Zerar } from "@/components/briefing/zerar";
 import { briefingsDaAmostra } from "@/lib/briefing/amostra";
+import { exemplos } from "@/lib/briefing/amostra-preenchida";
 
 // O começo da amostra do briefing: só no `next dev`, nunca publicada.
 
@@ -24,26 +25,30 @@ export default function InicioDaAmostra() {
           <li key={b.slug} className="rounded-2xl border bg-card p-5">
             <p className="text-sm text-muted-foreground">{b.tipo === "pagina" ? "Página" : "Google Ads"}</p>
             <h2 className="font-heading text-xl">{b.segmento}</h2>
-            <p className="mt-4 text-sm font-medium">Já preenchido</p>
-            <div className="mt-2 flex flex-wrap gap-2 text-sm font-medium">
-              <a href={`/forms/amostra/${b.slug}?preenchido=1&ir=fim`} className={cheio}>
-                O fim
-              </a>
-              <a href={`/forms/amostra/${b.slug}?preenchido=1&ir=revisao`} className={contorno}>
-                A revisão
-              </a>
-              {b.pastaDoMaterial && (
-                <a href={`/forms/amostra/${b.slug}?preenchido=1&ir=material`} className={contorno}>
-                  O material
-                </a>
-              )}
-              <a href={`/forms/amostra/${b.slug}?preenchido=1`} className={contorno}>
-                Quem volta
-              </a>
-              <a href={`/forms/amostra/${b.slug}/agencia?preenchido=1`} className={contorno}>
-                Como você vai ver
-              </a>
-            </div>
+            {exemplos[b.slug] && (
+              <>
+                <p className="mt-4 text-sm font-medium">Já preenchido</p>
+                <div className="mt-2 flex flex-wrap gap-2 text-sm font-medium">
+                  <a href={`/forms/amostra/${b.slug}?preenchido=1&ir=fim`} className={cheio}>
+                    O fim
+                  </a>
+                  <a href={`/forms/amostra/${b.slug}?preenchido=1&ir=revisao`} className={contorno}>
+                    A revisão
+                  </a>
+                  {b.pastaDoMaterial && (
+                    <a href={`/forms/amostra/${b.slug}?preenchido=1&ir=material`} className={contorno}>
+                      O material
+                    </a>
+                  )}
+                  <a href={`/forms/amostra/${b.slug}?preenchido=1`} className={contorno}>
+                    Quem volta
+                  </a>
+                  <a href={`/forms/amostra/${b.slug}/agencia?preenchido=1`} className={contorno}>
+                    Como você vai ver
+                  </a>
+                </div>
+              </>
+            )}
             <p className="mt-5 text-sm font-medium">Do zero</p>
             <div className="mt-2 flex flex-wrap gap-2 text-sm font-medium">
               <a href={`/forms/amostra/${b.slug}`} className={cheio}>

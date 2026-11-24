@@ -237,6 +237,8 @@ function Contagem({ marcadas, max }: { marcadas: number; max: number }) {
 function Confirmar({ p, respostas, mudar, escolheu, comErro }: PropsDoCampo) {
   const r = respostas[p.id];
   const outro = r?.opcoes?.includes("outro") ?? false;
+  // Sem nada para confirmar, a pessoa escreve direto.
+  if (p.tipo === "endereco" && !p.valorConhecido) return <CampoDoEndereco r={r} mudar={mudar} />;
   return (
     <div className="space-y-2.5">
       <ValorConhecido>{p.valorConhecido}</ValorConhecido>
@@ -335,7 +337,7 @@ function Detalhes({ p, briefing, respostas, mudar }: PropsDoCampo) {
 }
 
 function Horarios({ p, respostas, mudar }: PropsDoCampo) {
-  return <CampoDosHorarios r={respostas[p.id]} mudar={mudar} />;
+  return <CampoDosHorarios r={respostas[p.id]} mudar={mudar} semHoraMarcada={p.semHoraMarcada} />;
 }
 
 const exemplosDeRede: Record<string, string> = {

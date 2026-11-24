@@ -87,7 +87,7 @@ export function blocosDasRespostas(briefing: Briefing, respostas: Respostas): Bl
     duvidas: itens("duvidas").map(([k]) => k),
     historia: linhas("historia")?.[0],
     lugar: linhas("lugar")?.[0],
-    atende: prontas.find((p) => p.tipo === "etiquetas") ? respostas[prontas.find((p) => p.tipo === "etiquetas")!.id].opcoes : undefined,
+    atende: prontas.filter((p) => p.tipo === "etiquetas" && p.papel === "lugar").map((p) => respostas[p.id].opcoes)[0],
     horarios: horarios && (horarios.length > 1 ? "Horários da semana" : horarios[0]),
     estilos: opcoes("estilo"),
     cores: opcoes("cores"),

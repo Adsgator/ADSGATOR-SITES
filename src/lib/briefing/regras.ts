@@ -53,6 +53,7 @@ export type Papel =
   | "preco"
   | "dominio"
   | "destaques"
+  | "site"
   | "cidades"
   | "naoQuer";
 
@@ -82,6 +83,8 @@ export type Pergunta = {
   max?: number;
   /** Sugere a cidade do cliente e as vizinhas de verdade (src/lib/regiao.ts). */
   sugereRegiao?: true;
+  /** Nos horários, sem o "Só com hora marcada". */
+  semHoraMarcada?: true;
   /** Deixa escrever uma opção que não está na lista. */
   outra?: string;
   /** Para confirmar o que já se sabe. */
@@ -126,7 +129,7 @@ export type Briefing = {
   /** A pasta do cliente no Drive, para o material (logo, fotos). */
   pastaDoMaterial?: string;
   /** O que já veio da página, da ficha ou do diagnóstico, para o desenho do anúncio. */
-  jaSabemos?: { nome: string; site: string; buscas: string[]; servicos?: string[]; principal?: string; horarios?: Horario[] };
+  jaSabemos?: { nome?: string; site?: string; buscas?: string[]; servicos?: string[]; principal?: string; horarios?: Horario[] };
 };
 
 /** Textos longos obrigatórios precisam dizer alguma coisa. */
@@ -241,13 +244,13 @@ export function problema(p: Pergunta, briefing: Briefing, respostas: Respostas):
     case "estilo":
       return r?.opcoes?.length ? null : "Escolha pelo menos uma opção.";
     case "etiquetas":
-      return r?.opcoes?.length ? null : "Adicione pelo menos uma.";
+      return r?.opcoes?.length ? null : "Adicione pelo menos uma opção.";
     case "confirmar":
       return r?.opcoes?.includes("sim") || cheio(r?.valor) ? null : "Confirme ou escreva o certo para continuar.";
     case "endereco": {
       if (r?.opcoes?.includes("sim")) return null;
-      if (!r?.opcoes?.includes("outro")) return "Confirme ou escreva o certo para continuar.";
-      const i = r.itens ?? {};
+      if (p.valorConhecido && !r?.opcoes?.includes("outro")) return "Confirme ou escreva o certo para continuar.";
+      const i = r?.itens ?? {};
       if ((i.cep ?? "").replace(/\D/g, "").length !== 8) return "Falta o CEP. Se não souber, toque em Não sei o CEP.";
       const falta = PARTES_DO_ENDERECO.find(([chave]) => !cheio(i[chave]));
       return falta ? `Falta ${falta[1]}.` : null;

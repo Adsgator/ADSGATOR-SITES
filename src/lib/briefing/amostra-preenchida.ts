@@ -65,7 +65,7 @@ export const exemplos: Record<string, Exemplo> = {
           "No fim": "Acompanho até o dinheiro cair e aviso cada passo",
         },
       },
-      facilita: { opcoes: ["Atendimento por vídeo", "Primeira conversa sem custo", "Explico sem juridiquês", "Acompanhamento pelo WhatsApp"] },
+      facilita: { opcoes: ["Atendimento por vídeo", "Atendimento no mesmo dia", "Explico sem juridiquês", "Acompanhamento pelo WhatsApp"] },
       quem_chega: { valor: "Oi doutora, me mandaram embora faz um mês e até hoje não recebi nada. Tenho direito a quê?" },
       quem_quer: {
         valor: "Uma moça que trabalhou seis anos numa loja de roupas. Saiu sem receber as férias e achava que não ia dar em nada.",
@@ -85,7 +85,7 @@ export const exemplos: Record<string, Exemplo> = {
       diferente: {
         valor: "Eu mando um áudio toda sexta contando o que andou no processo, mesmo quando não andou nada. Ninguém fica sem notícia.",
       },
-      numeros: { itens: { "Anos de experiência": "9 anos", "Pessoas atendidas": "Mais de 400", "Nota no Google": "4,9" } },
+      numeros: { itens: { "Anos de experiência": "9 anos" } },
       oab: { valor: "OAB/SP 000.000" },
       estilo: { opcoes: ["Elegante", "Acolhedor"] },
       cores_tem: { opcoes: ["Tenho, estão no meu logo"] },
@@ -93,7 +93,7 @@ export const exemplos: Record<string, Exemplo> = {
       sensacao: { opcoes: ["Confiança", "Acolhimento", "Clareza"] },
       admira: { valor: "Gosto de página clara, com pouca coisa na tela. Nada de martelo e balança em todo canto." },
       evitar: { valor: "Não usar a palavra causa ganha. E nada de vermelho forte." },
-      material: { opcoes: ["O logo", "Fotos minhas", "Fotos do lugar"] },
+      material: { opcoes: ["O logo"] },
       dominio: { opcoes: ["Ainda não tenho"] },
       dominio_novo: sim,
       mais: { valor: "Queria que a pessoa lesse e pensasse que finalmente alguém vai explicar direito para ela." },

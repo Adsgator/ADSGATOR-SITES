@@ -240,7 +240,7 @@ export function Semana({ horarios }: { horarios: Horario[] }) {
   );
 }
 
-export function CampoDosHorarios({ r, mudar }: { r: Resposta | undefined; mudar: (r: Resposta) => void }) {
+export function CampoDosHorarios({ r, mudar, semHoraMarcada }: { r: Resposta | undefined; mudar: (r: Resposta) => void; semHoraMarcada?: boolean }) {
   const lista = r?.horarios ?? HORARIOS_INICIAIS;
   const horaMarcada = r?.opcoes?.includes(HORA_MARCADA) ?? false;
   const trocar = (i: number, mudanca: Partial<Horario>) =>
@@ -284,22 +284,24 @@ export function CampoDosHorarios({ r, mudar }: { r: Resposta | undefined; mudar:
           </AnimatePresence>
         </div>
       ))}
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={horaMarcada}
-        onClick={() => mudar({ horarios: lista, opcoes: horaMarcada ? [] : [HORA_MARCADA] })}
-        className={cn(
-          "flex min-h-13 w-full items-center gap-3 rounded-xl border px-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/40",
-          horaMarcada ? "border-ink bg-brand/20" : "border-input bg-card hover:border-ring",
-        )}
-      >
-        <span
-          className={cn("size-5 shrink-0 rounded-md border", horaMarcada ? "border-ink bg-ink" : "border-ring/50")}
-          aria-hidden="true"
-        />
-        {HORA_MARCADA}
-      </button>
+      {!semHoraMarcada && (
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={horaMarcada}
+          onClick={() => mudar({ horarios: lista, opcoes: horaMarcada ? [] : [HORA_MARCADA] })}
+          className={cn(
+            "flex min-h-13 w-full items-center gap-3 rounded-xl border px-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/40",
+            horaMarcada ? "border-ink bg-brand/20" : "border-input bg-card hover:border-ring",
+          )}
+        >
+          <span
+            className={cn("size-5 shrink-0 rounded-md border", horaMarcada ? "border-ink bg-ink" : "border-ring/50")}
+            aria-hidden="true"
+          />
+          {HORA_MARCADA}
+        </button>
+      )}
       <AnimatePresence initial={false}>
         {lista.some((h) => h.aberto) && (
           <Abre key="semana">

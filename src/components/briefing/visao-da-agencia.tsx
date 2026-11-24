@@ -1,14 +1,14 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { ClipboardPasteIcon, MessageCircleQuestionIcon } from "lucide-react";
+import { CameraOffIcon, ClipboardPasteIcon, MessageCircleQuestionIcon } from "lucide-react";
 
 import { BolinhasDeCor } from "@/components/briefing/cores";
 import { Desenho, desenhoDe } from "@/components/briefing/desenho";
 import type { Exemplo } from "@/lib/briefing/amostra-preenchida";
 import { lerAmostra } from "@/lib/briefing/guardado-da-amostra";
 import { emTexto, progresso, visiveis, type Briefing } from "@/lib/briefing/regras";
-import { sinalDa, type Sinal } from "@/lib/briefing/sinais";
+import { semFotos, sinalDa, type Sinal } from "@/lib/briefing/sinais";
 import { fraseDoVisual } from "@/lib/briefing/temas";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +37,15 @@ export function VisaoDaAgencia({ briefing, exemplo }: { briefing: Briefing; exem
       <p className="mt-2 text-muted-foreground">
         {enviado ? "Enviado" : `Respondendo, ${porcento}%`} · {feitas} de {total} respostas
       </p>
+      {semFotos(respostas) && (
+        <p className="mt-5 flex items-start gap-3 rounded-2xl border border-brand bg-brand/20 px-5 py-4" data-sem-fotos>
+          <CameraOffIcon className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          <span>
+            <strong className="block font-medium">Sem nenhuma foto</strong>
+            <span className="text-sm">No material, marcou {(respostas.material.opcoes ?? []).join(", ").toLowerCase()}. Combine as fotos antes de confirmar que chegou tudo, porque o prazo só conta com tudo em mãos.</span>
+          </span>
+        </p>
+      )}
       {briefing.secoes.map((s, i) => (
         <section key={s} className="mt-8">
           <h2 className="font-heading text-xl">{s}</h2>

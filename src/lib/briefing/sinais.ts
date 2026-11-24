@@ -32,3 +32,9 @@ export function sinalDa(p: Pergunta, respostas: Respostas, colados: Colados): Si
   }
   return p.tipo === "longo" && p.obrigatoria && final.trim().length < CURTA ? "curta" : null;
 }
+
+/** A pessoa respondeu o que já tem de material e não marcou nenhuma foto. */
+export function semFotos(respostas: Respostas) {
+  const material = respostas.material?.opcoes;
+  return Boolean(material?.length) && !material!.some((m) => m.startsWith("Fotos"));
+}

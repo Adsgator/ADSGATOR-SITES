@@ -41,7 +41,7 @@ export function blocosDoAnuncio(briefing: Briefing, respostas: Respostas): Bloco
   const horarios = r("horarios");
   return {
     nome: sabemos?.nome,
-    site: sabemos?.site,
+    site: r("site")?.valor?.trim() ?? sabemos?.site,
     servicos: r("servicos")?.opcoes ?? sabemos?.servicos,
     principal: r("principal")?.opcoes?.[0] ?? sabemos?.principal,
     buscas: sabemos?.buscas,
@@ -197,7 +197,7 @@ export function RascunhoDoAnuncio({
   const servico = blocos.principal ?? blocos.servicos?.[0];
   const outros = (blocos.servicos ?? []).filter((s) => s !== servico);
   const Icone = blocos.icone ? iconesDoNegocio[blocos.icone] : undefined;
-  const noAnuncio = foco && ["servicos", "principal", "destaques"].includes(foco);
+  const noAnuncio = foco && ["site", "servicos", "principal", "destaques"].includes(foco);
 
   const moldura = useRef<HTMLDivElement>(null);
   const folha = useRef<HTMLDivElement>(null);
