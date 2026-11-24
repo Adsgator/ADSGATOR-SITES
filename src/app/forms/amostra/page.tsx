@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BrandLogo } from "@/components/brand";
@@ -21,9 +20,6 @@ export default function InicioDaAmostra() {
         Negócios inventados. As respostas ficam só neste navegador.
       </p>
       <Zerar />
-      <Link href="/forms/amostra/mockup" className={`${contorno} mt-3 text-sm font-medium`}>
-        As duas composições novas
-      </Link>
       <ul className="mt-8 space-y-4">
         {briefingsDaAmostra.map((b) => (
           <li key={b.slug} className="rounded-2xl border bg-card p-5">

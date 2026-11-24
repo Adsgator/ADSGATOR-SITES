@@ -216,7 +216,7 @@ export function RascunhoDoAnuncio({
     return () => a.stop();
   }, [foco, passeio, janela, blocos]);
 
-  const comum = { foco, tema, refinado };
+  const comum = { foco, tema, refinado, comTitulo: true };
   return (
     <div
       aria-hidden="true"

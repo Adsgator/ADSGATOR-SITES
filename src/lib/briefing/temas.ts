@@ -1,3 +1,5 @@
+import { letras } from "@/lib/briefing/letras";
+
 // O que o estilo, as cores e a sensação mudam no desenho da página (pedido do Lucas,
 // 2026-11-24). A sensação diz o comportamento (o que se mexe e como) e o estilo diz a
 // linguagem (com que formas): alegria num estilo feito à mão não é a mesma coisa que
@@ -35,30 +37,23 @@ export type Estilo = {
   italico?: true;
 };
 
-const sans = "var(--font-geist-sans)";
-const serifa = "Georgia, 'Times New Roman', serif";
-const slab = "servus-slab, Georgia, serif";
-const mono = "var(--font-geist-mono)";
-const redonda = "'Trebuchet MS', ui-rounded, system-ui, sans-serif";
-const condensada = "Impact, 'Arial Narrow Bold', 'Arial Black', sans-serif";
-
 export const estilos: Estilo[] = [
-  { nome: "Moderno", fala: "Limpo e atual", familia: "geometrica", estrutura: 0.75, expressao: 0.35, fundo: "#ffffff", tinta: "#0f172a", destaque: "#2563eb", apoio: "#dbeafe", fonte: sans, peso: 700, raio: 0.6, topo: "lado", foto: "quadro", textura: "nenhuma" },
-  { nome: "Minimalista", fala: "Pouca coisa, muito espaço", familia: "geometrica", estrutura: 0.95, expressao: 0.05, fundo: "#fafafa", tinta: "#18181b", destaque: "#18181b", apoio: "#e8e8ea", fonte: sans, peso: 400, raio: 0, topo: "editorial", foto: "quadro", textura: "nenhuma" },
-  { nome: "Elegante", fala: "Fino e discreto", familia: "classica", estrutura: 0.85, expressao: 0.3, fundo: "#f5f1ea", tinta: "#2b2420", destaque: "#8a6a3f", apoio: "#e6dccb", fonte: serifa, peso: 400, raio: 0, topo: "centro", foto: "arco", textura: "fios" },
-  { nome: "Acolhedor", fala: "Quente e próximo", familia: "organica", estrutura: 0.5, expressao: 0.5, fundo: "#fdf3e7", tinta: "#5b3a29", destaque: "#c4612c", apoio: "#f7dcc0", fonte: slab, peso: 400, raio: 0.9, topo: "centro", foto: "circulo", textura: "ondas" },
-  { nome: "Clássico", fala: "Tradicional e firme", familia: "classica", estrutura: 0.9, expressao: 0.2, fundo: "#f6f3ec", tinta: "#1f2f46", destaque: "#7a1f2b", apoio: "#e3dccb", fonte: serifa, peso: 700, raio: 0.15, topo: "lado", foto: "quadro", textura: "fios" },
-  { nome: "Divertido", fala: "Leve e colorido", familia: "ludica", estrutura: 0.2, expressao: 0.95, fundo: "#fff4c2", tinta: "#4a1d6b", destaque: "#d6286f", apoio: "#b8f0e0", fonte: redonda, peso: 800, raio: 1.2, topo: "lado", foto: "inclinada", textura: "pontos" },
-  { nome: "Natural", fala: "Verde e tranquilo", familia: "organica", estrutura: 0.55, expressao: 0.55, fundo: "#eef3e6", tinta: "#2f4a2b", destaque: "#4f7336", apoio: "#d3e2c1", fonte: slab, peso: 400, raio: 0.9, topo: "centro", foto: "folha", textura: "ondas" },
-  { nome: "Rústico", fala: "Madeira, terra e mão", familia: "artesanal", estrutura: 0.6, expressao: 0.6, fundo: "#f1e6d6", tinta: "#3b2618", destaque: "#8c4a22", apoio: "#dcc5a5", fonte: slab, peso: 700, raio: 0.25, topo: "lado", foto: "quadro", textura: "pontilhado" },
-  { nome: "Tecnológico", fala: "Preciso, com cara de futuro", familia: "geometrica", estrutura: 0.8, expressao: 0.55, fundo: "#0b1220", tinta: "#dbeafe", destaque: "#22d3ee", apoio: "#16243f", escuro: true, fonte: mono, peso: 600, raio: 0.3, topo: "lado", foto: "corte", textura: "grade" },
-  { nome: "Delicado", fala: "Suave e cuidadoso", familia: "organica", estrutura: 0.6, expressao: 0.4, fundo: "#fdf1f3", tinta: "#6b4450", destaque: "#b5566f", apoio: "#f8dbe1", fonte: serifa, peso: 400, raio: 1.4, topo: "centro", foto: "arco", textura: "ondas", italico: true },
-  { nome: "Luxuoso", fala: "Escuro, com brilho", familia: "classica", estrutura: 0.88, expressao: 0.45, fundo: "#14110d", tinta: "#f3e8d2", destaque: "#c9a45c", apoio: "#2a231a", escuro: true, fonte: serifa, peso: 400, raio: 0, topo: "centro", foto: "arco", textura: "fios", maiusculas: true },
-  { nome: "Jovem", fala: "Vivo e solto", familia: "ludica", estrutura: 0.3, expressao: 0.85, fundo: "#ede9fe", tinta: "#1e1b4b", destaque: "#7c3aed", apoio: "#fbcfe8", fonte: redonda, peso: 800, raio: 1.2, topo: "cheio", foto: "inclinada", textura: "pontos" },
-  { nome: "Artístico", fala: "Livre, com traço próprio", familia: "ludica", estrutura: 0.25, expressao: 0.9, fundo: "#f7efe6", tinta: "#1d2a44", destaque: "#e2552d", apoio: "#f3c6a8", fonte: slab, peso: 700, raio: 0.5, topo: "editorial", foto: "folha", textura: "manchas" },
-  { nome: "Vibrante", fala: "Cores de agora, com brilho", familia: "geometrica", estrutura: 0.4, expressao: 0.9, fundo: "#f6f3ff", tinta: "#170b3b", destaque: "#6d28ff", apoio: "#c8f7ee", fonte: sans, peso: 800, raio: 1, topo: "cheio", foto: "quadro", textura: "manchas" },
-  { nome: "Industrial", fala: "Ferro, concreto e firmeza", familia: "artesanal", estrutura: 0.7, expressao: 0.4, fundo: "#e7e5e1", tinta: "#26262a", destaque: "#b5531c", apoio: "#cfccc5", fonte: condensada, peso: 400, raio: 0.1, topo: "lado", foto: "corte", textura: "grade", maiusculas: true },
-  { nome: "Forte", fala: "Direto e marcante", familia: "geometrica", estrutura: 0.65, expressao: 0.7, fundo: "#1c1917", tinta: "#fafaf9", destaque: "#ef4444", apoio: "#33302d", escuro: true, fonte: condensada, peso: 400, raio: 0, topo: "editorial", foto: "corte", textura: "raios", maiusculas: true },
+  { nome: "Moderno", fala: "Limpo e atual", familia: "geometrica", estrutura: 0.75, expressao: 0.35, fundo: "#ffffff", tinta: "#0f172a", destaque: "#2563eb", apoio: "#dbeafe", fonte: letras.texto, peso: 700, raio: 0.6, topo: "lado", foto: "quadro", textura: "nenhuma" },
+  { nome: "Minimalista", fala: "Pouca coisa, muito espaço", familia: "geometrica", estrutura: 0.95, expressao: 0.05, fundo: "#fafafa", tinta: "#18181b", destaque: "#18181b", apoio: "#e8e8ea", fonte: letras.limpa, peso: 400, raio: 0, topo: "editorial", foto: "quadro", textura: "nenhuma" },
+  { nome: "Elegante", fala: "Fino e discreto", familia: "classica", estrutura: 0.85, expressao: 0.3, fundo: "#f5f1ea", tinta: "#2b2420", destaque: "#8a6a3f", apoio: "#e6dccb", fonte: letras.fina, peso: 400, raio: 0, topo: "centro", foto: "arco", textura: "fios" },
+  { nome: "Acolhedor", fala: "Quente e próximo", familia: "organica", estrutura: 0.5, expressao: 0.5, fundo: "#fdf3e7", tinta: "#5b3a29", destaque: "#c4612c", apoio: "#f7dcc0", fonte: letras.quente, peso: 400, raio: 0.9, topo: "centro", foto: "circulo", textura: "ondas" },
+  { nome: "Clássico", fala: "Tradicional e firme", familia: "classica", estrutura: 0.9, expressao: 0.2, fundo: "#f6f3ec", tinta: "#1f2f46", destaque: "#7a1f2b", apoio: "#e3dccb", fonte: letras.classica, peso: 700, raio: 0.15, topo: "lado", foto: "quadro", textura: "fios" },
+  { nome: "Divertido", fala: "Leve e colorido", familia: "ludica", estrutura: 0.2, expressao: 0.95, fundo: "#fff4c2", tinta: "#4a1d6b", destaque: "#d6286f", apoio: "#b8f0e0", fonte: letras.redonda, peso: 800, raio: 1.2, topo: "lado", foto: "inclinada", textura: "pontos" },
+  { nome: "Natural", fala: "Verde e tranquilo", familia: "organica", estrutura: 0.55, expressao: 0.55, fundo: "#eef3e6", tinta: "#2f4a2b", destaque: "#4f7336", apoio: "#d3e2c1", fonte: letras.daMarca, peso: 400, raio: 0.9, topo: "centro", foto: "folha", textura: "ondas" },
+  { nome: "Rústico", fala: "Madeira, terra e mão", familia: "artesanal", estrutura: 0.6, expressao: 0.6, fundo: "#f1e6d6", tinta: "#3b2618", destaque: "#8c4a22", apoio: "#dcc5a5", fonte: letras.daMarca, peso: 700, raio: 0.25, topo: "lado", foto: "quadro", textura: "pontilhado" },
+  { nome: "Tecnológico", fala: "Preciso, com cara de futuro", familia: "geometrica", estrutura: 0.8, expressao: 0.55, fundo: "#0b1220", tinta: "#dbeafe", destaque: "#22d3ee", apoio: "#16243f", escuro: true, fonte: letras.mono, peso: 600, raio: 0.3, topo: "lado", foto: "corte", textura: "grade" },
+  { nome: "Delicado", fala: "Suave e cuidadoso", familia: "organica", estrutura: 0.6, expressao: 0.4, fundo: "#fdf1f3", tinta: "#6b4450", destaque: "#b5566f", apoio: "#f8dbe1", fonte: letras.suave, peso: 400, raio: 1.4, topo: "centro", foto: "arco", textura: "ondas", italico: true },
+  { nome: "Luxuoso", fala: "Escuro, com brilho", familia: "classica", estrutura: 0.88, expressao: 0.45, fundo: "#14110d", tinta: "#f3e8d2", destaque: "#c9a45c", apoio: "#2a231a", escuro: true, fonte: letras.fina, peso: 400, raio: 0, topo: "centro", foto: "arco", textura: "fios", maiusculas: true },
+  { nome: "Jovem", fala: "Vivo e solto", familia: "ludica", estrutura: 0.3, expressao: 0.85, fundo: "#ede9fe", tinta: "#1e1b4b", destaque: "#7c3aed", apoio: "#fbcfe8", fonte: letras.solta, peso: 800, raio: 1.2, topo: "cheio", foto: "inclinada", textura: "pontos" },
+  { nome: "Artístico", fala: "Livre, com traço próprio", familia: "ludica", estrutura: 0.25, expressao: 0.9, fundo: "#f7efe6", tinta: "#1d2a44", destaque: "#e2552d", apoio: "#f3c6a8", fonte: letras.quente, peso: 700, raio: 0.5, topo: "editorial", foto: "folha", textura: "manchas" },
+  { nome: "Vibrante", fala: "Cores de agora, com brilho", familia: "geometrica", estrutura: 0.4, expressao: 0.9, fundo: "#f6f3ff", tinta: "#170b3b", destaque: "#6d28ff", apoio: "#c8f7ee", fonte: letras.solta, peso: 800, raio: 1, topo: "cheio", foto: "quadro", textura: "manchas" },
+  { nome: "Industrial", fala: "Ferro, concreto e firmeza", familia: "artesanal", estrutura: 0.7, expressao: 0.4, fundo: "#e7e5e1", tinta: "#26262a", destaque: "#b5531c", apoio: "#cfccc5", fonte: letras.cartaz, peso: 400, raio: 0.1, topo: "lado", foto: "corte", textura: "grade", maiusculas: true },
+  { nome: "Forte", fala: "Direto e marcante", familia: "geometrica", estrutura: 0.65, expressao: 0.7, fundo: "#1c1917", tinta: "#fafaf9", destaque: "#ef4444", apoio: "#33302d", escuro: true, fonte: letras.cartaz, peso: 400, raio: 0, topo: "editorial", foto: "corte", textura: "raios", maiusculas: true },
 ];
 
 /** Antes de a pessoa escolher: o papel e a tinta da Adsgator, como uma planta. */
@@ -72,7 +67,7 @@ export const semEstilo: Estilo = {
   tinta: "#1f271b",
   destaque: "#ffb100",
   apoio: "#efece3",
-  fonte: slab,
+  fonte: letras.daMarca,
   peso: 400,
   raio: 0.6,
   topo: "centro",

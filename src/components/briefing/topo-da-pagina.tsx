@@ -140,7 +140,8 @@ export function TopoDaPagina({
         className={cn(
           "line-clamp-4 leading-[1.1] text-balance [overflow-wrap:anywhere] transition-all duration-500",
           tema.italico && "italic",
-          tema.maiusculas && "uppercase",
+          // A letra maiúscula com acento passa da linha: sem a folga, o acento era cortado.
+          tema.maiusculas ? "-mt-[0.3em] pt-[0.3em] uppercase" : "-mt-[0.18em] pt-[0.18em]",
         )}
         style={{
           fontFamily: tema.fonte,

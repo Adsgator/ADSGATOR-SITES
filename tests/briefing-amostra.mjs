@@ -859,6 +859,8 @@ for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
           : ["rafaadestramento.com.br", "Comportamento", "Vou até a casa", "Filhotes", "Valinhos", "Banho e tosa"];
       const faltam = esperados.filter((e) => !texto.includes(e));
       check(`${nome}, ${slug}: o desenho traz o que a pessoa contou (${esperados.length} conferidos)`, faltam.length === 0, faltam.join(" | "));
+      const blocos = ["Onde aparece", "Quando aparece", "O que fica de fora"].filter((t) => !texto.includes(t));
+      check(`${nome}, ${slug}: cada bloco com o título`, blocos.length === 0, blocos.join(" | "));
       const titulos = new Set();
       for (let k = 0; k < 24; k++) {
         titulos.add(await desenho.locator("[data-titulo-do-anuncio]").last().innerText());
@@ -876,11 +878,12 @@ for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
       const texto = await desenho.innerText();
       const esperados =
         slug === "trabalhista"
-          ? ["helenapradoadvocacia.com.br", "Helena Prado Advocacia", "Verbas rescisórias", "refaço a conta", "Rescisão indireta", "9 anos", "Explico sem juridiquês", "me mandaram embora", "Você me conta o que aconteceu", "áudio toda sexta", "outro advogado sumia", "motorista a vida toda", "Quanto tempo demora?", "Rua das Acácias", "Horários da semana", "Instagram", "OAB/SP 000.000"]
+          ? ["helenapradoadvocacia.com.br", "Helena Prado Advocacia", "Verbas rescisórias", "refaço a conta", "Rescisão indireta", "9 anos", "Explico sem juridiquês", "Você me conta o que aconteceu", "áudio toda sexta", "motorista a vida toda", "Quanto tempo demora?", "Rua das Acácias", "Horários da semana", "Instagram", "OAB/SP 000.000"]
           : ["rafaadestramento.com.br", "Comportamento", "Primeiro entendo o porquê", "7 anos", "Parcela no cartão", "Tem medo de tudo", "Visito a casa", "Não treino o cão longe do dono", "Três pessoas me falaram", "Cão adulto ainda aprende?", "Valinhos", "TikTok"];
       const faltam = esperados.filter((e) => !texto.includes(e));
       check(`${nome}, ${slug}: o desenho traz o que a pessoa contou (${esperados.length} conferidos)`, faltam.length === 0, faltam.join(" | "));
       if (FOTOS) await pg.screenshot({ path: `${FOTOS}/ex-${f}-${slug}-olho.png` });
+      check(`${nome}, ${slug}: nada com cara de depoimento`, !/[“”]|me mandaram embora|outro advogado sumia|humanizado|O que dizem/.test(texto));
     }
     await pg.goto(`${SITE}/forms/amostra/${slug}?preenchido=1&ir=fim`);
     await pg.waitForSelector("[data-cena-final]");

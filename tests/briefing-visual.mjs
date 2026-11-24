@@ -67,6 +67,14 @@ for (const [i, sensacoes] of grupos.entries()) {
         for (let a = 0; a < pecas.length; a++)
           for (let b = a + 1; b < pecas.length; b++)
             if (cruza(pecas[a].getBoundingClientRect(), pecas[b].getBoundingClientRect())) ruins.push(`${nome}: ${pecas[a].textContent.slice(0, 8)} em cima de ${pecas[b].textContent.slice(0, 8)}`);
+        // A caixa do título corta o que passa dela: o acento da primeira linha tem de caber.
+        const et = getComputedStyle(titulo);
+        tela.font = `${et.fontStyle} ${et.fontWeight} 100px ${et.fontFamily}`;
+        const m = tela.measureText(et.textTransform === "uppercase" ? "ÁÇÃ" : "Áçã");
+        const meia = (parseFloat(et.lineHeight) / parseFloat(et.fontSize)) * 100;
+        const sobra = (meia - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 + (parseFloat(et.paddingTop) / parseFloat(et.fontSize)) * 100;
+        const passou = m.actualBoundingBoxAscent - m.fontBoundingBoxAscent - sobra;
+        if (passou > 1) ruins.push(`${nome}: acento cortado ${passou.toFixed(0)}%`);
         const fundo = getComputedStyle(topo).backgroundColor;
         const noTitulo = contraste(getComputedStyle(titulo).color, fundo);
         if (noTitulo < 4.5) ruins.push(`${nome}: título ${noTitulo.toFixed(1)}`);

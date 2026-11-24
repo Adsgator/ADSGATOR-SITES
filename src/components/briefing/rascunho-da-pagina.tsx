@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { CheckIcon, ClockIcon, MapPinIcon, PlusIcon, QuoteIcon } from "lucide-react";
+import { CheckIcon, ClockIcon, MapPinIcon, PlusIcon, HeartIcon } from "lucide-react";
 import { animate, AnimatePresence, motion } from "motion/react";
 
 import { Traco, TopoDaPagina } from "@/components/briefing/topo-da-pagina";
@@ -116,6 +116,7 @@ export function Parte({
   refinado,
   nome,
   faixa,
+  comTitulo,
   children,
 }: {
   papel: Papel[];
@@ -128,6 +129,8 @@ export function Parte({
   refinado?: boolean;
   /** O título da seção, quando a página está refinada. */
   nome?: string;
+  /** Com o título sempre, e não só na página refinada. */
+  comTitulo?: boolean;
   /** Seção com o fundo de apoio, quando a página está refinada. */
   faixa?: boolean;
   children: React.ReactNode;
@@ -141,7 +144,7 @@ export function Parte({
       data-ativa={ativa}
       data-em-foco={emFoco || undefined}
     >
-      {refinado && nome && ativa && (
+      {(refinado || comTitulo) && nome && ativa && (
         <motion.div
           initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -421,9 +424,11 @@ export function RascunhoDaPagina({
             }
           >
             {blocos.clientes?.length === 1 ? (
-              <p className="line-clamp-4 text-[0.8rem] leading-snug text-balance" style={titulo}>
-                “{trecho(blocos.clientes[0], 120)}”
-              </p>
+              // A mensagem de quem chega, sem o texto: é conversa, e não vai para a página.
+              <span className="flex w-4/5 flex-col gap-1.5 p-3" style={{ borderRadius: "0.9rem 0.9rem 0.9rem 0.2rem", background: tema.apoio }}>
+                <Traco largura="88%" cor={tinta} forte />
+                <Traco largura="64%" cor={tinta} />
+              </span>
             ) : (
               <ul className="flex flex-wrap gap-1.5">
                 {blocos.clientes?.map((c) => (
@@ -485,7 +490,7 @@ export function RascunhoDaPagina({
           )}
 
           <Parte
-            papel={["elogio"]} refinado={refinado} nome="O que dizem" faixa
+            papel={["elogio"]} refinado={refinado} nome="O jeito de atender" faixa
             foco={foco}
             rotulo="o que falam de você"
             ativa={Boolean(blocos.elogio)}
@@ -493,10 +498,12 @@ export function RascunhoDaPagina({
             planta={<Traco largura="80%" cor={tinta} forte />}
           >
             <div className="p-3" style={cartao}>
-              <QuoteIcon className="size-3.5" style={{ color: tema.destaque }} />
-              <p className="mt-1 line-clamp-3 text-[0.7rem] leading-snug" style={titulo}>
-                {blocos.elogio && trecho(blocos.elogio, 130)}
-              </p>
+              {/* Sem o texto nem aspas: elogio contado pela pessoa não vira depoimento. */}
+              <HeartIcon className="size-4" style={{ color: tema.destaque, fill: tema.destaque }} />
+              <span className="mt-2.5 block space-y-1.5">
+                <Traco largura="92%" cor={tinta} forte />
+                <Traco largura="58%" cor={tinta} />
+              </span>
             </div>
           </Parte>
 
