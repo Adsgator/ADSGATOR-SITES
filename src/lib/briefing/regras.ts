@@ -18,6 +18,7 @@ export type TipoDePergunta =
   | "redes"
   | "duvidas"
   | "cores"
+  | "meses"
   | "estilo";
 
 /** A pergunta só aparece quando todas as condições valem. */
@@ -52,6 +53,12 @@ export type Papel =
   | "registro"
   | "preco"
   | "dominio"
+  | "nomes"
+  | "momento"
+  | "destaques"
+  | "fora"
+  | "epocas"
+  | "contato"
   | "site"
   | "cidades"
   | "procuram"
@@ -122,6 +129,8 @@ export type Briefing = {
   cidade?: { nome: string; uf: string };
   /** O ícone do negócio, no desenho da página. */
   icone?: IconeDoNegocio;
+  /** O nome do negócio, quando não veio do briefing da página. */
+  negocio?: string;
   /** A pasta do cliente no Drive, para o material (logo, fotos). */
   pastaDoMaterial?: string;
   /** O que já veio do briefing da página, para o desenho do anúncio. */
@@ -130,6 +139,8 @@ export type Briefing = {
 
 /** Textos longos obrigatórios precisam dizer alguma coisa. */
 export const MINIMO_DO_LONGO = 20;
+
+export const MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
 export const DIAS_UTEIS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 export const SEMANA = [...DIAS_UTEIS, "Sábado", "Domingo"];
@@ -236,6 +247,8 @@ export function problema(p: Pergunta, briefing: Briefing, respostas: Respostas):
       // O código que a gente não reconhece vale também: chega do jeito que foi escrito.
       if (p.modo === "exatas") return cheio(r?.valor) ? null : "Escreva ou cole pelo menos uma cor.";
       return r?.opcoes?.length ? null : "Escolha pelo menos uma cor.";
+    case "meses":
+      return r?.opcoes?.length ? null : "Marque pelo menos um mês.";
     case "multipla":
     case "estilo":
       return r?.opcoes?.length ? null : "Escolha pelo menos uma opção.";
@@ -320,6 +333,7 @@ export function emTexto(p: Pergunta, briefing: Briefing, respostas: Respostas): 
     case "multipla":
     case "escolha":
     case "etiquetas":
+    case "meses":
     case "estilo":
       return [(r.opcoes ?? []).join(", ")];
     default:

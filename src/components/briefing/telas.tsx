@@ -71,10 +71,10 @@ const textos = {
     rotulo: "O briefing do seu Google Ads",
     titulo: (nome: string) => `Vamos preparar os seus anúncios, ${nome}`,
     texto:
-      "Com as suas respostas, a gente escolhe em quais buscas você vai aparecer e quem vai chamar no seu WhatsApp.",
+      "Com as suas respostas, a gente entende quem procura você, escolhe em quais buscas aparecer e monta anúncios com o jeito do seu negócio.",
     combinados: [
       ...jeitoDeResponder,
-      { titulo: "Os seus valores não são publicados.", texto: "Servem para a gente calcular o retorno dos anúncios." },
+      { titulo: "Os seus valores ficam com a gente.", texto: "Não são publicados, servem para calcular o retorno dos anúncios." },
     ],
     frases: ["A gente já sabe quem procurar", "O anúncio está tomando forma"],
     depois: [
@@ -97,17 +97,28 @@ const cenas: Record<TipoDeBriefing, { texto: string; bloco: object; foco?: Papel
     { texto: "E com as minhas cores", bloco: { cores: ["Verde-petróleo"] }, foco: "cores" },
   ],
   google_ads: [
-    { texto: "Procuram assim", bloco: { busca: "o seu serviço perto de mim" } },
-    { texto: "O principal é este", bloco: { servicos: ["O seu serviço"], site: "seunegocio.com.br" } },
-    { texto: "Atendo a cidade toda", bloco: { cidades: ["Sua cidade e região"] } },
-    { texto: "Faço outros dois também", bloco: { servicos: ["O seu serviço", "O mais pedido", "O novo"] } },
-    { texto: "Esses pedidos eu não quero", bloco: { bloqueadas: ["curso", "vaga de emprego", "de graça"] } },
-    { texto: "Respondo em horário comercial", bloco: { horarios: "Segunda a sexta" } },
+    { texto: "Procuram assim", bloco: { buscas: ["o seu serviço perto de mim", "quem faz o seu serviço hoje"] }, foco: "procuram" },
+    { texto: "Começa por este", bloco: { servicos: ["O seu serviço", "O mais pedido", "O novo"], principal: "O seu serviço", nome: "Seu negócio", site: "seunegocio.com.br" }, foco: "servicos" },
+    { texto: "Isto eu quero destacar", bloco: { destaques: ["Atendo no mesmo dia", "Parcela no cartão"], nota: "4,9" }, foco: "destaques" },
+    { texto: "Atendo nestas cidades", bloco: { cidades: ["Sua cidade", "A vizinha"], fora: ["Longe demais"], momento: ["Precisa para hoje"] }, foco: "cidades" },
+    {
+      texto: "Respondo nestes horários",
+      bloco: {
+        horarios: [
+          { dias: "Segunda a sexta", aberto: true, de: "08:00", ate: "19:00" },
+          { dias: "Sábado", aberto: true, de: "08:00", ate: "13:00" },
+          { dias: "Domingo", aberto: false, de: "08:00", ate: "12:00" },
+        ],
+        epocas: ["Março", "Abril", "Novembro"],
+      },
+      foco: "horarios",
+    },
+    { texto: "Esses pedidos, não", bloco: { bloqueadas: ["curso", "vaga de emprego", "de graça"] }, foco: "naoQuer" },
   ],
 };
 
-/** As respostas virando a página (ou o anúncio), uma vez só (6 respostas, perto de 5 segundos), quando
- * a cena está à vista: no celular, ela fica embaixo do texto. */
+/** As respostas virando a página (ou o anúncio), em ciclo, enquanto a cena está à vista: no
+ * celular, ela fica embaixo do texto. */
 function CenaDaAbertura({ tipo }: { tipo: TipoDeBriefing }) {
   const respostasDaCena = cenas[tipo];
   const ref = useRef<HTMLDivElement>(null);
@@ -115,8 +126,9 @@ function CenaDaAbertura({ tipo }: { tipo: TipoDeBriefing }) {
   // Passa uma da última resposta, para o balão sair no fim.
   const [n, setN] = useState(0);
   useEffect(() => {
-    if (!aVista || n > respostasDaCena.length) return;
-    const t = setTimeout(() => setN(n + 1), n === 0 ? 700 : 800);
+    if (!aVista) return;
+    const acabou = n > respostasDaCena.length;
+    const t = setTimeout(() => setN(acabou ? 0 : n + 1), acabou ? 3200 : n === 0 ? 900 : 1500);
     return () => clearTimeout(t);
   }, [n, aVista, respostasDaCena.length]);
   const desenho = { tipo, blocos: Object.assign({}, ...respostasDaCena.slice(0, n).map((r) => r.bloco)) } as BlocosDoDesenho;
@@ -373,11 +385,14 @@ export function Revisao({
   briefing,
   respostas,
   aoMudar,
+  aoResponder,
   aoEnviar,
 }: {
   briefing: Briefing;
   respostas: Respostas;
   aoMudar: (id: string) => void;
+  /** Passa por tudo o que falta, uma a uma. */
+  aoResponder: (id: string) => void;
   aoEnviar: () => void;
 }) {
   const lista = visiveis(briefing, respostas);
@@ -435,7 +450,7 @@ export function Revisao({
         <div className="mx-auto flex max-w-3xl px-4 py-3">
           <button
             type="button"
-            onClick={() => (faltam.length ? aoMudar(faltam[0].id) : aoEnviar())}
+            onClick={() => (faltam.length ? aoResponder(faltam[0].id) : aoEnviar())}
             className={cn(botaoAmarelo, "min-h-12 w-full text-sm sm:ml-auto sm:w-auto")}
           >
             {faltam.length ? "Responder o que falta" : "Enviar as respostas"}
@@ -483,7 +498,7 @@ export function Material({
         <p className="mt-4 max-w-lg text-base leading-7 text-pretty text-muted-foreground sm:text-lg sm:leading-8">
           {nada
             ? "Você disse que ainda não tem nada pronto, e tudo bem. Se achar uma foto ou um depoimento, é só colocar aqui."
-            : "É com ele que a página fica com a sua cara. O prazo começa a contar quando chegar tudo."}
+            : `É com ele que ${briefing.tipo === "pagina" ? "a página fica" : "os anúncios ficam"} com a sua cara. O prazo começa a contar quando chegar tudo.`}
         </p>
         <div className="mt-8 rounded-3xl border border-brand/40 bg-card p-5 sm:p-7">
           <p className="flex items-center gap-3 font-heading text-xl sm:text-2xl">

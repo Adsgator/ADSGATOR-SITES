@@ -80,6 +80,15 @@ function Codigos({ p, r, mudar }: Props) {
         spellCheck={false}
         className="w-full resize-none rounded-xl border border-input bg-card px-4 py-3 font-mono text-base leading-7 outline-none placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
       />
+      <DaImagem
+        rotulo="Tenho uma imagem com as cores"
+        cores={lidas.map((c) => c.cor)}
+        mudar={(cores) => {
+          // O que veio da imagem entra no texto, sem apagar o que a pessoa escreveu.
+          const novas = cores.filter((c) => !lidas.some((l) => l.cor === c));
+          if (novas.length) trocar([texto.trim(), novas.join(" ")].filter(Boolean).join("\n"));
+        }}
+      />
       {lidas.length > 0 && (
         <div className="space-y-2.5">
           <p className="text-sm text-muted-foreground">
@@ -103,7 +112,7 @@ function Codigos({ p, r, mudar }: Props) {
 const LADO = 320;
 
 /** A imagem do logo: as cores saem dela, sem enviar nada, e tocar num ponto pega a cor. */
-function DaImagem({ cores, mudar }: { cores: string[]; mudar: (cores: string[]) => void }) {
+function DaImagem({ rotulo = "Escolher a imagem do logo", cores, mudar }: { rotulo?: string; cores: string[]; mudar: (cores: string[]) => void }) {
   const tela = useRef<HTMLCanvasElement>(null);
   const [aberta, setAberta] = useState(false);
   const [erro, setErro] = useState(false);
@@ -149,7 +158,7 @@ function DaImagem({ cores, mudar }: { cores: string[]; mudar: (cores: string[]) 
     <div className="space-y-3 rounded-2xl border border-ink/15 bg-card/60 p-4">
       <label className="flex min-h-14 cursor-pointer items-center justify-center gap-2.5 rounded-xl border border-dashed border-ring bg-card px-4 text-base font-medium hover:border-solid has-focus-visible:ring-3 has-focus-visible:ring-ring/40">
         <ImageUpIcon className="size-5" aria-hidden="true" />
-        {aberta ? "Trocar a imagem" : "Escolher a imagem do logo"}
+        {aberta ? "Trocar a imagem" : rotulo}
         <input type="file" accept="image/*" className="sr-only" onChange={(e) => void abrir(e.target.files?.[0])} data-imagem-do-logo />
       </label>
       <p className="text-sm text-pretty text-muted-foreground">

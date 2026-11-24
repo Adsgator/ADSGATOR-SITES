@@ -55,9 +55,7 @@ export function CenaFinal({ desenho, nome, mensagens }: { desenho: BlocosDoDesen
   useEffect(() => {
     if (!aVista) return;
     const falta = etapa === "conversa" && chegaram < mensagens.length;
-    // O anúncio cabe inteiro na tela: não tem por onde passear.
-    const parada = desenho.tipo === "google_ads" && ["refinando", "passeando", "voltando"].includes(etapa);
-    const ms = etapa !== "conversa" ? (parada ? 300 : TEMPOS[etapa]) : falta ? (chegaram === 0 ? 900 : 1600) : PAUSA;
+    const ms = etapa !== "conversa" ? TEMPOS[etapa] : falta ? (chegaram === 0 ? 900 : 1600) : PAUSA;
     const t = setTimeout(() => {
       if (falta) return setChegaram(chegaram + 1);
       if (etapa === "voltando") {
@@ -69,7 +67,7 @@ export function CenaFinal({ desenho, nome, mensagens }: { desenho: BlocosDoDesen
       setEtapa(SEGUINTE[etapa]);
     }, ms);
     return () => clearTimeout(t);
-  }, [aVista, etapa, chegaram, mensagens.length, desenho.tipo]);
+  }, [aVista, etapa, chegaram, mensagens.length]);
 
   const digitando = etapa === "conversa" && chegaram < mensagens.length ? mensagens[chegaram].de : null;
   const b = desenho.tipo === "pagina" ? desenho.blocos : null;
@@ -84,7 +82,7 @@ export function CenaFinal({ desenho, nome, mensagens }: { desenho: BlocosDoDesen
             <Desenho desenho={desenho} passeio={etapa === "passeando" ? DESCER : SUBIR} refinado={etapa !== "pronta"} janela altura="h-[30rem] sm:h-[33rem]" />
             {/* O toque da Adsgator: a luz passa e a página ganha o acabamento. */}
             <AnimatePresence>
-              {etapa === "refinando" && desenho.tipo === "pagina" && (
+              {etapa === "refinando" && (
                 <motion.div key="toque" exit={{ opacity: 0 }} transition={{ duration: 0.6 }} className="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
                   <motion.span
                     initial={{ y: "-60%" }}

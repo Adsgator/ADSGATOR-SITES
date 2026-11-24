@@ -32,7 +32,7 @@ export function Desenho({
   foco?: Papel;
   passeio?: Passeio;
   refinado?: boolean;
-  /** A página numa janela de altura fixa. O anúncio cabe inteiro e não precisa. */
+  /** Numa janela de altura fixa, que rola até a parte em foco. */
   janela?: boolean;
   /** A altura da janela (classes), quando não é a de sempre. */
   altura?: string;
@@ -41,7 +41,7 @@ export function Desenho({
   return desenho.tipo === "pagina" ? (
     <RascunhoDaPagina blocos={desenho.blocos} foco={foco} passeio={passeio} refinado={refinado} janela={janela} altura={altura} className={className} />
   ) : (
-    <RascunhoDoAnuncio blocos={desenho.blocos} className={cn(altura, className)} />
+    <RascunhoDoAnuncio blocos={desenho.blocos} foco={foco} passeio={passeio} refinado={refinado} janela={janela} altura={altura} className={className} />
   );
 }
 

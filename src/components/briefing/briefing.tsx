@@ -38,7 +38,8 @@ import { cn } from "@/lib/utils";
 
 type Tela =
   | { tipo: "aparelho" | "abertura" | "volta" | "revisao" | "material" | "fim" }
-  | { tipo: "pergunta"; id: string; daRevisao?: boolean }
+  // daRevisao: o que já faltava quando a pessoa abriu a edição (não é cobrado nela).
+  | { tipo: "pergunta"; id: string; daRevisao?: string[] }
   | { tipo: "passo"; secao: number };
 
 const semAssinatura = () => () => {};
@@ -127,9 +128,13 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
   }, []);
 
   /** A pergunta seguinte (ou a tela entre os passos, ou a revisão). */
-  function seguinte(id: string, com: Respostas, daRevisao?: boolean) {
-    if (daRevisao) return ir({ tipo: "revisao" });
+  function seguinte(id: string, com: Respostas, daRevisao?: string[]) {
     const agora = visiveis(briefing, com);
+    if (daRevisao) {
+      // A mudança pode ter aberto perguntas (ou deixado outra incompleta): passa por elas antes.
+      const nova = agora.find((p) => !daRevisao.includes(p.id) && !respondida(p, briefing, com));
+      return ir(nova ? { tipo: "pergunta", id: nova.id, daRevisao } : { tipo: "revisao" });
+    }
     const i = agora.findIndex((p) => p.id === id);
     const proxima = agora[i + 1];
     if (!proxima) return ir({ tipo: "revisao" });
@@ -137,7 +142,7 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
     ir({ tipo: "pergunta", id: proxima.id });
   }
 
-  function anterior(id: string, daRevisao?: boolean) {
+  function anterior(id: string, daRevisao?: string[]) {
     if (daRevisao) return ir({ tipo: "revisao" }, -1);
     const i = lista.findIndex((p) => p.id === id);
     ir(i > 0 ? { tipo: "pergunta", id: lista[i - 1].id } : { tipo: "abertura" }, -1);
@@ -290,7 +295,8 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
             <Revisao
               briefing={briefing}
               respostas={respostas}
-              aoMudar={(id) => ir({ tipo: "pergunta", id, daRevisao: true })}
+              aoMudar={(id) => ir({ tipo: "pergunta", id, daRevisao: lista.filter((p) => !respondida(p, briefing, respostas)).map((p) => p.id) })}
+              aoResponder={(id) => ir({ tipo: "pergunta", id, daRevisao: [] })}
               aoEnviar={() => {
                 setEnviado(true);
                 guardar(respostas, { enviado: true });

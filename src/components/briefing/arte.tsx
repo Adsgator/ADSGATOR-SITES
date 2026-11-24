@@ -1,6 +1,5 @@
 "use client";
 
-import { iconesDoNegocio, type IconeDoNegocio } from "@/lib/briefing/icones";
 import type { Foto, Tema, Textura } from "@/lib/briefing/temas";
 import { cn } from "@/lib/utils";
 
@@ -15,15 +14,13 @@ const formatos: Record<Foto, React.CSSProperties> = {
   corte: { clipPath: "polygon(14% 0, 100% 0, 100% 86%, 86% 100%, 0 100%, 0 14%)" },
 };
 
-/** Um retrato em formas simples, com o ícone do negócio ao lado. */
+/** Um retrato em formas simples, com luz de um lado. */
 export function Retrato({
   tema,
-  icone,
   larga,
   className,
 }: {
   tema: Tema;
-  icone?: IconeDoNegocio;
   /** Foto deitada: enquadra a cabeça. */
   larga?: boolean;
   className?: string;
@@ -31,33 +28,25 @@ export function Retrato({
   // No escuro, a pele usa a tinta clara e o cabelo, o fundo.
   const claro = tema.escuro ? tema.tinta : tema.fundo;
   const forte = tema.escuro ? tema.fundo : tema.tinta;
-  const Icone = icone ? iconesDoNegocio[icone] : undefined;
+  // Um tom de pele neutro, para a cor do estilo não deixar o rosto azul ou roxo.
+  const pele = `color-mix(in oklab, #dfb396 48%, ${claro})`;
+  const roupa = tema.escuro ? `color-mix(in oklab, ${tema.destaque} 62%, ${forte})` : `color-mix(in oklab, ${forte} 88%, ${tema.destaque})`;
   return (
-    <div className={cn("relative", className)}>
-      <div
-        className="h-full w-full overflow-hidden transition-all duration-700"
-        style={{
-          borderRadius: tema.foto === "quadro" ? tema.raio : undefined,
-          ...formatos[tema.foto],
-          background: `linear-gradient(160deg, ${tema.apoio}, color-mix(in oklab, ${tema.destaque} 55%, ${tema.apoio}))`,
-        }}
-      >
-        <svg viewBox={larga ? "-30 14 160 64" : "0 0 100 100"} preserveAspectRatio="xMidYMid slice" className="h-full w-full">
-          <circle cx="80" cy="24" r="13" fill={claro} opacity="0.3" />
-          <path d="M18 100C18 76 32 66 50 66S82 76 82 100Z" fill={tema.escuro ? `color-mix(in oklab, ${tema.destaque} 60%, ${forte})` : forte} opacity="0.9" />
-          <path d="M42 58H58V70C58 76 42 76 42 70Z" fill={`color-mix(in oklab, ${claro} 68%, ${tema.destaque})`} />
-          <ellipse cx="50" cy="46" rx="14.5" ry="17" fill={`color-mix(in oklab, ${claro} 82%, ${tema.destaque})`} />
-          <path d="M34 46C31 26 44 22 52 23C64 24 69 34 66 47C63 38 56 35 47 35C40 35 36 39 34 46Z" fill={forte} />
-        </svg>
-      </div>
-      {Icone && (
-        <span
-          className="absolute -right-1 bottom-1 flex size-7 items-center justify-center rounded-full shadow-md transition-colors duration-700"
-          style={{ background: tema.destaque, color: tema.sobre }}
-        >
-          <Icone className="size-3.5" />
-        </span>
-      )}
+    <div
+      className={cn("overflow-hidden shadow-[0_14px_26px_-18px_rgb(0_0_0/0.55)] transition-all duration-700", className)}
+      style={{
+        borderRadius: tema.foto === "quadro" ? tema.raio : undefined,
+        ...formatos[tema.foto],
+        background: `radial-gradient(circle at 74% 18%, color-mix(in oklab, ${claro} 55%, ${tema.destaque}), transparent 46%), linear-gradient(165deg, ${tema.apoio}, color-mix(in oklab, ${tema.destaque} 58%, ${tema.apoio}))`,
+      }}
+    >
+      <svg viewBox={larga ? "-34 12 168 66" : "0 0 100 100"} preserveAspectRatio="xMidYMid slice" className="h-full w-full">
+        <path d="M14 102C15 79 30 68 50 68S85 79 86 102Z" fill={roupa} />
+        <path d="M41 56H59V70C59 78 41 78 41 70Z" fill={`color-mix(in oklab, ${pele} 84%, ${forte})`} />
+        <path d="M44 66L50 74L56 66L62 70L50 88L38 70Z" fill={claro} opacity="0.85" />
+        <path d="M35 44C35 60 42 66 50 66S65 60 65 44C65 34 58 29 50 29S35 34 35 44Z" fill={pele} />
+        <path d="M33 47C29 25 44 19 53 20C67 21 71 34 67 49C66 42 63 38 59 35C52 39 42 39 37 37C35 40 34 43 33 47Z" fill={forte} />
+      </svg>
     </div>
   );
 }

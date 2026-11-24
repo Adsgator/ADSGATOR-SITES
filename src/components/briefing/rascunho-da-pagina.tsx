@@ -36,6 +36,8 @@ export type Blocos = {
   duvidas?: string[];
   historia?: string;
   lugar?: string;
+  /** As cidades onde atende. */
+  atende?: string[];
   horarios?: string;
   estilos?: string[];
   cores?: string[];
@@ -85,6 +87,7 @@ export function blocosDasRespostas(briefing: Briefing, respostas: Respostas): Bl
     duvidas: itens("duvidas").map(([k]) => k),
     historia: linhas("historia")?.[0],
     lugar: linhas("lugar")?.[0],
+    atende: prontas.find((p) => p.tipo === "etiquetas") ? respostas[prontas.find((p) => p.tipo === "etiquetas")!.id].opcoes : undefined,
     horarios: horarios && (horarios.length > 1 ? "Horários da semana" : horarios[0]),
     estilos: opcoes("estilo"),
     cores: opcoes("cores"),
@@ -102,7 +105,7 @@ const entrada = {
 };
 
 /** Uma parte da página: planta tracejada até a resposta vir. */
-function Parte({
+export function Parte({
   papel,
   foco,
   rotulo,
@@ -192,11 +195,11 @@ function Parte({
 }
 
 /** O começo do texto, sem cortar palavra. */
-const trecho = (texto: string, limite: number) =>
+export const trecho = (texto: string, limite: number) =>
   texto.length > limite ? `${texto.slice(0, limite).replace(/\s+\S*$/, "")}…` : texto;
 
 /** Os 3 quadrinhos de uma planta de colunas. */
-function Quadros({ n, cor, altura }: { n: number; cor: string; altura: string }) {
+export function Quadros({ n, cor, altura }: { n: number; cor: string; altura: string }) {
   return (
     <span className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${n}, 1fr)` }}>
       {Array.from({ length: n }, (_, i) => (
@@ -241,6 +244,7 @@ export function RascunhoDaPagina({
   // O principal vem primeiro e maior.
   const ordenados = blocos.principal ? [blocos.principal, ...servicos.filter((s) => s !== blocos.principal)] : servicos;
 
+  const nota = blocos.numeros?.find(([, k]) => /nota/i.test(k))?.[0];
   const pergunta = (papel: Papel) => blocos.partes?.includes(papel) ?? false;
   const chamada = blocos.detalhes?.[ordenados[0]]?.trim();
 
@@ -296,9 +300,13 @@ export function RascunhoDaPagina({
               </span>
             </span>
             <span className="flex gap-1.5">
-              {[14, 18, 12].map((w) => (
-                <span key={w} className="h-1 rounded-full bg-current opacity-30" style={{ width: w }} />
+              {[12, 16].map((w) => (
+                <span key={w} className="h-1 self-center rounded-full bg-current opacity-30" style={{ width: w }} />
               ))}
+              <span
+                className="h-3 w-7"
+                style={{ background: tema.topo === "cheio" ? tema.sobre : tema.destaque, borderRadius: tema.raio }}
+              />
             </span>
           </div>
 
@@ -308,7 +316,9 @@ export function RascunhoDaPagina({
               tema={tema}
               titulo={trecho(blocos.principal ?? servicos[0] ?? blocos.nome ?? "A mensagem principal", 60)}
               chamada={chamada && trecho(chamada, 90)}
-              className="pt-11"
+              className="pt-12"
+              lugar={blocos.atende?.[0] && trecho(blocos.atende[0], 26)}
+              prova={nota && nota.length <= 6 ? nota : undefined}
               comBotao={Boolean(blocos.whatsapp)}
               icone={blocos.icone}
               sensacoes={blocos.sensacoes}

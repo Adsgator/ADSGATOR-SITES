@@ -3,7 +3,6 @@
 import { createElement } from "react";
 import { motion, type TargetAndTransition, type Transition } from "motion/react";
 
-import { iconeDaOpcao } from "@/lib/briefing/icones";
 import type { Familia, Tema } from "@/lib/briefing/temas";
 import { cn } from "@/lib/utils";
 
@@ -76,7 +75,7 @@ const lugares = [
 /** Quantas formas cabem: um estilo contido mostra duas, um solto mostra sete. */
 const quantas = (tema: Tema) => Math.round(2 + tema.expressao * 5);
 
-type Props = { tema: Tema; compacto?: boolean; inicial?: string };
+type Props = { tema: Tema; inicial?: string };
 
 /** Misturando estilos, a forma é do que organiza e o movimento é do que solta: rústico
  * com divertido são pontos de costura que pulam, não bolinhas. */
@@ -235,11 +234,10 @@ function Acolhimento({ tema }: Props) {
       />
       {/* Um abraço em volta, na linguagem do estilo. */}
       <span
-        className={cn("absolute -bottom-24 left-1/2 h-40 w-[130%] -translate-x-1/2", tema.familia === "artesanal" && "border-2 border-dashed")}
+        className="absolute -bottom-28 left-1/2 h-40 w-[130%] -translate-x-1/2"
         style={{
           borderRadius: tema.familia === "geometrica" ? "999px 999px 0 0" : "50%",
-          background: tema.familia === "artesanal" ? "transparent" : tema.apoio,
-          borderColor: tema.destaque,
+          background: tema.apoio,
           opacity: 0.45,
         }}
       />
@@ -271,32 +269,6 @@ function Inspiracao({ tema }: Props) {
   );
 }
 
-function Selo({ tema, compacto, sensacao }: Props & { sensacao: string }) {
-  const icone = iconeDaOpcao(sensacao);
-  if (!icone) return null;
-  // Com o texto à esquerda, o selo fica no canto da foto, para não cobrir o título.
-  const lugar = tema.topo === "centro" ? "left-3" : "right-2";
-  const altura = sensacao === "Confiança" ? (compacto ? "top-2" : "top-9") : compacto ? "top-12" : "top-19";
-  const formas: Record<Familia, React.CSSProperties> = {
-    geometrica: { borderRadius: tema.raio, boxShadow: `0 0 0 1.5px ${tema.destaque}` },
-    organica: { borderRadius: "58% 42% 55% 45%", boxShadow: `0 0 0 1.5px ${tema.destaque}` },
-    classica: { borderRadius: "50%", boxShadow: `0 0 0 1px ${tema.destaque}, 0 0 0 4px ${tema.fundo}, 0 0 0 5px ${tema.destaque}` },
-    artesanal: { borderRadius: "50%", border: `2px dashed ${tema.destaque}`, rotate: "-9deg" },
-    ludica: { borderRadius: "38% 62% 55% 45%", background: tema.destaque, color: tema.sobre },
-  };
-  return (
-    <motion.span
-      initial={{ scale: 0 }}
-      animate={{ scale: [1, 1.1, 1] }}
-      transition={repete(2.8)}
-      className={cn("absolute flex size-8 items-center justify-center shadow-lg", lugar, altura)}
-      style={{ background: tema.fundo, color: tema.destaque, ...formas[tema.familia] }}
-    >
-      {createElement(icone, { className: "size-4" })}
-    </motion.span>
-  );
-}
-
 function Profissionalismo({ tema }: Props) {
   const cor = tema.tinta;
   const regua: Record<Familia, React.CSSProperties> = {
@@ -322,27 +294,6 @@ function Profissionalismo({ tema }: Props) {
   );
 }
 
-function Exclusividade({ tema }: Props) {
-  const cor = tema.destaque;
-  const moldura: Record<Exclude<Familia, "geometrica">, React.CSSProperties> = {
-    organica: { border: `1px solid ${cor}`, borderRadius: 18 },
-    classica: { border: `1px solid ${cor}`, outline: `1px solid ${cor}`, outlineOffset: -5 },
-    artesanal: { border: `1.5px dashed ${cor}` },
-    ludica: { border: `2px solid ${cor}`, borderRadius: 14, transform: "translate(4px, 4px)" },
-  };
-  return (
-    <motion.span initial={{ opacity: 0, scale: 1.06 }} animate={{ opacity: 0.9, scale: 1 }} transition={{ duration: 0.8 }} className="absolute inset-2">
-      {tema.familia === "geometrica" ? (
-        (["top-0 left-0 border-t border-l", "top-0 right-0 border-t border-r", "bottom-0 left-0 border-b border-l", "bottom-0 right-0 border-b border-r"] as const).map((c) => (
-          <span key={c} className={cn("absolute size-5", c)} style={{ borderColor: cor }} />
-        ))
-      ) : (
-        <span className="absolute inset-0" style={moldura[tema.familia]} />
-      )}
-    </motion.span>
-  );
-}
-
 function Ousadia({ tema, inicial }: Props) {
   const cor = tema.destaque;
   if (tema.familia === "classica") {
@@ -350,7 +301,7 @@ function Ousadia({ tema, inicial }: Props) {
     return (
       <motion.span
         initial={{ opacity: 0, x: 30 }}
-        animate={{ opacity: 0.16, x: 0 }}
+        animate={{ opacity: 0.08, x: 0 }}
         transition={{ duration: 0.8 }}
         className="absolute -top-8 -right-3 leading-none"
         style={{ fontFamily: tema.fonte, fontSize: "13rem", color: cor }}
@@ -359,22 +310,20 @@ function Ousadia({ tema, inicial }: Props) {
       </motion.span>
     );
   }
+  // Pelo lado de baixo: em cima fica o menu.
   const formas: Record<Exclude<Familia, "classica">, string> = {
-    geometrica: "-top-10 -right-12 size-36",
-    organica: "-top-14 -right-16 size-40 rounded-[38%_62%_55%_45%]",
-    artesanal: "-top-2 -right-16 h-14 w-64 rotate-[-18deg]",
-    ludica: "-top-14 -right-14 size-40 rounded-full",
+    geometrica: tema.topo === "lado" || tema.topo === "cheio" ? "top-12 -right-1 bottom-0 w-[31%]" : "-bottom-16 -right-10 size-44 rotate-12",
+    organica: "-bottom-20 -right-16 size-52 rounded-[38%_62%_55%_45%]",
+    artesanal: "-bottom-3 -right-10 h-12 w-72 rotate-[-9deg]",
+    ludica: "-bottom-20 -right-16 size-52 rounded-full",
   };
   return (
     <motion.span
-      initial={{ scale: 0 }}
-      animate={tema.familia === "geometrica" ? { scale: 1, rotate: [0, 0, 12, 12, 0] } : { scale: 1, rotate: tema.familia === "artesanal" ? -18 : [0, 10, 0] }}
-      transition={{ scale: { type: "spring", stiffness: 160, damping: 14 }, rotate: repete(7) }}
+      initial={{ opacity: 0, scale: 0.6 }}
+      animate={{ opacity: tema.familia === "artesanal" ? 0.3 : 0.26, scale: 1 }}
+      transition={{ type: "spring", stiffness: 120, damping: 16 }}
       className={cn("absolute", formas[tema.familia])}
-      style={{
-        background: tema.familia === "artesanal" ? `repeating-linear-gradient(90deg, ${cor} 0 7px, transparent 7px 10px)` : cor,
-        opacity: tema.familia === "artesanal" ? 0.35 : 0.5,
-      }}
+      style={{ background: tema.familia === "artesanal" ? `repeating-linear-gradient(90deg, ${cor} 0 7px, transparent 7px 10px)` : cor }}
     />
   );
 }
@@ -390,47 +339,37 @@ function Clareza({ tema }: Props) {
   );
 }
 
-const efeitos: Record<string, React.ComponentType<Props & { sensacao: string }>> = {
+/** O selo (Confiança, Cuidado), a moldura da foto (Exclusividade) e o tamanho do título
+ * (Clareza, Ousadia) são do próprio topo (topo-da-pagina.tsx). */
+const efeitos: Record<string, React.ComponentType<Props>> = {
   Alegria,
   Leveza,
   Energia,
   Calma,
   Acolhimento,
   Inspiração: Inspiracao,
-  Confiança: Selo,
-  Cuidado: Selo,
   Profissionalismo,
-  Exclusividade,
   Ousadia,
   Clareza,
 };
 
-/** Os selos ficam na frente, para a foto não os cobrir. */
-const NA_FRENTE = ["Confiança", "Cuidado"];
-
 export function EfeitosDaSensacao({
   sensacoes,
   tema,
-  compacto,
   inicial,
-  camada,
 }: {
   sensacoes: string[];
   tema: Tema;
-  compacto?: boolean;
   /** A primeira letra do título. */
   inicial?: string;
-  camada: "fundo" | "frente";
 }) {
   return (
     <div
       className="pointer-events-none absolute inset-0 overflow-hidden"
-      data-sensacoes={camada === "fundo" ? sensacoes.join(",") : undefined}
-      data-linguagem={camada === "fundo" ? `${tema.familia}/${movimento(tema)}` : undefined}
+      data-sensacoes={sensacoes.join(",")}
+      data-linguagem={`${tema.familia}/${movimento(tema)}`}
     >
-      {sensacoes
-        .filter((s) => efeitos[s] && NA_FRENTE.includes(s) === (camada === "frente"))
-        .map((s) => createElement(efeitos[s], { key: s, sensacao: s, tema, compacto, inicial }))}
+      {sensacoes.filter((s) => efeitos[s]).map((s) => createElement(efeitos[s], { key: s, tema, inicial }))}
     </div>
   );
 }

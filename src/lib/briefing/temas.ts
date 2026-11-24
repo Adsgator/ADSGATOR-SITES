@@ -53,7 +53,7 @@ export const estilos: Estilo[] = [
   { nome: "Rústico", fala: "Madeira, terra e mão", familia: "artesanal", estrutura: 0.6, expressao: 0.6, fundo: "#f1e6d6", tinta: "#3b2618", destaque: "#8c4a22", apoio: "#dcc5a5", fonte: slab, peso: 700, raio: 0.25, topo: "lado", foto: "quadro", textura: "pontilhado" },
   { nome: "Tecnológico", fala: "Preciso, com cara de futuro", familia: "geometrica", estrutura: 0.8, expressao: 0.55, fundo: "#0b1220", tinta: "#dbeafe", destaque: "#22d3ee", apoio: "#16243f", escuro: true, fonte: mono, peso: 600, raio: 0.3, topo: "lado", foto: "corte", textura: "grade" },
   { nome: "Delicado", fala: "Suave e cuidadoso", familia: "organica", estrutura: 0.6, expressao: 0.4, fundo: "#fdf1f3", tinta: "#6b4450", destaque: "#b5566f", apoio: "#f8dbe1", fonte: serifa, peso: 400, raio: 1.4, topo: "centro", foto: "arco", textura: "ondas", italico: true },
-  { nome: "Luxuoso", fala: "Escuro, com brilho", familia: "classica", estrutura: 0.88, expressao: 0.45, fundo: "#14110d", tinta: "#f3e8d2", destaque: "#c9a45c", apoio: "#2a231a", escuro: true, fonte: serifa, peso: 400, raio: 0, topo: "lado", foto: "corte", textura: "fios", maiusculas: true },
+  { nome: "Luxuoso", fala: "Escuro, com brilho", familia: "classica", estrutura: 0.88, expressao: 0.45, fundo: "#14110d", tinta: "#f3e8d2", destaque: "#c9a45c", apoio: "#2a231a", escuro: true, fonte: serifa, peso: 400, raio: 0, topo: "centro", foto: "arco", textura: "fios", maiusculas: true },
   { nome: "Jovem", fala: "Vivo e solto", familia: "ludica", estrutura: 0.3, expressao: 0.85, fundo: "#ede9fe", tinta: "#1e1b4b", destaque: "#7c3aed", apoio: "#fbcfe8", fonte: redonda, peso: 800, raio: 1.2, topo: "cheio", foto: "inclinada", textura: "pontos" },
   { nome: "Artístico", fala: "Livre, com traço próprio", familia: "ludica", estrutura: 0.25, expressao: 0.9, fundo: "#f7efe6", tinta: "#1d2a44", destaque: "#e2552d", apoio: "#f3c6a8", fonte: slab, peso: 700, raio: 0.5, topo: "editorial", foto: "folha", textura: "manchas" },
   { nome: "Vibrante", fala: "Cores de agora, com brilho", familia: "geometrica", estrutura: 0.4, expressao: 0.9, fundo: "#f6f3ff", tinta: "#170b3b", destaque: "#6d28ff", apoio: "#c8f7ee", fonte: sans, peso: 800, raio: 1, topo: "cheio", foto: "quadro", textura: "manchas" },
@@ -170,8 +170,21 @@ function misturar(a: string, b: string, quanto: number) {
   );
   return `#${canais.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
 }
+/** Clareia a cor, aos poucos, até ela aparecer num fundo escuro. */
+function aparecer(cor: string, fundo: string, minimo: number) {
+  let c = cor;
+  for (let i = 0; i < 12 && contraste(c, fundo) < minimo; i++) c = misturar(c, "#ffffff", 0.9);
+  return c;
+}
+/** Escurece (ou clareia) a cor o mínimo para o texto em cima dela ser lido. */
+function legivel(cor: string) {
+  const sobre = textoSobre(cor);
+  let c = cor;
+  for (let i = 0; i < 10 && contraste(c, sobre) < 4.6; i++) c = misturar(c, sobre === "#ffffff" ? "#000000" : "#ffffff", 0.95);
+  return c;
+}
 /** A cor do texto que se lê em cima de outra. */
-export const textoSobre = (cor: string) => (luminancia(cor) > 0.36 ? "#17181a" : "#ffffff");
+export const textoSobre = (cor: string) => (contraste(cor, "#17181a") > contraste(cor, "#ffffff") ? "#17181a" : "#ffffff");
 
 export type Tema = Pick<
   Estilo,
@@ -206,13 +219,20 @@ export function temaDe(nomes: string[] = [], cores: string[] = []): Tema {
   const expressao = lista.length ? media(lista.map((e) => e.expressao)) : semEstilo.expressao;
   // O estilo que organiza tempera a cor do que solta (rosa no elegante fica mais fechado);
   // no geométrico ela entra pura, porque é ela a surpresa.
+  // O clássico escuro guarda a própria cor (o dourado do luxuoso não vira coral).
   const corDoTempero =
-    tempero === casa || casa.familia === "geometrica" ? tempero.destaque : misturar(tempero.destaque, casa.destaque, 0.62);
+    tempero === casa || (casa.familia === "geometrica" && !casa.escuro)
+      ? tempero.destaque
+      : casa.familia === "classica"
+        ? casa.escuro
+          ? casa.destaque
+          : misturar(tempero.destaque, casa.destaque, 0.42)
+        : misturar(tempero.destaque, casa.destaque, 0.6);
   const base: Tema = {
     fundo: casa.fundo,
     tinta: casa.tinta,
     // Num fundo escuro, a cor de um estilo claro pode sumir: só entra se destacar.
-    destaque: contraste(corDoTempero, casa.fundo) >= 3 ? corDoTempero : casa.destaque,
+    destaque: legivel(contraste(corDoTempero, casa.fundo) >= 3.4 ? corDoTempero : casa.destaque),
     apoio: casa.apoio,
     escuro: casa.escuro,
     fonte: casa.fonte,
@@ -230,19 +250,24 @@ export function temaDe(nomes: string[] = [], cores: string[] = []): Tema {
     sobre: "",
   };
   // Vários estilos: o apoio puxa um pouco da cor do tempero, para o conjunto conversar.
-  if (tempero !== casa) base.apoio = `color-mix(in oklab, ${casa.apoio} 70%, ${tempero.apoio})`;
+  // Claro com escuro não se misturam: dava um cinza sujo.
+  if (tempero !== casa && Boolean(tempero.escuro) === Boolean(casa.escuro)) {
+    base.apoio = `color-mix(in oklab, ${casa.apoio} 70%, ${tempero.apoio})`;
+  }
 
   const paleta = paletas.find((p) => p.nome === cores[0]);
   if (paleta) {
     const { fundo, tinta, destaque, apoio } = paleta;
-    return { ...base, fundo, tinta, destaque, apoio, escuro: luminancia(fundo) < 0.2 || undefined, sobre: textoSobre(destaque) };
+    return { ...base, fundo, tinta, destaque: legivel(destaque), apoio, escuro: luminancia(fundo) < 0.2 || undefined, sobre: textoSobre(destaque) };
   }
-  const [principal, apoio] = cores.map(corDe).filter((x) => x !== undefined);
-  if (principal) {
+  const [marca, apoio] = cores.map(corDe).filter((x) => x !== undefined);
+  if (marca) {
+    // Cor escura da marca num estilo escuro: clareia até aparecer.
+    const principal = base.escuro ? aparecer(marca, "#17181b", 3.2) : legivel(marca);
     const mistura = (parte: number, com: string) => `color-mix(in oklab, ${principal} ${parte}%, ${com})`;
     return {
       ...base,
-      fundo: base.escuro ? mistura(14, "#0f0f10") : mistura(5, "#ffffff"),
+      fundo: base.escuro ? `color-mix(in oklab, ${marca} 12%, #0f0f10)` : mistura(5, "#ffffff"),
       tinta: base.escuro ? mistura(10, "#ffffff") : mistura(30, "#121212"),
       destaque: principal,
       apoio: apoio
