@@ -490,10 +490,10 @@ console.log("\n# As combinações");
   const linguagens = {};
   for (const [duplas, rotulo] of [[["Rústico"], "Rústico"], [["Minimalista"], "Minimalista"], [["Divertido"], "Divertido"], [["Elegante"], "Elegante"], [["Natural"], "Natural"], [["Rústico", "Divertido"], "Rústico com divertido"], [["Elegante", "Divertido"], "Elegante com divertido"]]) {
     await pg.evaluate(([s, e]) => {
-      const g = JSON.parse(localStorage.getItem(`amostra-briefing:${s}`));
+      const g = JSON.parse(localStorage.getItem(`amostra-briefing-2:${s}`));
       g.respostas.estilo = { opcoes: e };
       g.respostas.sensacao = { opcoes: ["Alegria", "Confiança"] };
-      localStorage.setItem(`amostra-briefing:${s}`, JSON.stringify(g));
+      localStorage.setItem(`amostra-briefing-2:${s}`, JSON.stringify(g));
     }, ["adestramento", duplas]);
     await pg.goto(`${SITE}/forms/amostra/adestramento`);
     await tela(pg);
@@ -810,7 +810,7 @@ for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
       await tela(pg);
       // O exemplo, com todos os textos trocados (as opções que a pessoa acrescenta também).
       await pg.evaluate(([s, txt]) => {
-        const g = JSON.parse(localStorage.getItem(`amostra-briefing:${s}-exemplo`));
+        const g = JSON.parse(localStorage.getItem(`amostra-briefing-2:${s}-exemplo`));
         for (const [id, r] of Object.entries(g.respostas)) {
           if (["estilo", "sensacao", "cores_tem", "cores_logo", "cores_novas", "atende", "lado", "preco", "dominio", "horarios", "responde"].includes(id)) continue;
           if (r.opcoes?.includes("sim")) Object.assign(r, { opcoes: ["outro"], valor: txt });
@@ -823,7 +823,7 @@ for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
         if (g.respostas.principal) g.respostas.principal.opcoes = [txt.slice(0, 280)];
         if (g.respostas.detalhes) g.respostas.detalhes.itens = Object.fromEntries(lista.opcoes.map((o) => [o, txt]));
         for (const id of ["facilita", "quem_quer", "procuram", "nao_quer", "cidades"]) if (g.respostas[id]?.opcoes) g.respostas[id].opcoes = [txt.slice(0, 280), ...g.respostas[id].opcoes.slice(1)];
-        localStorage.setItem(`amostra-briefing:${s}`, JSON.stringify({ ...g, enviado: false }));
+        localStorage.setItem(`amostra-briefing-2:${s}`, JSON.stringify({ ...g, enviado: false }));
       }, [slug, texto]);
       const fora = async (raiz) =>
         pg.locator(raiz).first().evaluate((r) => {
@@ -912,10 +912,10 @@ console.log("\n# Mudar na revisão");
   await pg.getByRole("radio", { name: "Tenho um manual da marca" }).click();
   check("mudança que não abre nada volta à revisão", (await pg.waitForTimeout(900), await tela(pg)) === "revisao");
   await pg.evaluate(() => {
-    const k = "amostra-briefing:trabalhista-exemplo";
+    const k = "amostra-briefing-2:trabalhista-exemplo";
     const g = JSON.parse(localStorage.getItem(k));
     delete g.respostas.cores_logo;
-    localStorage.setItem("amostra-briefing:trabalhista", JSON.stringify(g));
+    localStorage.setItem("amostra-briefing-2:trabalhista", JSON.stringify(g));
   });
   await pg.goto(`${SITE}/forms/amostra/trabalhista?ir=revisao`);
   await tela(pg);
@@ -928,7 +928,7 @@ console.log("\n# Mudar na revisão");
   check("respondida, volta à revisão", (await tela(pg)) === "revisao");
   // Quem edita no meio do preenchimento não é levado para o resto.
   await pg.evaluate(() => {
-    const k = "amostra-briefing:trabalhista";
+    const k = "amostra-briefing-2:trabalhista";
     const g = JSON.parse(localStorage.getItem(k));
     delete g.respostas.historia;
     delete g.respostas.oab;

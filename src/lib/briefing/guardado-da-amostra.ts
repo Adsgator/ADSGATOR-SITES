@@ -7,7 +7,9 @@ import type { Colados } from "@/lib/briefing/sinais";
 
 export type Guardado = { respostas: Respostas; enviado: boolean; colados: Colados; materialMandado?: boolean };
 
-const chaveDe = (slug: string) => `amostra-briefing:${slug}`;
+// O número muda para todos recomeçarem do zero, em qualquer aparelho.
+const PREFIXO = "amostra-briefing-2:";
+const chaveDe = (slug: string) => `${PREFIXO}${slug}`;
 
 /** Sem nada guardado, o exemplo preenchido (quando tem) ou o vazio. */
 export function lerAmostra(slug: string, exemplo?: Exemplo): Guardado {
@@ -28,5 +30,16 @@ export function guardarAmostra(slug: string, dados: Guardado) {
     return true;
   } catch {
     return false;
+  }
+}
+
+/** Apaga tudo o que a amostra guardou neste navegador; devolve quantos briefings havia. */
+export function zerarAmostra() {
+  try {
+    const chaves = Object.keys(localStorage).filter((k) => k.startsWith("amostra-briefing"));
+    chaves.forEach((k) => localStorage.removeItem(k));
+    return chaves.length;
+  } catch {
+    return 0;
   }
 }

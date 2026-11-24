@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { BrandLogo } from "@/components/brand";
+import { Zerar } from "@/components/briefing/zerar";
 import { briefingsDaAmostra } from "@/lib/briefing/amostra";
 
 // O começo da amostra do briefing: só no `next dev`, nunca publicada.
@@ -17,6 +18,7 @@ export default function InicioDaAmostra() {
       <p className="mt-3 leading-7 text-muted-foreground">
         Negócios inventados. As respostas ficam só neste navegador.
       </p>
+      <Zerar />
       <ul className="mt-8 space-y-4">
         {briefingsDaAmostra.map((b) => (
           <li key={b.slug} className="rounded-2xl border bg-card p-5">
