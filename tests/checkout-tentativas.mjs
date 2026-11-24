@@ -1,6 +1,7 @@
 // O que o servidor do checkout aguenta sem a tela (plano geral, Parte 4), no SANDBOX do Asaas:
-// dois pedidos ao mesmo tempo no mesmo link (não pode criar duas cobranças) e muitos cartões
-// recusados seguidos no mesmo link (tem de parar). Cria clientes "[TESTE] Checkout" no painel e
+// dois pedidos ao mesmo tempo no mesmo link e o Pix pedido de novo (uma cobrança só). Os cartões
+// recusados ficam em checkout-falhas.mjs: em 2026-11-23 o sandbox aprovou os cartões de recusa da
+// documentação. Cria clientes "[TESTE] Checkout" no painel e
 // apaga no fim; o que fica no sandbox sai com tests/checkout-limpar.mjs.
 // O painel (PAINEL_URL) e o site precisam estar rodando.
 // Uso: node tests/checkout-tentativas.mjs [checkout]   (padrão: http://checkout.localhost:3005)
@@ -34,8 +35,6 @@ const dados = (doc) => ({
   cep: "01001-000", endereco: "Praça da Sé", numero: "100", bairro: "Sé", cidade: "São Paulo", uf: "SP",
 });
 const bom = { numero: "4444 4444 4444 4444", nome: "PESSOA DE TESTE", validade: "12/30", codigo: "123" };
-// O cartão que o sandbox recusa (docs.asaas.com, "Como testar funcionalidades").
-const recusado = { ...bom, numero: "4916 5613 5824 0741" };
 const enviar = (corpo) =>
   fetch(`${CHECKOUT}/contratar`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(corpo) }).then(
     async (x) => ({ status: x.status, j: await x.json().catch(() => ({})) }),
@@ -66,13 +65,6 @@ try {
     const segunda = await enviar(pedido);
     const { cobrancas } = await cobrancasDe(doc);
     check("pix: pedir de novo depois devolve o mesmo Pix", cobrancas.length === 1 && primeira.j.cobranca === segunda.j.cobranca, `${cobrancas.length} cobranças`);
-  }
-  {
-    const doc = cpf(s++);
-    const codigo = await criarLink(cliente, "contratacao", ["landing-page"]);
-    const status = [];
-    for (let i = 0; i < 8; i++) status.push((await enviar({ codigo, forma: "cartao", parcelas: 1, semCnpj: true, dados: dados(doc), cartao: recusado, aceite: true })).status);
-    check("cartões recusados seguidos no mesmo link param", status.slice(5).every((x) => x === 429), status.join(" "));
   }
 } finally {
   await limparPainel();
