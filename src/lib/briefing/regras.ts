@@ -18,7 +18,6 @@ export type TipoDePergunta =
   | "redes"
   | "duvidas"
   | "cores"
-  | "meses"
   | "estilo";
 
 /** A pergunta só aparece quando todas as condições valem. */
@@ -53,15 +52,8 @@ export type Papel =
   | "registro"
   | "preco"
   | "dominio"
-  | "nomes"
-  | "momento"
   | "destaques"
-  | "fora"
-  | "epocas"
-  | "contato"
-  | "site"
   | "cidades"
-  | "procuram"
   | "naoQuer";
 
 export type Pergunta = {
@@ -85,6 +77,8 @@ export type Pergunta = {
   modo?: "exatas" | "logo" | "combinacoes";
   /** As opções são as respostas destas perguntas (das que aparecem). */
   opcoesDe?: string[];
+  /** O que já se sabe chega marcado; vale depois que a pessoa confirma. */
+  marcadas?: string[];
   max?: number;
   /** Sugere a cidade do cliente e as vizinhas de verdade (src/lib/regiao.ts). */
   sugereRegiao?: true;
@@ -129,18 +123,14 @@ export type Briefing = {
   cidade?: { nome: string; uf: string };
   /** O ícone do negócio, no desenho da página. */
   icone?: IconeDoNegocio;
-  /** O nome do negócio, quando não veio do briefing da página. */
-  negocio?: string;
   /** A pasta do cliente no Drive, para o material (logo, fotos). */
   pastaDoMaterial?: string;
-  /** O que já veio do briefing da página, para o desenho do anúncio. */
-  jaSabemos?: { nome: string; site: string; servicos: string[] };
+  /** O que já veio da página, da ficha ou do diagnóstico, para o desenho do anúncio. */
+  jaSabemos?: { nome: string; site: string; buscas: string[]; servicos?: string[]; principal?: string; horarios?: Horario[] };
 };
 
 /** Textos longos obrigatórios precisam dizer alguma coisa. */
 export const MINIMO_DO_LONGO = 20;
-
-export const MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
 export const DIAS_UTEIS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 export const SEMANA = [...DIAS_UTEIS, "Sábado", "Domingo"];
@@ -247,8 +237,6 @@ export function problema(p: Pergunta, briefing: Briefing, respostas: Respostas):
       // O código que a gente não reconhece vale também: chega do jeito que foi escrito.
       if (p.modo === "exatas") return cheio(r?.valor) ? null : "Escreva ou cole pelo menos uma cor.";
       return r?.opcoes?.length ? null : "Escolha pelo menos uma cor.";
-    case "meses":
-      return r?.opcoes?.length ? null : "Marque pelo menos um mês.";
     case "multipla":
     case "estilo":
       return r?.opcoes?.length ? null : "Escolha pelo menos uma opção.";
@@ -333,7 +321,6 @@ export function emTexto(p: Pergunta, briefing: Briefing, respostas: Respostas): 
     case "multipla":
     case "escolha":
     case "etiquetas":
-    case "meses":
     case "estilo":
       return [(r.opcoes ?? []).join(", ")];
     default:

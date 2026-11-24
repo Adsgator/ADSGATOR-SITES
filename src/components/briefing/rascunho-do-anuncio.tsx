@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BanIcon, MapPinIcon, PhoneIcon, SearchIcon, StarIcon } from "lucide-react";
+import { BanIcon, MapPinIcon, SearchIcon } from "lucide-react";
 import { animate, AnimatePresence, motion } from "motion/react";
 
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
@@ -9,68 +9,48 @@ import { useDigitacao } from "@/components/motion/use-digitacao";
 import { Parte, Quadros, trecho, type Passeio } from "@/components/briefing/rascunho-da-pagina";
 import { Traco } from "@/components/briefing/topo-da-pagina";
 import { iconesDoNegocio, type IconeDoNegocio } from "@/lib/briefing/icones";
-import { emTexto, MESES, semanaDe, visiveis, type Briefing, type Horario, type Papel, type Respostas } from "@/lib/briefing/regras";
+import { emTexto, semanaDe, visiveis, type Briefing, type Horario, type Papel, type Respostas } from "@/lib/briefing/regras";
 import { temaDe } from "@/lib/briefing/temas";
 import { cn } from "@/lib/utils";
 
 // O desenho da campanha que vai tomando forma com as respostas do briefing do Google Ads:
-// a busca sendo digitada, o anúncio com as variações, onde e quando aparece, as épocas e o
-// que fica de fora. As palavras são as da pessoa. É um esboço, e a legenda diz isso.
+// a busca sendo digitada (as do diagnóstico), o anúncio com as variações, onde e quando aparece
+// e o que fica de fora. É um esboço, e a legenda diz isso.
 
 export type BlocosDoAnuncio = {
   nome?: string;
   site?: string;
   servicos?: string[];
   principal?: string;
-  detalhes?: Record<string, string>;
   buscas?: string[];
-  momento?: string[];
   destaques?: string[];
-  diferente?: string;
-  nota?: string;
   cidades?: string[];
-  fora?: string[];
   horarios?: Horario[];
-  epocas?: string[];
   bloqueadas?: string[];
-  ligacao?: boolean;
   icone?: IconeDoNegocio;
-  partes?: Papel[];
 };
 
 export function blocosDoAnuncio(briefing: Briefing, respostas: Respostas): BlocosDoAnuncio {
-  const vistas = visiveis(briefing, respostas);
-  const prontas = vistas.filter((p) => p.papel && emTexto(p, briefing, respostas).length);
-  const com = (papel: Papel) => prontas.find((p) => p.papel === papel);
+  const prontas = visiveis(briefing, respostas).filter((p) => p.papel && emTexto(p, briefing, respostas).length);
   const r = (papel: Papel) => {
-    const p = com(papel);
+    // A última pergunta da parte: "em outros horários" vale mais que a confirmação.
+    const p = prontas.findLast((x) => x.papel === papel);
     return p && !respostas[p.id].nada ? respostas[p.id] : undefined;
   };
-  const linha = (papel: Papel) => {
-    const p = com(papel);
-    return p && !respostas[p.id].nada ? emTexto(p, briefing, respostas)[0] : undefined;
-  };
-  const numeros = r("numeros")?.itens ?? {};
-  const buscas = [...(r("procuram")?.opcoes ?? []), ...(r("nomes")?.opcoes ?? [])];
+  const sabemos = briefing.jaSabemos;
+  const horarios = r("horarios");
   return {
-    nome: briefing.jaSabemos?.nome ?? briefing.negocio,
-    site: linha("site") ?? briefing.jaSabemos?.site,
-    servicos: r("servicos")?.opcoes ?? briefing.jaSabemos?.servicos,
-    principal: r("principal")?.opcoes?.[0],
-    detalhes: Object.assign({}, ...vistas.filter((p) => p.tipo === "detalhes").map((p) => respostas[p.id]?.itens ?? {})),
-    buscas: buscas.length ? buscas : undefined,
-    momento: r("momento")?.opcoes,
+    nome: sabemos?.nome,
+    site: sabemos?.site,
+    servicos: r("servicos")?.opcoes ?? sabemos?.servicos,
+    principal: r("principal")?.opcoes?.[0] ?? sabemos?.principal,
+    buscas: sabemos?.buscas,
     destaques: r("destaques")?.opcoes,
-    diferente: linha("diferente"),
-    nota: Object.entries(numeros).find(([k, v]) => /nota/i.test(k) && v.trim())?.[1].trim(),
     cidades: r("cidades")?.opcoes,
-    fora: r("fora")?.opcoes,
-    horarios: r("horarios")?.horarios,
-    epocas: r("epocas")?.opcoes,
+    // Quem responde nos mesmos horários já tinha contado quais.
+    horarios: horarios && (horarios.horarios ?? sabemos?.horarios),
     bloqueadas: r("naoQuer")?.opcoes,
-    ligacao: r("contato")?.opcoes?.[0]?.includes("ligação"),
     icone: briefing.icone,
-    partes: vistas.flatMap((p) => (p.papel ? [p.papel] : [])),
   };
 }
 
@@ -143,7 +123,7 @@ const PINOS = [
   { x: 74, y: 72 },
 ];
 
-function Mapa({ cidades, fora }: { cidades: string[]; fora: string[] }) {
+function Mapa({ cidades }: { cidades: string[] }) {
   return (
     <div className="relative h-36 overflow-hidden rounded-xl border border-ink/10 bg-[#eef1ea]">
       <svg viewBox="0 0 200 110" preserveAspectRatio="none" className="absolute inset-0 size-full" fill="none" stroke="#1f271b" strokeOpacity="0.1">
@@ -154,24 +134,17 @@ function Mapa({ cidades, fora }: { cidades: string[]; fora: string[] }) {
         transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-1/2 left-1/2 size-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand"
       />
-      {[...cidades.map((c) => ({ c, dentro: true })), ...fora.map((c) => ({ c, dentro: false }))].slice(0, 5).map(({ c, dentro }, i) => (
+      {cidades.slice(0, PINOS.length).map((c, i) => (
         <motion.span
-          key={`${dentro}${c}`}
+          key={c}
           initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 320, damping: 18, delay: 0.15 + i * 0.14 }}
           className="absolute flex max-w-[44%] -translate-x-1/2 -translate-y-1/2 flex-col items-center"
           style={{ left: `${PINOS[i].x}%`, top: `${PINOS[i].y}%` }}
         >
-          {dentro ? <MapPinIcon className="size-4.5 fill-brand text-ink" /> : <BanIcon className="size-3.5 text-destructive" />}
-          <span
-            className={cn(
-              "mt-0.5 max-w-full truncate rounded-full bg-white/90 px-1.5 py-px text-[0.56rem] font-medium shadow-sm",
-              !dentro && "line-through opacity-70",
-            )}
-          >
-            {c}
-          </span>
+          <MapPinIcon className="size-4.5 fill-brand text-ink" />
+          <span className="mt-0.5 max-w-full truncate rounded-full bg-white/90 px-1.5 py-px text-[0.56rem] font-medium shadow-sm">{c}</span>
         </motion.span>
       ))}
     </div>
@@ -222,11 +195,9 @@ export function RascunhoDoAnuncio({
 }) {
   const titulos = titulosDe(blocos);
   const servico = blocos.principal ?? blocos.servicos?.[0];
-  const descricao = blocos.diferente ?? (servico && blocos.detalhes?.[servico]);
   const outros = (blocos.servicos ?? []).filter((s) => s !== servico);
-  const pergunta = (p: Papel) => blocos.partes?.includes(p) ?? true;
   const Icone = blocos.icone ? iconesDoNegocio[blocos.icone] : undefined;
-  const noAnuncio = foco && ["site", "servicos", "principal", "destaques", "diferente", "numeros", "contato", "nome"].includes(foco);
+  const noAnuncio = foco && ["servicos", "principal", "destaques"].includes(foco);
 
   const moldura = useRef<HTMLDivElement>(null);
   const folha = useRef<HTMLDivElement>(null);
@@ -257,7 +228,7 @@ export function RascunhoDoAnuncio({
     >
       {/* A busca fica sempre à vista. */}
       <div
-        className={cn("relative z-10 border-b border-ink/10 bg-white px-3 pt-3 pb-2", foco === "procuram" || foco === "nomes" ? "shadow-[inset_0_0_0_1.5px_var(--brand)]" : "")}
+        className="relative z-10 border-b border-ink/10 bg-white px-3 pt-3 pb-2"
         data-parte="procuram"
         data-ativa={Boolean(blocos.buscas)}
       >
@@ -301,24 +272,10 @@ export function RascunhoDoAnuncio({
                   </span>
                 </div>
                 <Titulo key={titulos.join()} titulos={titulos} />
-                {descricao ? (
-                  <p className="line-clamp-3 text-[0.68rem] leading-relaxed opacity-80">{trecho(descricao, 140)}</p>
-                ) : (
-                  <span className="block space-y-1.5 py-0.5">
-                    <Traco largura="94%" cor={tinta} />
-                    <Traco largura="66%" cor={tinta} />
-                  </span>
-                )}
-                {blocos.nota && blocos.nota.length <= 6 && (
-                  <p className="flex items-center gap-1 text-[0.64rem] font-medium">
-                    <span className="flex">
-                      {[0, 1, 2, 3, 4].map((i) => (
-                        <StarIcon key={i} className="size-3 fill-brand text-brand" />
-                      ))}
-                    </span>
-                    {trecho(blocos.nota, 12)} no Google
-                  </p>
-                )}
+                <span className="block space-y-1.5 py-0.5">
+                  <Traco largura="94%" cor={tinta} />
+                  <Traco largura="66%" cor={tinta} />
+                </span>
                 {blocos.destaques && blocos.destaques.length > 0 && (
                   <p className="text-[0.64rem] leading-relaxed opacity-80">{blocos.destaques.slice(0, 4).map((d) => trecho(d, 34)).join(" · ")}</p>
                 )}
@@ -329,11 +286,7 @@ export function RascunhoDoAnuncio({
                         <span className="block truncate text-[0.68rem] font-medium" style={{ color: AZUL }}>
                           {s}
                         </span>
-                        {blocos.detalhes?.[s]?.trim() ? (
-                          <span className="line-clamp-2 text-[0.56rem] leading-snug opacity-70">{blocos.detalhes[s]}</span>
-                        ) : (
-                          <Traco largura="80%" cor={tinta} />
-                        )}
+                        <Traco largura="80%" cor={tinta} />
                       </motion.span>
                     ))}
                   </div>
@@ -353,11 +306,6 @@ export function RascunhoDoAnuncio({
                     <IconeWhatsApp className="size-3" />
                     Chamar no WhatsApp
                   </span>
-                  {blocos.ligacao && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 px-3 py-2 text-[0.66rem] font-medium">
-                      <PhoneIcon className="size-3" /> Ligar
-                    </span>
-                  )}
                 </div>
               </motion.div>
             ) : (
@@ -377,35 +325,16 @@ export function RascunhoDoAnuncio({
             <Traco largura="90%" cor={tinta} />
           </div>
 
-          {pergunta("momento") && (
-            <Parte
-              {...comum}
-              papel={["momento", "clientes"]}
-              rotulo="quem procura"
-              nome="Quem vai procurar"
-              ativa={Boolean(blocos.momento?.length)}
-              planta={<Quadros n={3} cor={tinta} altura="h-4" />}
-            >
-              <ul className="flex flex-wrap gap-1.5">
-                {blocos.momento?.map((m) => (
-                  <li key={m} className="rounded-full bg-ink px-2.5 py-1 text-[0.6rem] text-paper">
-                    {trecho(m, 46)}
-                  </li>
-                ))}
-              </ul>
-            </Parte>
-          )}
-
           <Parte
             {...comum}
-            papel={["cidades", "fora"]}
+            papel={["cidades"]}
             rotulo="onde aparece"
             nome="Onde aparece"
             faixa
             ativa={Boolean(blocos.cidades?.length)}
             planta={<Quadros n={1} cor={tinta} altura="h-16" />}
           >
-            <Mapa cidades={blocos.cidades?.slice(0, 4) ?? []} fora={blocos.fora?.slice(0, 2) ?? []} />
+            <Mapa cidades={blocos.cidades ?? []} />
           </Parte>
 
           <Parte
@@ -418,35 +347,6 @@ export function RascunhoDoAnuncio({
           >
             {blocos.horarios && <SemanaPequena horarios={blocos.horarios} />}
           </Parte>
-
-          {pergunta("epocas") && (
-            <Parte
-              {...comum}
-              papel={["epocas"]}
-              rotulo="as épocas fortes"
-              nome="As épocas mais fortes"
-              faixa
-              ativa={Boolean(blocos.epocas?.length)}
-              planta={<Quadros n={12} cor={tinta} altura="h-7" />}
-            >
-              <div className="flex h-16 items-end gap-1">
-                {MESES.map((m, i) => {
-                  const forte = blocos.epocas?.includes(m);
-                  return (
-                    <span key={m} className="flex flex-1 flex-col items-center gap-1">
-                      <motion.span
-                        initial={{ height: 4 }}
-                        animate={{ height: forte ? 42 : 14 }}
-                        transition={{ duration: 0.7, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
-                        className={cn("w-full rounded-sm", forte ? "bg-brand" : "bg-ink/12")}
-                      />
-                      <span className={cn("text-[0.5rem]", forte && "font-semibold")}>{m.slice(0, 1)}</span>
-                    </span>
-                  );
-                })}
-              </div>
-            </Parte>
-          )}
 
           <Parte
             {...comum}

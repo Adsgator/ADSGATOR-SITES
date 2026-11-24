@@ -13,7 +13,6 @@ import { iconeDaOpcao } from "@/lib/briefing/icones";
 import { estilos, falasDaSensacao, opostoMarcado, temaDe } from "@/lib/briefing/temas";
 import {
   cidadeDe,
-  MESES,
   opcoesDa,
   type Briefing,
   type Pergunta,
@@ -304,37 +303,6 @@ function Etiquetas({ p, briefing, respostas, mudar }: PropsDoCampo) {
   );
 }
 
-function Meses({ p, respostas, mudar }: PropsDoCampo) {
-  const marcados = respostas[p.id]?.opcoes ?? [];
-  return (
-    <div role="group" aria-label={p.titulo} className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
-      {MESES.map((m) => {
-        const marcado = marcados.includes(m);
-        return (
-          <button
-            key={m}
-            type="button"
-            role="checkbox"
-            aria-checked={marcado}
-            onClick={() => mudar({ opcoes: marcado ? marcados.filter((x) => x !== m) : MESES.filter((x) => x === m || marcados.includes(x)) })}
-            className={cn(
-              "flex min-h-15 flex-col items-start justify-between rounded-xl border px-3.5 py-2.5 text-left text-sm transition-all duration-200 outline-none focus-visible:ring-3 focus-visible:ring-ring/40 active:scale-[0.98]",
-              marcado ? "border-ink bg-brand/25 font-medium" : "border-input bg-card hover:border-ring",
-            )}
-          >
-            <span className="flex h-4 items-end gap-0.5" aria-hidden="true">
-              {[6, 10, marcado ? 16 : 8].map((h, i) => (
-                <span key={i} className={cn("w-1.5 rounded-sm transition-all duration-300", marcado ? "bg-ink" : "bg-ring/40")} style={{ height: h }} />
-              ))}
-            </span>
-            {m}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 function Detalhes({ p, briefing, respostas, mudar }: PropsDoCampo) {
   const itens = respostas[p.id]?.itens ?? {};
   return (
@@ -523,7 +491,6 @@ const porTipo = {
   redes: Redes,
   duvidas: Duvidas,
   cores: Cores,
-  meses: Meses,
   estilo: Estilos,
 } satisfies Record<Pergunta["tipo"], React.ComponentType<PropsDoCampo>>;
 

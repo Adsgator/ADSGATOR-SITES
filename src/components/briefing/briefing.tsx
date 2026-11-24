@@ -156,6 +156,9 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
 
   const pergunta = tela.tipo === "pergunta" ? lista.find((p) => p.id === tela.id) : undefined;
   const daRevisao = tela.tipo === "pergunta" ? tela.daRevisao : undefined;
+  // O que já se sabe aparece marcado, e só vira resposta quando a pessoa confirma.
+  const naTela =
+    pergunta?.marcadas && !respostas[pergunta.id] ? { ...respostas, [pergunta.id]: { opcoes: pergunta.marcadas } } : respostas;
 
   function responder(id: string, r: Resposta) {
     const novas = { ...respostas, [id]: r };
@@ -166,9 +169,10 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
 
   function confirmar() {
     if (!pergunta) return;
-    const falta = problema(pergunta, briefing, respostas);
+    const falta = problema(pergunta, briefing, naTela);
     if (falta) return setErro(falta);
-    seguinte(pergunta.id, respostas, daRevisao);
+    if (naTela !== respostas) guardar(naTela);
+    seguinte(pergunta.id, naTela, daRevisao);
   }
 
   /** Escolha única: mostra a marca por um instante e segue. */
@@ -364,11 +368,11 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
                       transition={{ delay: 0.22, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                       className="mt-7 sm:mt-9"
                     >
-                      {pergunta.papel && AO_VIVO.includes(pergunta.papel) && <AoVivo briefing={briefing} respostas={respostas} />}
+                      {pergunta.papel && AO_VIVO.includes(pergunta.papel) && <AoVivo briefing={briefing} respostas={naTela} />}
                       <CampoDaPergunta
                         p={pergunta}
                         briefing={briefing}
-                        respostas={respostas}
+                        respostas={naTela}
                         mudar={(r) => responder(pergunta.id, r)}
                         escolheu={(r) => escolheu(pergunta.id, r)}
                         comErro={Boolean(erro)}
@@ -396,8 +400,8 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
                   </div>
                   <aside className="hidden lg:block" aria-hidden="true">
                     <div className="sticky top-28">
-                      <Desenho desenho={desenhoDe(briefing, respostas)} foco={pergunta.papel} janela />
-                      <LegendaDoDesenho tipo={briefing.tipo} desenho={desenhoDe(briefing, respostas)} />
+                      <Desenho desenho={desenhoDe(briefing, naTela)} foco={pergunta.papel} janela />
+                      <LegendaDoDesenho tipo={briefing.tipo} desenho={desenhoDe(briefing, naTela)} />
                     </div>
                   </aside>
                 </div>

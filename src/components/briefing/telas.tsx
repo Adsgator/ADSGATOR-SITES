@@ -97,10 +97,9 @@ const cenas: Record<TipoDeBriefing, { texto: string; bloco: object; foco?: Papel
     { texto: "E com as minhas cores", bloco: { cores: ["Verde-petróleo"] }, foco: "cores" },
   ],
   google_ads: [
-    { texto: "Procuram assim", bloco: { buscas: ["o seu serviço perto de mim", "quem faz o seu serviço hoje"] }, foco: "procuram" },
-    { texto: "Começa por este", bloco: { servicos: ["O seu serviço", "O mais pedido", "O novo"], principal: "O seu serviço", nome: "Seu negócio", site: "seunegocio.com.br" }, foco: "servicos" },
-    { texto: "Isto eu quero destacar", bloco: { destaques: ["Atendo no mesmo dia", "Parcela no cartão"], nota: "4,9" }, foco: "destaques" },
-    { texto: "Atendo nestas cidades", bloco: { cidades: ["Sua cidade", "A vizinha"], fora: ["Longe demais"], momento: ["Precisa para hoje"] }, foco: "cidades" },
+    { texto: "Começa por este", bloco: { buscas: ["o seu serviço perto de mim", "quem faz o seu serviço hoje"], servicos: ["O seu serviço", "O mais pedido", "O novo"], principal: "O seu serviço", nome: "Seu negócio", site: "seunegocio.com.br" }, foco: "servicos" },
+    { texto: "Isto eu quero destacar", bloco: { destaques: ["Atendo no mesmo dia", "Parcela no cartão"] }, foco: "destaques" },
+    { texto: "Atendo nestas cidades", bloco: { cidades: ["Sua cidade", "A vizinha"] }, foco: "cidades" },
     {
       texto: "Respondo nestes horários",
       bloco: {
@@ -109,7 +108,6 @@ const cenas: Record<TipoDeBriefing, { texto: string; bloco: object; foco?: Papel
           { dias: "Sábado", aberto: true, de: "08:00", ate: "13:00" },
           { dias: "Domingo", aberto: false, de: "08:00", ate: "12:00" },
         ],
-        epocas: ["Março", "Abril", "Novembro"],
       },
       foco: "horarios",
     },
@@ -555,7 +553,7 @@ export function Material({
 
 /** A conversa do fim, com o que a pessoa contou que os clientes dela escrevem. */
 function conversaDe(briefing: Briefing, respostas: Respostas): Mensagem[] {
-  const servico = respostas.principal?.opcoes?.[0] ?? briefing.jaSabemos?.servicos[0];
+  const servico = respostas.principal?.opcoes?.[0] ?? briefing.jaSabemos?.principal;
   const contada = respostas.quem_chega?.valor?.trim().split(/(?<=[.!?])\s/)[0];
   const origem = briefing.tipo === "pagina" ? "vi a sua página" : "vi o seu anúncio no Google";
   return [
@@ -587,9 +585,9 @@ export function Fim({
       </div>
       <div className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-14 px-4 py-10 lg:grid-cols-[1.1fr_1fr]">
         <div>
-          <Eyebrow className="text-brand">Tudo certo por aqui</Eyebrow>
+          <Eyebrow className="text-brand">Briefing enviado</Eyebrow>
           <TituloDaTela className="mt-4">
-            Recebemos, {briefing.nome}. <span className="highlight">Obrigado!</span>
+            <span className="highlight">Obrigado</span> pelas respostas, {briefing.nome}!
           </TituloDaTela>
           {faltaMaterial && (
             <div className="mt-6 flex max-w-lg flex-col gap-4 rounded-2xl border border-brand/50 bg-card p-5 sm:flex-row sm:items-center" data-falta-material>

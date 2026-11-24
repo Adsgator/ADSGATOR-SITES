@@ -281,7 +281,7 @@ console.log("\n# Escreveu e tocou em Continuar sem tocar em Adicionar");
 }
 
 console.log("\n# Google Ads");
-for (const [slug, maximo, minimo] of [["trabalhista-ads", 20, 17], ["adestramento-ads", 28, 25]]) {
+for (const [slug, esperadas] of [["trabalhista-ads", 8], ["adestramento-ads", 12]]) {
   const pg = await nova(CELULAR);
   pg.foto = `ads-${slug}`;
   await pg.goto(`${SITE}/forms/amostra/${slug}`);
@@ -293,24 +293,88 @@ for (const [slug, maximo, minimo] of [["trabalhista-ads", 20, 17], ["adestrament
   }
   await pg.getByRole("button", { name: "Começar" }).click();
   const vistas = await ateORevisao(pg);
-  check(`${slug}: entre ${minimo} e ${maximo} perguntas`, vistas.length >= minimo && vistas.length <= maximo, vistas.length);
-  check(`${slug}: nunca anunciou, não pergunta como foi`, !vistas.includes("Conta para a gente como foi essa experiência."));
+  check(`${slug}: ${esperadas} perguntas`, vistas.length === esperadas, vistas.length);
+  const saiu = /no Google\?$|outros nomes|costuma estar|não compensa|costuma aparecer|primeira resposta|receber os contatos|Em quais meses|mais gosta|explica|dificilmente|algum número|não digam|material|seu site/;
+  check(`${slug}: nenhuma das que saíram`, !vistas.some((v) => saiu.test(v)), vistas.filter((v) => saiu.test(v)).join(" | "));
   check(`${slug}: não pergunta a verba`, !vistas.some((v) => /verba|investir/i.test(v)));
-  check(
-    `${slug}: o que já veio do da página não repete`,
-    vistas.includes("É este o site que vai receber os anúncios?") === (slug === "adestramento-ads"),
-  );
+  const doSite = ["Quais serviços você gostaria de anunciar?", "O que vale destacar logo no anúncio?", "O que a pessoa costuma escrever na primeira mensagem?"];
+  check(`${slug}: o que já veio do da página não repete`, doSite.every((v) => vistas.includes(v) === (slug === "adestramento-ads")));
   await pg.getByRole("button", { name: "Enviar as respostas" }).click();
   // Quem já fez o da página já mandou o material por lá.
   const temMaterial = slug === "adestramento-ads";
   check(`${slug}: envia`, (await tela(pg)) === (temMaterial ? "material" : "fim"));
-  if (temMaterial) await pg.getByRole("button", { name: "Já coloquei tudo" }).click();
+  if (temMaterial) {
+    await pg.getByRole("button", { name: "Vou colocar depois" }).click();
+    await tela(pg);
+    const texto = await pg.locator("main").innerText();
+    check(`${slug}: sem o material, o fim agradece e lembra que falta`, /Obrigado pelas respostas, Rafa!/.test(texto) && /Ainda falta o material/.test(texto) && !/tudo certo/i.test(texto));
+    await pg.getByRole("button", { name: "Mandar agora" }).click();
+    await tela(pg);
+    await pg.getByRole("button", { name: "Já coloquei tudo" }).click();
+  }
   await tela(pg);
+  check(`${slug}: o fim agradece`, /Obrigado pelas respostas/.test(await titulo(pg).innerText()), await titulo(pg).innerText());
   await pg.locator("[data-cena-final]").evaluate((e) => e.scrollIntoView({ block: "center" }));
   await pg.waitForSelector("[data-conversa]", { timeout: 45000 });
   check(`${slug}: a conversa abre no fim`, true);
   if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${pg.foto}-fim.png`, fullPage: true });
   check(`${slug}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 160));
+  await pg.context().close();
+}
+
+console.log("\n# Google Ads, o que já se sabe");
+for (const [nome, opcoes] of [["celular, animações reduzidas", { ...CELULAR, reducedMotion: "reduce" }], ["computador", {}]]) {
+  const pg = await nova(opcoes);
+  await pg.goto(`${SITE}/forms/amostra/adestramento-ads`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  await tela(pg);
+  const marcada = (c) => pg.getByRole("button", { name: `Tirar ${c}` });
+  check(`${nome}: as cidades já chegam marcadas`, (await marcada("Campinas").count()) === 1 && (await marcada("Valinhos").count()) === 1);
+  check(`${nome}: e ainda não contam como resposta`, /^0 de /.test(await pg.locator("[data-contagem]").last().innerText()), await pg.locator("[data-contagem]").last().innerText());
+  await marcada("Valinhos").click();
+  await marcada("Campinas").click();
+  await continuar(pg);
+  check(`${nome}: sem nenhuma cidade não passa`, /Adicione/.test(await pg.locator("[data-erro]").last().innerText()));
+  await pg.reload();
+  await tela(pg);
+  await pg.getByRole("button", { name: "Começar de novo" }).click().catch(() => {});
+  await pg.evaluate(() => localStorage.clear());
+  await pg.goto(`${SITE}/forms/amostra/adestramento-ads`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  await tela(pg);
+  await continuar(pg);
+  await tela(pg);
+  check(`${nome}: só confirmar já passa`, /primeira mensagem/.test(await titulo(pg).innerText()));
+  await pg.reload();
+  await pg.getByRole("button", { name: "Rever o que já respondi" }).click();
+  await tela(pg);
+  check(`${nome}: e fica guardado`, /Campinas, Valinhos/.test(await pg.locator('[data-revisao="cidades"]').innerText()), await pg.locator('[data-revisao="cidades"]').innerText());
+  await pg.goto(`${SITE}/forms/amostra/adestramento-ads`);
+  await pg.getByRole("button", { name: "Continuar de onde parei" }).click();
+  const vistas = await ateORevisao(pg, {}, (v) => v.at(-1) === "Que tipo de pedido chega até você e não faz sentido atender?");
+  for (let k = 0; k < 3 && !/anunciar/.test(await titulo(pg).innerText()); k++) {
+    if ((await tela(pg)) === "passo") await continuar(pg);
+    await tela(pg);
+  }
+  check(`${nome}: os serviços do site chegam marcados`, (await pg.locator('form [role="checkbox"][aria-checked="true"]').allInnerTexts()).join() === "Adestramento básico,Filhotes,Comportamento", vistas.length);
+  await pg.getByRole("checkbox", { name: "Filhotes" }).click();
+  await pg.getByRole("checkbox", { name: "Comportamento" }).click();
+  await continuar(pg);
+  await tela(pg);
+  check(`${nome}: com um serviço só, não pergunta por qual começar`, /destacar/.test(await titulo(pg).innerText()), await titulo(pg).innerText());
+
+  // Quem responde o WhatsApp em outros horários conta quais.
+  await pg.goto(`${SITE}/forms/amostra/trabalhista-ads?preenchido=1&ir=revisao`);
+  await tela(pg);
+  await pg.locator('[data-revisao="responde_mesmo"] button').click();
+  await tela(pg);
+  await pg.locator("form").last().getByText("Não, em outros horários", { exact: true }).click();
+  await pg.waitForTimeout(1200);
+  check(`${nome}: em outros horários, pergunta quais`, /consegue responder o WhatsApp/.test(await titulo(pg).innerText()) && (await pg.getByRole("switch").count()) > 0, await titulo(pg).innerText());
+  await pg.getByRole("switch", { name: "Domingo" }).click();
+  await pg.getByRole("button", { name: "Pronto" }).last().click();
+  check(`${nome}: e volta à revisão com eles`, (await tela(pg)) === "revisao" && /Domingo/.test(await pg.locator('[data-revisao="responde"]').innerText()));
+  check(`${nome}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 160));
   await pg.context().close();
 }
 
@@ -745,8 +809,8 @@ for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
       const texto = await desenho.innerText();
       const esperados =
         slug === "trabalhista-ads"
-          ? ["helenapradoadvocacia.com.br", "Verbas rescisórias", "Só defendo o trabalhador", "Horas extras", "Acabou de ser mandado embora", "Toda a região de Campinas", "Cálculo de rescisão"]
-          : ["rafaadestramento.com.br", "Comportamento", "Não treino o cão longe do dono", "5,0 no Google", "Vou até a casa", "Filhotes", "Ligar", "Valinhos", "Elias Fausto", "Banho e tosa", "Já tentou com outra pessoa"];
+          ? ["helenapradoadvocacia.com.br", "Verbas rescisórias", "Horas extras", "Toda a região de Campinas", "Só o cálculo da rescisão"]
+          : ["rafaadestramento.com.br", "Comportamento", "Vou até a casa", "Filhotes", "Valinhos", "Banho e tosa"];
       const faltam = esperados.filter((e) => !texto.includes(e));
       check(`${nome}, ${slug}: o desenho traz o que a pessoa contou (${esperados.length} conferidos)`, faltam.length === 0, faltam.join(" | "));
       const titulos = new Set();
