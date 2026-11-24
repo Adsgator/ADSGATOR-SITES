@@ -37,6 +37,29 @@ export async function linkDoPainel(codigo: string): Promise<LinkDoPainel | null>
   return (await r.json()) as LinkDoPainel;
 }
 
+export type MotivoDaRecusa = "invalido" | "vencido" | "pago" | "em_andamento" | "cartao_travado" | "muitas_tentativas";
+
+/** Reserva a vez do link (um pagamento por vez). Sem o painel, não cobra: lança erro. */
+export async function reservarVez(
+  codigo: string,
+  forma: "pix" | "cartao",
+  ip: string,
+): Promise<{ ok: true; tentativa: string; conferir: boolean } | { ok: false; motivo: MotivoDaRecusa }> {
+  const r = await chamar("POST", "/api/checkout/tentativa", { acao: "reservar", codigo, forma, ip });
+  if (!r.ok) throw new Error(`painel respondeu ${r.status} ao reservar a vez`);
+  return r.json();
+}
+
+/** Diz ao painel como a tentativa terminou. Se ele não responder, ela vira incerta lá. */
+export async function gravarResultado(
+  tentativa: string,
+  resultado: "criada" | "recusada" | "erro" | "incerta",
+  cobranca: string | null,
+  motivo: string,
+): Promise<void> {
+  await avisar("/api/checkout/tentativa", { acao: "resultado", tentativa, resultado, cobranca, motivo: motivo.slice(0, 300) });
+}
+
 /** Avisa o painel, tentando de novo se ele não respondeu (a cobrança já foi feita:
  * não pode se perder). Erro de conteúdo (4xx) não adianta repetir. */
 async function avisar(caminho: string, corpo: unknown) {
@@ -71,6 +94,18 @@ export type AvisoDeContratacao = {
 };
 
 export const avisarContratacao = (aviso: AvisoDeContratacao) => avisar("/api/checkout/contratacao", aviso);
+
+/** A 1ª mensalidade existe, mas a assinatura não nasceu: o painel avisa o Lucas e abre a tarefa. */
+export const avisarAssinaturaQueFalhou = (falha: {
+  codigo: string;
+  asaas_cliente: string;
+  asaas_cobranca: string;
+  /** Em reais. */
+  valor: number;
+  proximo: string;
+  forma: "pix" | "cartao";
+  motivo: string;
+}) => avisar("/api/checkout/assinatura", falha);
 
 export const avisarMensalidade = (aviso: { codigo: string; asaas_cobranca: string; pago: boolean }) =>
   avisar("/api/checkout/mensalidade", aviso);

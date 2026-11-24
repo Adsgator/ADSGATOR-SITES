@@ -10,9 +10,11 @@
 // - a assinatura gera uma cobrança só ao ser criada (a do primeiro vencimento);
 // - o QR do Pix precisa de uma chave Pix ativa na conta;
 // - a assinatura no cartão aceita remoteIp 127.0.0.1 no sandbox;
-// - o Asaas pede tempo limite de pelo menos 60 segundos no cartão.
+// - o Asaas pede tempo limite de pelo menos 60 segundos no cartão;
+// - as cobranças podem ser buscadas pela referência (externalReference), e as que a
+//   assinatura gera vêm com o campo subscription.
 
-const TEMPO_LIMITE_MS = 60_000;
+const TEMPO_LIMITE_MS = 65_000;
 
 export class ErroDoAsaas extends Error {
   constructor(
@@ -29,7 +31,7 @@ export function noSandbox() {
   return (process.env.ASAAS_API_URL ?? "").includes("sandbox");
 }
 
-async function chamar<T>(metodo: "GET" | "POST", caminho: string, corpo?: unknown): Promise<T> {
+async function chamar<T>(metodo: "GET" | "POST" | "DELETE", caminho: string, corpo?: unknown): Promise<T> {
   const url = process.env.ASAAS_API_URL;
   const chave = process.env.ASAAS_API_KEY;
   if (!url || !chave) throw new Error("ASAAS_API_URL ou ASAAS_API_KEY não configurada");
@@ -80,6 +82,8 @@ export type CartaoDoAsaas = {
 
 export type Cobranca = {
   id: string;
+  customer: string;
+  billingType: string;
   status: string;
   value: number;
   dueDate: string;
@@ -156,18 +160,23 @@ export async function assinaturasDoCliente(cliente: string) {
   return r.data;
 }
 
-/** As cobranças avulsas e de assinatura do cliente (até 100). */
-export async function cobrancasDoCliente(cliente: string) {
-  const r = await chamar<{ data: (Cobranca & { billingType: string; externalReference?: string; deleted?: boolean })[] }>(
+/** As cobranças com esta referência (até 100; um link tem poucas). */
+export async function cobrancasPorReferencia(referencia: string) {
+  const r = await chamar<{ data: (Cobranca & { deleted?: boolean; subscription?: string })[] }>(
     "GET",
-    `/payments?customer=${cliente}&limit=100`,
+    `/payments?externalReference=${encodeURIComponent(referencia)}&limit=100`,
   );
   return r.data;
 }
 
+/** Apaga uma cobrança ainda não paga (o Asaas recusa a paga). */
+export async function apagarCobranca(cobranca: string) {
+  await chamar("DELETE", `/payments/${cobranca}`);
+}
+
 /** As cobranças de uma assinatura, da mais nova para a mais antiga. */
 export async function cobrancasDaAssinatura(assinatura: string) {
-  return (await chamar<{ data: (Cobranca & { billingType: string })[] }>("GET", `/subscriptions/${assinatura}/payments`)).data;
+  return (await chamar<{ data: (Cobranca)[] }>("GET", `/subscriptions/${assinatura}/payments`)).data;
 }
 
 export async function situacaoDaCobranca(cobranca: string) {

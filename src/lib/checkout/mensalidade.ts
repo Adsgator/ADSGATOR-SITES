@@ -10,17 +10,19 @@ import * as asaas from "./asaas";
 import { soDigitos } from "./campos";
 import { servicoPorSlug } from "./catalogo";
 import {
-  ativarMensalidade,
   cartaoParaOAsaas,
+  criarPrimeiraMensalidade,
   dataIso,
+  garantirAssinatura,
   mesmoDiaNoMesSeguinte,
+  reaisDoAsaas,
   respostaDaCobranca,
-  SITUACOES_PAGAS,
   type RespostaDaContratacao,
 } from "./contratacao";
-import { avisarMensalidade, linkDoPainel, type LinkDoPainel } from "./painel";
+import { avisarAssinaturaQueFalhou, avisarMensalidade, linkDoPainel, type LinkDoPainel } from "./painel";
 import { DIAS_PARA_VENCER, hojeEmSaoPaulo, somarDias, type Data, type Forma } from "./pedido";
 import { cartaoVazio, validarCartao, type Cartao } from "./validacao";
+import { cobrancasDoLink, cobrarUmaVez, SITUACOES_PAGAS } from "./vez";
 
 /** O que o link da mensalidade traz, montado a partir do painel. */
 export type DadosDoLink = {
@@ -75,11 +77,12 @@ export async function situacaoDoLink(codigo: string, jaLido?: LinkDoPainel | nul
   const cliente = await asaas.clientePorId(link.cliente).catch(() => null);
   if (!cliente || cliente.deleted) return { tipo: "invalido" };
   const ref = referenciaDoLink(link);
-  const jaTem = (await asaas.assinaturasDoCliente(link.cliente)).some((a) => a.externalReference === ref && !a.deleted);
+  // Decide pela cobrança, não pela assinatura: se a assinatura não nasceu, a 1ª já
+  // existe e não pode ser cobrada de novo (o Lucas cria a assinatura pela tarefa).
+  const [cobrancas, assinaturas] = await Promise.all([cobrancasDoLink(ref), asaas.assinaturasDoCliente(link.cliente)]);
+  const jaTem = cobrancas.length > 0 || assinaturas.some((a) => a.externalReference === ref && !a.deleted);
   if (!jaTem) return { tipo: "pronto", link, cliente };
-  const pixPendente = (await asaas.cobrancasDoCliente(link.cliente)).find(
-    (c) => c.externalReference === ref && !c.deleted && c.billingType === "PIX" && c.status === "PENDING",
-  );
+  const pixPendente = cobrancas.find((c) => c.billingType === "PIX" && c.status === "PENDING");
   return { tipo: "ativado", link, pixPendente };
 }
 
@@ -146,17 +149,38 @@ export async function pagarMensalidade(
       )
     : {};
 
-  const cobranca = await ativarMensalidade({
+  const mensalidade = {
     cliente: cliente.id,
     slugs: [servico.slug],
     total: servico.preco[p.forma],
-    billingType: noCartao ? "CREDIT_CARD" : "PIX",
-    vencimento,
-    proximo: datas.proximo,
+    billingType: noCartao ? ("CREDIT_CARD" as const) : ("PIX" as const),
     referencia: referenciaDoLink(link),
     cartao,
+  };
+  const vez = await cobrarUmaVez({
+    codigo: link.id,
+    forma: p.forma,
+    ip,
+    referencia: mensalidade.referencia,
+    preparar: async () => cliente.id,
+    criar: () => criarPrimeiraMensalidade({ ...mensalidade, vencimento }),
   });
+  if (!vez.ok) return { status: vez.status, corpo: { ok: false, erro: vez.erro } };
+  const { cobranca } = vez;
+  const semAssinatura = await garantirAssinatura({ ...mensalidade, proximo: datas.proximo, conferir: vez.jaExistia });
   // O painel marca o link (pago no cartão; no Pix, quando o webhook trouxer o pagamento).
-  await avisarMensalidade({ codigo: link.id, asaas_cobranca: cobranca.id, pago: SITUACOES_PAGAS.includes(cobranca.status) });
-  return respostaDaCobranca(cobranca, p.forma, servico.preco[p.forma], 1, vencimento, datas.proximo);
+  const registrado = await avisarMensalidade({ codigo: link.id, asaas_cobranca: cobranca.id, pago: SITUACOES_PAGAS.includes(cobranca.status) });
+  await vez.terminar(registrado);
+  if (semAssinatura) {
+    await avisarAssinaturaQueFalhou({
+      codigo: link.id,
+      asaas_cliente: cliente.id,
+      asaas_cobranca: cobranca.id,
+      valor: reaisDoAsaas(mensalidade.total),
+      proximo: datas.proximo,
+      forma: p.forma,
+      motivo: semAssinatura,
+    });
+  }
+  return respostaDaCobranca(cobranca, p.forma, servico.preco[p.forma], 1, vez.jaExistia ? cobranca.dueDate : vencimento, datas.proximo);
 }

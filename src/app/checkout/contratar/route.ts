@@ -4,8 +4,10 @@ import { contratar, ipDoComprador, lerPedido } from "@/lib/checkout/contratacao"
 // Contratação pelo checkout (plano geral, Parte 4). Os dados do cartão passam
 // por aqui a caminho do Asaas e não são guardados nem registrados em log.
 
-// O Asaas pede pelo menos 60 segundos de tempo limite no cartão.
-export const maxDuration = 60;
+// O Asaas pede pelo menos 60 segundos de tempo limite no cartão; depois disso o servidor
+// ainda confere se a cobrança passou (src/lib/checkout/vez.ts). O painel dá a tentativa por
+// perdida depois de 150 segundos: este limite fica sempre abaixo.
+export const maxDuration = 120;
 
 const ERRO_GERAL =
   "Não foi possível concluir agora. Nada foi cobrado. Tente de novo em instantes ou fale com a gente no WhatsApp.";

@@ -1,5 +1,5 @@
 import { situacaoDaCobranca } from "@/lib/checkout/asaas";
-import { SITUACOES_PAGAS } from "@/lib/checkout/contratacao";
+import { SITUACOES_PAGAS } from "@/lib/checkout/vez";
 
 // Se a cobrança do Pix já foi paga, para a tela de pagamento mudar sozinha.
 // Devolve só sim ou não; o id da cobrança vem da resposta da contratação.

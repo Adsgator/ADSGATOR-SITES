@@ -11,19 +11,18 @@
 // - A mensalidade do combo e a manutenção depois da entrega não são cobradas
 //   aqui: vão pelo link que o Lucas manda depois.
 //
-// O registro do aceite e o aviso ao painel vêm na etapa seguinte do plano.
-
-import { randomUUID } from "node:crypto";
+// Um pagamento por vez em cada link, com a mesma referência: ver vez.ts.
 
 import { VERSAO_DOS_TERMOS } from "@/config/checkout";
 
 import * as asaas from "./asaas";
 import { soDigitos } from "./campos";
 import { servicosDoLink } from "./catalogo";
-import { avisarContratacao, linkDoPainel } from "./painel";
+import { avisarAssinaturaQueFalhou, avisarContratacao, linkDoPainel } from "./painel";
 import { pontosDosTermos } from "./termos";
 import { hojeEmSaoPaulo, montarPedido, type Data, type Forma } from "./pedido";
 import { cartaoVazio, dadosVazios, validarDados, type Cartao, type Dados } from "./validacao";
+import { cobrarUmaVez, SITUACOES_PAGAS } from "./vez";
 
 export type PedidoDeContratacao = {
   /** O código do link gerado no painel: é dele que vêm os serviços. */
@@ -58,9 +57,6 @@ export type RespostaDaContratacao =
       proxima?: string;
     }
   | { ok: false; erro: string; campos?: Record<string, string> };
-
-/** Situações do Asaas que contam como pago. */
-export const SITUACOES_PAGAS = ["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"];
 
 /** Nome na descrição da cobrança. A taxa de gestão aparece por escrito em toda
  * cobrança do Google Ads (regra do Google; Base, "Serviços e preços"). */
@@ -150,9 +146,9 @@ export async function contratar(
     .filter(Boolean)
     .join(" · ");
 
-  const cliente =
+  const acharOuCriarCliente = async () =>
     (await asaas.clientePorDocumento(documento)) ??
-    (await asaas.criarCliente({
+    asaas.criarCliente({
       name: p.semCnpj ? d.nome : d.empresa,
       company: p.semCnpj ? undefined : d.empresa,
       cpfCnpj: documento,
@@ -164,7 +160,7 @@ export async function contratar(
       complement: d.complemento || undefined,
       province: d.bairro,
       observations: observacoes,
-    }));
+    });
 
   const noCartao = p.forma === "cartao";
   const cartao = noCartao
@@ -184,7 +180,8 @@ export async function contratar(
     : {};
 
   const hoje = hojeEmSaoPaulo();
-  const referencia = `checkout:${randomUUID()}`;
+  // Fixa por link: é por ela que uma nova tentativa acha a cobrança que já existe.
+  const referencia = `checkout:${p.codigo}`;
   const billingType = noCartao ? "CREDIT_CARD" : "PIX";
   // No cartão, cobra na hora; no Pix, vence em 3 dias.
   const vencimento = dataIso(noCartao ? hoje : pedido.vencimento);
@@ -195,41 +192,60 @@ export async function contratar(
   // mensalidade na aprovação); se um dia juntarem, este fluxo precisa mudar.
   if (criacoes.length > 0 && mensais.length > 0) throw new Error("pedido com criação e mensalidade no mesmo dia");
 
-  let cobranca: asaas.Cobranca;
-  let proxima: string | undefined;
-  if (criacoes.length > 0) {
-    const total = criacoes.reduce((s, l) => s + l.valor, 0);
-    cobranca = await asaas.criarCobranca({
-      customer: cliente,
-      billingType,
-      dueDate: vencimento,
-      description: `${criacoes.map((l) => nomeNaCobranca[l.slug] ?? l.nome).join(" + ")} · Adsgator`,
-      externalReference: referencia,
-      ...(noCartao && p.parcelas > 1
-        ? { installmentCount: p.parcelas, totalValue: reaisDoAsaas(total) }
-        : { value: reaisDoAsaas(total) }),
-      ...cartao,
-    });
-  } else {
-    proxima = dataIso(mesmoDiaNoMesSeguinte(hoje));
-    cobranca = await ativarMensalidade({
+  const totalMensal = mensais.reduce((s, l) => s + l.valor, 0);
+  const proxima = mensais.length > 0 ? dataIso(mesmoDiaNoMesSeguinte(hoje)) : undefined;
+  let cliente = "";
+  const vez = await cobrarUmaVez({
+    codigo: p.codigo,
+    forma: p.forma,
+    ip,
+    referencia,
+    preparar: acharOuCriarCliente,
+    criar: (doAsaas) => {
+      cliente = doAsaas;
+      if (mensais.length > 0) {
+        return criarPrimeiraMensalidade({ cliente, slugs: mensais.map((l) => l.slug), total: totalMensal, billingType, vencimento, referencia, cartao });
+      }
+      const total = criacoes.reduce((s, l) => s + l.valor, 0);
+      return asaas.criarCobranca({
+        customer: cliente,
+        billingType,
+        dueDate: vencimento,
+        description: `${criacoes.map((l) => nomeNaCobranca[l.slug] ?? l.nome).join(" + ")} · Adsgator`,
+        externalReference: referencia,
+        ...(noCartao && p.parcelas > 1
+          ? { installmentCount: p.parcelas, totalValue: reaisDoAsaas(total) }
+          : { value: reaisDoAsaas(total) }),
+        ...cartao,
+      });
+    },
+  });
+  if (!vez.ok) return { status: vez.status, corpo: { ok: false, erro: vez.erro } };
+  const { cobranca } = vez;
+  cliente ||= cobranca.customer;
+  // A cobrança que já existia pode ser de outra forma (ex.: Pix já pago e agora o cartão).
+  const forma: Forma = cobranca.billingType === "PIX" ? "pix" : "cartao";
+
+  let semAssinatura = "";
+  if (mensais.length > 0 && proxima) {
+    semAssinatura = await garantirAssinatura({
       cliente,
       slugs: mensais.map((l) => l.slug),
-      total: mensais.reduce((s, l) => s + l.valor, 0),
+      total: totalMensal,
       billingType,
-      vencimento,
       proximo: proxima,
       referencia,
       cartao,
+      conferir: vez.jaExistia,
     });
   }
 
-  // O painel registra o cliente, o aceite e, se já pagou, começa a Entrada. Se
-  // ele não responder, a cobrança fica no Asaas e o erro no registro do servidor.
-  await avisarContratacao({
+  // O painel registra o cliente, o aceite e, se já pagou, começa a Entrada. Se ele
+  // não responder, a tentativa fica incerta: a próxima acha a cobrança e registra.
+  const registrado = await avisarContratacao({
     codigo: p.codigo,
     servicos: slugs,
-    forma: p.forma,
+    forma,
     parcelas: p.parcelas,
     valor: reaisDoAsaas(pedido.totalHoje),
     asaas_cliente: cliente,
@@ -260,7 +276,20 @@ export async function contratar(
     },
   });
 
-  return respostaDaCobranca(cobranca, p.forma, pedido.totalHoje, p.parcelas, vencimento, proxima);
+  await vez.terminar(registrado);
+  if (semAssinatura && proxima) {
+    await avisarAssinaturaQueFalhou({
+      codigo: p.codigo,
+      asaas_cliente: cliente,
+      asaas_cobranca: cobranca.id,
+      valor: reaisDoAsaas(totalMensal),
+      proximo: proxima,
+      forma: p.forma,
+      motivo: semAssinatura,
+    });
+  }
+  // O Pix que já existia mantém o vencimento dele.
+  return respostaDaCobranca(cobranca, forma, pedido.totalHoje, p.parcelas, vez.jaExistia ? cobranca.dueDate : vencimento, proxima);
 }
 
 /** O cartão no formato do Asaas, com quem é o titular e o IP de quem compra. */
@@ -277,55 +306,67 @@ export function cartaoParaOAsaas(
   };
 }
 
-/** A 1ª mensalidade numa cobrança avulsa (Pix com vencimento, cartão na hora)
- * e a assinatura com as próximas, a partir de `proximo`. Usada pela
- * contratação (só o plano mensal) e pelo link da mensalidade (combo e
- * manutenção depois da entrega). */
-export async function ativarMensalidade(m: {
+type Mensalidade = {
   cliente: string;
   slugs: string[];
   /** Em centavos. */
   total: number;
   billingType: "PIX" | "CREDIT_CARD";
-  /** Vencimento da 1ª (aaaa-mm-dd). */
-  vencimento: string;
-  /** Vencimento da 2ª, que dá o dia das próximas (aaaa-mm-dd). */
-  proximo: string;
   referencia: string;
   cartao: Partial<asaas.CartaoDoAsaas>;
-}) {
-  const nomes = m.slugs.map((s) => nomeNaCobranca[s] ?? s).join(" + ");
-  const cobranca = await asaas.criarCobranca({
+};
+
+const nomesNaCobranca = (slugs: string[]) => slugs.map((s) => nomeNaCobranca[s] ?? s).join(" + ");
+
+/** A 1ª mensalidade numa cobrança avulsa (Pix com vencimento, cartão na hora). Usada
+ * pela contratação (só o plano mensal) e pelo link da mensalidade (combo e manutenção
+ * depois da entrega); as próximas são da assinatura (garantirAssinatura). */
+export function criarPrimeiraMensalidade(m: Mensalidade & { vencimento: string }) {
+  return asaas.criarCobranca({
     customer: m.cliente,
     billingType: m.billingType,
     dueDate: m.vencimento,
-    description: `${nomes} · 1ª mensalidade · Adsgator`,
+    description: `${nomesNaCobranca(m.slugs)} · 1ª mensalidade · Adsgator`,
     externalReference: m.referencia,
     value: reaisDoAsaas(m.total),
     ...m.cartao,
   });
-  try {
-    await asaas.criarAssinatura({
-      customer: m.cliente,
-      billingType: m.billingType,
-      value: reaisDoAsaas(m.total),
-      nextDueDate: m.proximo,
-      cycle: "MONTHLY",
-      description: `${nomes} · mensalidade · Adsgator`,
-      externalReference: m.referencia,
-      ...m.cartao,
-    });
-  } catch (e) {
-    // A 1ª mensalidade já foi criada (e, no cartão, paga): a pessoa não pode
-    // ver erro. O Lucas cria a assinatura à mão pelo registro do servidor.
-    console.error("checkout: assinatura não criada", {
-      cliente: m.cliente,
-      cobranca: cobranca.id,
-      referencia: m.referencia,
-      erro: String(e),
-    });
+}
+
+/**
+ * A assinatura com as próximas mensalidades, a partir de `proximo`. A 1ª já foi criada (e, no
+ * cartão, paga), então a pessoa nunca vê erro: tenta 3 vezes e devolve o motivo se não nasceu
+ * (vazio quando deu certo), para o painel avisar o Lucas (decisão 3 A, 2026-11-23).
+ */
+export async function garantirAssinatura(m: Mensalidade & { proximo: string; conferir: boolean }): Promise<string> {
+  let motivo = "";
+  for (let tentativa = 1; tentativa <= 3; tentativa++) {
+    try {
+      // Depois de uma falha, pode ter nascido sem a resposta chegar.
+      if (m.conferir || tentativa > 1) {
+        const doCliente = await asaas.assinaturasDoCliente(m.cliente);
+        if (doCliente.some((a) => a.externalReference === m.referencia && !a.deleted)) return "";
+      }
+      await asaas.criarAssinatura({
+        customer: m.cliente,
+        billingType: m.billingType,
+        value: reaisDoAsaas(m.total),
+        nextDueDate: m.proximo,
+        cycle: "MONTHLY",
+        description: `${nomesNaCobranca(m.slugs)} · mensalidade · Adsgator`,
+        externalReference: m.referencia,
+        ...m.cartao,
+      });
+      return "";
+    } catch (e) {
+      motivo = e instanceof Error ? e.message : String(e);
+      console.error("checkout: assinatura não criada", { cliente: m.cliente, referencia: m.referencia, tentativa, erro: motivo });
+      // O que o Asaas recusou (cartão, dado) não muda tentando de novo.
+      if (e instanceof asaas.ErroDoAsaas && e.status < 500) break;
+      await new Promise((ok) => setTimeout(ok, 1000 * tentativa));
+    }
   }
-  return cobranca;
+  return motivo || "sem resposta do Asaas";
 }
 
 /** O que a tela recebe depois da cobrança: o QR do Pix ou a situação do cartão. */
