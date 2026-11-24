@@ -169,6 +169,8 @@ for (const [nome, opcoes] of [
   await pg.getByRole("button", { name: "Vou colocar depois" }).click();
   check("deixar para depois vai ao fim", (await tela(pg)) === "fim");
   check("e o fim lembra que falta", await pg.locator("[data-falta-material]").isVisible());
+  const fimSemMaterial = await pg.locator("main").innerText();
+  check("e agradece sem dizer que chegou tudo", /Obrigado pelas respostas, Helena!/.test(fimSemMaterial) && !/tudo certo/i.test(fimSemMaterial));
   await pg.getByRole("button", { name: "Mandar agora" }).click();
   check("dá para mandar dali", (await tela(pg)) === "material");
   await pg.getByRole("button", { name: "Já coloquei tudo" }).click();
@@ -306,18 +308,7 @@ for (const [slug, esperadas] of [["trabalhista-ads", 8], ["adestramento-ads", 12
   const doSite = ["Quais serviços você gostaria de anunciar?", "O que vale destacar logo no anúncio?", "O que a pessoa costuma escrever na primeira mensagem?"];
   check(`${slug}: o que já veio do da página não repete`, doSite.every((v) => vistas.includes(v) === (slug === "adestramento-ads")));
   await pg.getByRole("button", { name: "Enviar as respostas" }).click();
-  // Quem já fez o da página já mandou o material por lá.
-  const temMaterial = slug === "adestramento-ads";
-  check(`${slug}: envia`, (await tela(pg)) === (temMaterial ? "material" : "fim"));
-  if (temMaterial) {
-    await pg.getByRole("button", { name: "Vou colocar depois" }).click();
-    await tela(pg);
-    const texto = await pg.locator("main").innerText();
-    check(`${slug}: sem o material, o fim agradece e lembra que falta`, /Obrigado pelas respostas, Rafa!/.test(texto) && /Ainda falta o material/.test(texto) && !/tudo certo/i.test(texto));
-    await pg.getByRole("button", { name: "Mandar agora" }).click();
-    await tela(pg);
-    await pg.getByRole("button", { name: "Já coloquei tudo" }).click();
-  }
+  check(`${slug}: envia, sem pedir material`, (await tela(pg)) === "fim" && (await pg.locator("[data-falta-material]").count()) === 0);
   await tela(pg);
   check(`${slug}: o fim agradece`, /Obrigado pelas respostas/.test(await titulo(pg).innerText()), await titulo(pg).innerText());
   await pg.locator("[data-cena-final]").evaluate((e) => e.scrollIntoView({ block: "center" }));
@@ -397,6 +388,14 @@ for (const [slug, minimo, maximo] of [["padrao", 28, 34], ["padrao-ads", 12, 13]
   check(`${slug}: entre ${minimo} e ${maximo} perguntas`, vistas.length >= minimo && vistas.length <= maximo, vistas.length);
   check(`${slug}: nada que um conselho limita`, textos.length > 0 && !textos.some((t) => /grátis|gratuit|sem custo|parcela|desconto|promoção|preço|Pessoas atendidas|Nota no Google|Depoimentos/i.test(t)));
   check(`${slug}: chega inteiro à revisão`, (await pg.getByText("Ainda sem resposta").count()) === 0 && (await pg.getByRole("button", { name: "Enviar as respostas" }).count()) === 1);
+  if (slug === "padrao") {
+    await pg.locator('[data-revisao="numeros"] button').click();
+    await tela(pg);
+    await pg.getByLabel("Outro número").fill("250 famílias atendidas");
+    await pg.getByRole("button", { name: "Pronto" }).last().click();
+    await tela(pg);
+    check("padrao: dá para escrever um número próprio", /250 famílias atendidas/.test(await pg.locator('[data-revisao="numeros"]').innerText()));
+  }
   if (slug === "padrao") check("padrao: o endereço é pedido direto", vistas.includes("Qual é o endereço?"));
   check(`${slug}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 160));
   await pg.context().close();

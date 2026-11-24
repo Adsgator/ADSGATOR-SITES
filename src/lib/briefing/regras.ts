@@ -126,7 +126,7 @@ export type Briefing = {
   cidade?: { nome: string; uf: string };
   /** O ícone do negócio, no desenho da página. */
   icone?: IconeDoNegocio;
-  /** A pasta do cliente no Drive, para o material (logo, fotos). */
+  /** A pasta do cliente no Drive, para o material (logo, fotos); só no da página. */
   pastaDoMaterial?: string;
   /** O que já veio da página, da ficha ou do diagnóstico, para o desenho do anúncio. */
   jaSabemos?: { nome?: string; site?: string; buscas?: string[]; servicos?: string[]; principal?: string; horarios?: Horario[] };

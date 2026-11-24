@@ -5,6 +5,7 @@ import { CheckIcon, ClockIcon, MapPinIcon, PlusIcon, QuoteIcon } from "lucide-re
 import { animate, AnimatePresence, motion } from "motion/react";
 
 import { Traco, TopoDaPagina } from "@/components/briefing/topo-da-pagina";
+import { numeroEmPartes } from "@/lib/briefing/fatos";
 import { iconesDoNegocio, type IconeDoNegocio } from "@/lib/briefing/icones";
 import { emTexto, visiveis, type Briefing, type Papel, type Respostas } from "@/lib/briefing/regras";
 import { temaDe, type Tema } from "@/lib/briefing/temas";
@@ -74,7 +75,7 @@ export function blocosDasRespostas(briefing: Briefing, respostas: Respostas): Bl
     detalhes: Object.assign({}, ...visiveis(briefing, respostas).filter((p) => p.tipo === "detalhes" && p.opcoesDe).map((p) => respostas[p.id]?.itens ?? {})),
     principal: linhas("principal")?.[0],
     passos: passos.length ? passos.map(([, v]) => v.trim()) : undefined,
-    numeros: numeros.length ? (numeros.map(([k, v]) => [v.trim(), k[0].toLowerCase() + k.slice(1)]) as [string, string][]) : undefined,
+    numeros: numeros.length ? (numeros.map(([k, v]) => (k === "Outro número" ? numeroEmPartes(v) : [v.trim(), k[0].toLowerCase() + k.slice(1)])) as [string, string][]) : undefined,
     facilita: opcoes("facilita"),
     diferente: linhas("diferente")?.[0],
     preco: linhas("preco")?.[0],

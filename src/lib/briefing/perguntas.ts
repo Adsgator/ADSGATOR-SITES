@@ -288,18 +288,22 @@ export const diferente: Pergunta = {
   obrigatoria: true,
 };
 
+const OUTRO_NUMERO = "Outro número";
 const NUMEROS: Record<string, string> = {
   "Anos de experiência": "8 anos",
   "Pessoas atendidas": "Mais de 300",
   "Nota no Google": "4,9",
+  "Cursos e formações": "12 cursos",
+  "Pessoas na equipe": "5 pessoas",
   "Link do seu perfil no Google": "Cole o link",
+  [OUTRO_NUMERO]: "O que você quiser mostrar",
 };
 
 /** O que qualquer profissão pode mostrar, também as que o conselho limita. */
-export const NUMEROS_SEM_RESTRICAO = ["Anos de experiência", "Link do seu perfil no Google"];
+export const NUMEROS_SEM_RESTRICAO = ["Anos de experiência", "Cursos e formações", "Pessoas na equipe", "Link do seu perfil no Google"];
 export const MATERIAL_RESTRITO = ["Depoimentos de clientes"];
 
-export const numeros = (opcoes = Object.keys(NUMEROS)): Pergunta => ({
+export const numeros = (opcoes = ["Anos de experiência", "Pessoas atendidas", "Nota no Google", "Link do seu perfil no Google"]): Pergunta => ({
   id: "numeros",
   secao: 3,
   tipo: "redes",
@@ -308,6 +312,7 @@ export const numeros = (opcoes = Object.keys(NUMEROS)): Pergunta => ({
   ajuda: "Preencha os que você tiver. Eles passam confiança logo de cara.",
   opcoes,
   exemplos: NUMEROS,
+  outra: OUTRO_NUMERO,
   nada: "Ainda não tenho números",
   papel: "numeros",
 });

@@ -496,7 +496,7 @@ export function Material({
         <p className="mt-4 max-w-lg text-base leading-7 text-pretty text-muted-foreground sm:text-lg sm:leading-8">
           {nada
             ? "Você disse que ainda não tem nada pronto, e tudo bem. Se achar uma foto ou um depoimento, é só colocar aqui."
-            : `É com ele que ${briefing.tipo === "pagina" ? "a página fica" : "os anúncios ficam"} com a sua cara. O prazo começa a contar quando chegar tudo.`}
+            : "É com ele que a página fica com a sua cara. O prazo começa a contar quando chegar tudo."}
         </p>
         <div className="mt-8 rounded-3xl border border-brand/40 bg-card p-5 sm:p-7">
           <p className="flex items-center gap-3 font-heading text-xl sm:text-2xl">

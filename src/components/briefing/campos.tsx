@@ -353,8 +353,8 @@ function Redes({ p, respostas, mudar }: PropsDoCampo) {
   const itens = respostas[p.id]?.itens ?? {};
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      {(p.opcoes ?? []).map((o) => (
-        <label key={o} className="block space-y-1.5">
+      {[...(p.opcoes ?? []), ...(p.outra ? [p.outra] : [])].map((o) => (
+        <label key={o} className={cn("block space-y-1.5", o === p.outra && "sm:col-span-2")}>
           <span className="text-sm font-medium">{o}</span>
           <input
             value={itens[o] ?? ""}

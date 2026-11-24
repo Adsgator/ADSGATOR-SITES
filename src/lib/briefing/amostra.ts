@@ -506,7 +506,6 @@ const adestramentoAds: Briefing = {
   icone: "pata",
   nome: "Rafa",
   segmento: "Adestramento de cães, só o Google Ads",
-  pastaDoMaterial: "https://drive.google.com/",
   secoes: secoesDoAds,
   jaSabemos: {
     nome: "Rafa Adestramento",
@@ -566,10 +565,10 @@ const adestramentoAds: Briefing = {
 
 // O padrão ------------------------------------------------------------------------------------
 
-const semAdaptacao = { nome: "Bia", negocio: "Bia Andrade", cidade: { nome: "Campinas", uf: "SP" }, pastaDoMaterial: "https://drive.google.com/" };
+const semAdaptacao = { nome: "Bia", negocio: "Bia Andrade", cidade: { nome: "Campinas", uf: "SP" } };
 
 const padroes: Briefing[] = [
-  padraoDaPagina({ ...semAdaptacao, whatsapp: "(00) 90000-0000", slug: "padrao", segmento: "O padrão, sem adaptação" }),
+  padraoDaPagina({ ...semAdaptacao, pastaDoMaterial: "https://drive.google.com/", whatsapp: "(00) 90000-0000", slug: "padrao", segmento: "O padrão, sem adaptação" }),
   padraoDoGoogleAds({ ...semAdaptacao, slug: "padrao-ads", segmento: "O padrão, só o Google Ads" }),
   padraoDoGoogleAds(
     { ...semAdaptacao, slug: "padrao-ads-pagina", segmento: "O padrão, já com o da página", site: "biaandrade.com.br" },

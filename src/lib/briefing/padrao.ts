@@ -26,7 +26,7 @@ import type { Briefing } from "@/lib/briefing/regras";
 // profissão: as opções não falam de preço, pagamento, desconto, gratuidade nem de resultado,
 // que os conselhos (OAB, saúde) limitam. Quem quiser, escreve.
 
-type Cliente = Pick<Briefing, "slug" | "nome" | "segmento" | "cidade" | "pastaDoMaterial"> & {
+type Cliente = Pick<Briefing, "slug" | "nome" | "segmento" | "cidade"> & {
   /** O que o cadastro já sabe; o que faltar vira pergunta. */
   negocio?: string;
 };
@@ -41,7 +41,7 @@ const FACILIDADES = [
   "Acesso para cadeira de rodas",
 ];
 
-export const padraoDaPagina = ({ negocio, whatsapp: numero, ...cliente }: Cliente & { whatsapp?: string }): Briefing => ({
+export const padraoDaPagina = ({ negocio, whatsapp: numero, ...cliente }: Cliente & { whatsapp?: string; pastaDoMaterial?: string }): Briefing => ({
   ...cliente,
   tipo: "pagina",
   secoes: secoesDaPagina,
@@ -215,8 +215,6 @@ export const padraoDoGoogleAds = ({ negocio, site, ...cliente }: Cliente & { sit
   if (pagina)
     return {
       ...comum,
-      // O material já foi pela página.
-      pastaDoMaterial: undefined,
       secoes: secoesDoAdsComPagina,
       jaSabemos: { nome: negocio, site, servicos: pagina.servicos, principal: pagina.principal, horarios: pagina.horarios },
       perguntas: [
