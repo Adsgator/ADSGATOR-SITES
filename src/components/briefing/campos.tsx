@@ -3,11 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckIcon, PlusIcon, XIcon } from "lucide-react";
 
-import { Seletor } from "@/components/checkout/campo";
+import { CampoDosHorarios } from "@/components/briefing/horarios";
 import { estilos } from "@/lib/briefing/estilos";
 import {
-  HORA_MARCADA,
-  HORARIOS_INICIAIS,
   opcoesDa,
   type Briefing,
   type Pergunta,
@@ -83,7 +81,9 @@ function Opcao({
       >
         {marcada && <CheckIcon className="size-3.5" strokeWidth={3} />}
       </span>
-      <span className="min-w-0 break-words">{children}</span>
+      <span className="min-w-0 flex-1 break-words">{children}</span>
+      {/* O cursor da marca clica na opção escolhida. */}
+      {marcada && <span aria-hidden="true" className="brand-cursor cursor-clica mr-1 h-5 shrink-0 text-ink" />}
     </button>
   );
 }
@@ -219,7 +219,7 @@ function Confirmar({ p, respostas, mudar, escolheu, comErro }: PropsDoCampo) {
   const outro = r?.opcoes?.includes("outro") ?? false;
   return (
     <div className="space-y-2.5">
-      <p className="rounded-xl border-l-4 border-brand bg-card px-5 py-4 font-heading text-xl break-words sm:text-2xl">
+      <p className="rounded-xl border-l-4 border-brand bg-card px-5 py-4 font-heading text-xl lining-nums break-words sm:text-2xl">
         {p.valorConhecido}
       </p>
       <div role="radiogroup" aria-label={p.titulo} className="space-y-2.5">
@@ -325,73 +325,8 @@ function Detalhes({ p, briefing, respostas, mudar }: PropsDoCampo) {
   );
 }
 
-/** De meia em meia hora, das 5:00 às 23:30. */
-const horas = Array.from({ length: 38 }, (_, i) => {
-  const minutos = 5 * 60 + i * 30;
-  return `${String(Math.floor(minutos / 60)).padStart(2, "0")}:${String(minutos % 60).padStart(2, "0")}`;
-});
-
 function Horarios({ p, respostas, mudar }: PropsDoCampo) {
-  const r = respostas[p.id];
-  const lista = r?.horarios ?? HORARIOS_INICIAIS;
-  const marcada = r?.opcoes?.includes(HORA_MARCADA) ?? false;
-  const trocar = (i: number, mudanca: Partial<(typeof lista)[number]>) =>
-    mudar({ ...r, horarios: lista.map((h, j) => (j === i ? { ...h, ...mudanca } : h)) });
-  return (
-    <div className="space-y-2.5">
-      {lista.map((h, i) => (
-        <div key={h.dias} className={cn("rounded-xl border bg-card transition-colors", h.aberto ? "border-ink" : "border-input")}>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={h.aberto}
-            onClick={() => trocar(i, { aberto: !h.aberto })}
-            className="flex min-h-13 w-full items-center justify-between gap-3 rounded-xl px-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
-          >
-            <span className="font-medium">{h.dias}</span>
-            <span
-              className={cn("relative h-6 w-11 rounded-full transition-colors", h.aberto ? "bg-ink" : "bg-ring/40")}
-              aria-hidden="true"
-            >
-              <span
-                className={cn(
-                  "absolute top-0.5 left-0.5 size-5 rounded-full transition-transform",
-                  h.aberto ? "translate-x-5 bg-brand" : "bg-white",
-                )}
-              />
-            </span>
-          </button>
-          {h.aberto && (
-            <div className="flex items-center gap-2 px-4 pb-4 text-sm">
-              <span>das</span>
-              <div className="flex-1">
-                <Seletor aria-label={`${h.dias}, começa`} value={h.de} onChange={(e) => trocar(i, { de: e.target.value })}>
-                  {horas.map((x) => (
-                    <option key={x}>{x}</option>
-                  ))}
-                </Seletor>
-              </div>
-              <span>às</span>
-              <div className="flex-1">
-                <Seletor aria-label={`${h.dias}, termina`} value={h.ate} onChange={(e) => trocar(i, { ate: e.target.value })}>
-                  {horas.map((x) => (
-                    <option key={x}>{x}</option>
-                  ))}
-                </Seletor>
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-      <Opcao
-        papel="checkbox"
-        marcada={marcada}
-        onClick={() => mudar({ ...r, horarios: lista, opcoes: marcada ? [] : [HORA_MARCADA] })}
-      >
-        {HORA_MARCADA}
-      </Opcao>
-    </div>
-  );
+  return <CampoDosHorarios r={respostas[p.id]} mudar={mudar} />;
 }
 
 const exemplosDeRede: Record<string, string> = {

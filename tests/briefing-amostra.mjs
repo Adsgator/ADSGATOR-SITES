@@ -1,7 +1,8 @@
 // A amostra do briefing (plano geral, Parte 5), com cliques reais, no computador e no
 // celular, com "reduzir animações" ligado e desligado: responder do começo ao fim, as
 // perguntas que aparecem e somem, sair no meio e voltar, recomeçar, rever, mudar,
-// enviar e os 4 números em outro aparelho. Nada sai do navegador.
+// enviar, os 4 números em outro aparelho, os horários, o olho, o texto colado e os dois do
+// Google Ads. Nada sai do navegador.
 // Uso: node tests/briefing-amostra.mjs [endereço] [pasta das fotos]
 //   padrão: http://localhost:3005 (o next dev precisa estar aberto)
 import { chromium } from "playwright-core";
@@ -19,7 +20,7 @@ const browser = await chromium.launch({ channel: "chrome" });
 
 const titulo = (pg) => pg.locator("[data-tela] [data-titulo]").last();
 async function tela(pg) {
-  await pg.waitForTimeout(650);
+  await pg.waitForTimeout(750);
   return pg.locator("[data-tela]").last().getAttribute("data-tela");
 }
 const continuar = (pg) => pg.locator('[data-tela] button:has-text("Continuar"):visible').last().click();
@@ -46,7 +47,7 @@ async function responder(pg, escolhas = {}) {
     await area.locator("textarea").first().fill(LONGO);
   } else if (await area.locator("textarea").count()) {
     for (const c of await area.locator("textarea").all()) await c.fill(LONGO);
-  } else if (await area.getByText("Cidade", { exact: false }).count() || (await area.locator('input[aria-label="Cidade, bairro ou estado"]').count())) {
+  } else if (await area.locator('input[aria-label="Cidade, bairro ou estado"]').count()) {
     const campo = area.locator('input[aria-label="Cidade, bairro ou estado"]');
     await campo.fill("Cidade do Teste");
     await campo.press("Enter");
@@ -117,6 +118,7 @@ for (const [nome, opcoes] of [
 
   // Sem resposta, não passa; e diz o porquê.
   await continuar(pg);
+  check("sem resposta nenhuma, a contagem é zero", /^0 de /.test(await pg.locator("[data-contagem]").last().innerText()), await pg.locator("[data-contagem]").last().innerText());
   check("sem resposta não passa", /Confirme ou escreva/.test(await pg.locator("[data-erro]").last().innerText()));
 
   const vistas = await ateORevisao(pg, {
@@ -151,6 +153,8 @@ for (const [nome, opcoes] of [
   }
   await pg.getByRole("button", { name: "Enviar as respostas" }).click();
   check("envia", (await tela(pg)) === "fim");
+  check("a pasta do material abre em outra aba", (await pg.locator("[data-material] a").getAttribute("target")) === "_blank");
+  await pg.waitForTimeout(1500);
   if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${pg.foto}-fim.png`, fullPage: true });
   await pg.reload();
   check("depois de enviado, abre no fim", (await tela(pg)) === "fim");
@@ -236,6 +240,154 @@ console.log("\n# Escreveu e tocou em Continuar sem tocar em Adicionar");
   await pg.getByRole("button", { name: "Voltar" }).click();
   await tela(pg);
   check("a opção escrita está marcada", (await pg.getByRole("checkbox", { name: "No parque" }).getAttribute("aria-checked")) === "true");
+  await pg.context().close();
+}
+
+console.log("\n# Google Ads");
+for (const [slug, maximo, minimo] of [["trabalhista-ads", 9, 7], ["adestramento-ads", 14, 11]]) {
+  const pg = await nova(CELULAR);
+  pg.foto = `ads-${slug}`;
+  await pg.goto(`${SITE}/forms/amostra/${slug}`);
+  await pg.waitForSelector("[data-cena]");
+  if (FOTOS) {
+    await pg.evaluate(() => document.querySelector("[data-cena]").scrollIntoView({ block: "center" }));
+    await pg.waitForTimeout(7200);
+    await pg.screenshot({ path: `${FOTOS}/${pg.foto}-abertura.png`, fullPage: true });
+  }
+  await pg.getByRole("button", { name: "Começar" }).click();
+  const vistas = await ateORevisao(pg);
+  check(`${slug}: entre ${minimo} e ${maximo} perguntas`, vistas.length >= minimo && vistas.length <= maximo, vistas.length);
+  check(`${slug}: nunca anunciou, não pergunta como foi`, !vistas.includes("Como foi essa experiência?"));
+  check(`${slug}: não pergunta a verba`, !vistas.some((v) => /verba|investir/i.test(v)));
+  check(
+    `${slug}: o que já veio do da página não repete`,
+    vistas.includes("É este o site que vai receber os anúncios?") === (slug === "adestramento-ads"),
+  );
+  await pg.getByRole("button", { name: "Enviar as respostas" }).click();
+  check(`${slug}: envia`, (await tela(pg)) === "fim");
+  check(`${slug}: sem a pasta do material`, (await pg.locator("[data-material]").count()) === 0);
+  await pg.waitForTimeout(1500);
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${pg.foto}-fim.png`, fullPage: true });
+  check(`${slug}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 160));
+  await pg.context().close();
+}
+
+console.log("\n# Horários");
+for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
+  const pg = await nova(opcoes);
+  await pg.goto(`${SITE}/forms/amostra/adestramento`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  await ateORevisao(pg, {}, (v) => v.at(-1) === "Em quais cidades ou bairros você vai até a casa?");
+  await tela(pg);
+  check(`${nome}: chegou aos horários`, (await titulo(pg).innerText()).trim() === "Em quais dias e horários você dá aula?");
+  await pg.getByRole("switch", { name: "Segunda a sexta" }).click();
+  await pg.waitForTimeout(500);
+  await pg.getByRole("button", { name: "Terça tem outro horário" }).click();
+  await pg.waitForTimeout(500);
+  await pg.getByLabel("Terça, começa").selectOption("13:00");
+  await pg.getByLabel("Terça, termina").selectOption("20:30");
+  await pg.getByRole("button", { name: "Sexta tem outro horário" }).click();
+  await pg.waitForTimeout(500);
+  await pg.getByLabel("Não atendo na sexta").check();
+  await pg.getByRole("button", { name: "Paro no meio do dia" }).first().click();
+  await pg.waitForTimeout(700);
+  const dia = (d) => pg.locator(`[data-semana] [data-dia="${d}"]`);
+  check(`${nome}: a semana mostra a terça diferente`, /13:00/.test(await dia("Terça").innerText()) && /20:30/.test(await dia("Terça").innerText()));
+  check(`${nome}: e a sexta fechada`, (await dia("Sexta").getAttribute("data-aberto")) === "false");
+  check(`${nome}: segunda com intervalo (2 blocos)`, (await dia("Segunda").locator("span.bg-brand").count()) === 2);
+  check(`${nome}: sem rolagem lateral`, (await pg.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0);
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${nome === "celular" ? "cel" : "pc"}-horarios.png`, fullPage: true });
+  await pg.getByLabel("Terça, termina").selectOption("10:00");
+  await continuar(pg);
+  check(`${nome}: hora trocada não passa`, /Terça termina antes/.test(await pg.locator("[data-erro]").last().innerText()));
+  await pg.getByLabel("Terça, termina").selectOption("20:30");
+  await continuar(pg);
+  await tela(pg);
+  await pg.goto(`${SITE}/forms/amostra/adestramento/agencia`);
+  const linhas = await pg.locator('[data-resposta="horarios"]').innerText();
+  check(
+    `${nome}: o texto junta os dias iguais`,
+    linhas.includes("Segunda, quarta e quinta, das 08:00 às 12:00 e das 13:00 às 18:00") && linhas.includes("Terça, das 13:00 às 20:30"),
+    linhas.split("\n").slice(1).join(" | "),
+  );
+  await pg.context().close();
+}
+
+console.log("\n# O olho");
+for (const [nome, opcoes] of [["celular", CELULAR], ["computador", {}]]) {
+  const pg = await nova(opcoes);
+  await pg.goto(`${SITE}/forms/amostra/trabalhista`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  await tela(pg);
+  await avancar(pg);
+  await pg.waitForTimeout(1200);
+  const logo = await pg.locator("[data-cabecalho] img:visible").first().boundingBox();
+  const olho = await pg.locator("[data-olho]").boundingBox();
+  check(`${nome}: alinhado com a logo`, Math.abs(logo.y + logo.height / 2 - (olho.y + olho.height / 2)) <= 1.5, `${logo.y + logo.height / 2} x ${olho.y + olho.height / 2}`);
+  check(`${nome}: o convite só no celular`, (await pg.locator("[data-convite-do-olho]").isVisible()) === (nome === "celular"));
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${nome === "celular" ? "cel" : "pc"}-olho.png` });
+  const pupila = () => pg.locator(".olho-pupila").evaluate((e) => e.style.transform);
+  if (nome === "computador") {
+    await pg.mouse.move(20, 700);
+    const a = await pupila();
+    await pg.mouse.move(1340, 20);
+    check("computador: a pupila segue o mouse", a !== (await pupila()), `${a} / ${await pupila()}`);
+  }
+  const antes = (await titulo(pg).innerText()).trim();
+  await pg.locator("[data-olho]").click();
+  await pg.waitForTimeout(700);
+  check(`${nome}: o toque mostra o desenho`, await pg.locator("[data-ver-desenho]").isVisible());
+  check(`${nome}: com o que já foi respondido`, /Helena Prado Advocacia/.test(await pg.locator("[data-ver-desenho]").innerText()));
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/${nome === "celular" ? "cel" : "pc"}-ver.png` });
+  await pg.goBack();
+  await pg.waitForTimeout(600);
+  check(`${nome}: o Voltar fecha e fica na mesma pergunta`, (await pg.locator("[data-ver-desenho]").count()) === 0 && (await titulo(pg).innerText()).trim() === antes);
+  check(`${nome}: o convite não volta`, (await pg.locator("[data-convite-do-olho]").count()) === 0);
+  await pg.locator("[data-olho]").click();
+  await pg.waitForTimeout(500);
+  await pg.keyboard.press("Escape");
+  await pg.waitForTimeout(600);
+  check(`${nome}: Esc fecha`, (await pg.locator("[data-ver-desenho]").count()) === 0);
+  await pg.locator("[data-olho]").click();
+  await pg.waitForTimeout(500);
+  await pg.getByRole("button", { name: "Voltar a responder" }).first().click();
+  await pg.waitForTimeout(600);
+  check(`${nome}: o botão fecha e continua na pergunta`, (await titulo(pg).innerText()).trim() === antes);
+  check(`${nome}: sem erro no console`, pg.erros.length === 0, pg.erros[0]?.slice(0, 160));
+  await pg.context().close();
+}
+
+console.log("\n# Resposta que chegou pronta");
+{
+  const pg = await nova({ permissions: ["clipboard-read", "clipboard-write"] });
+  const TEXTO =
+    "Com um atendimento humanizado e personalizado, buscamos sempre a excelência em cada detalhe. Nosso compromisso é oferecer soluções completas, com foco na satisfação do cliente e em resultados reais.";
+  await pg.goto(`${SITE}/forms/amostra/trabalhista`);
+  await pg.getByRole("button", { name: "Começar" }).click();
+  const colar = async () => {
+    await pg.evaluate((t) => navigator.clipboard.writeText(t), TEXTO);
+    await pg.locator("form textarea").last().click();
+    await pg.keyboard.press("ControlOrMeta+v");
+  };
+  await ateORevisao(pg, { "Como você atende?": ["Por vídeo ou telefone"] }, (v) => v.at(-1) === "Qual deles você mais quer atender?");
+  if ((await tela(pg)) === "passo") await continuar(pg);
+  await tela(pg);
+  await colar(); // a primeira mensagem, colada
+  await continuar(pg);
+  await tela(pg);
+  await colar(); // o cliente de novo, colado e reescrito
+  await pg.locator("form textarea").last().fill("Era uma moça que trabalhava em loja e saiu sem receber nada, e a gente resolveu em duas conversas.");
+  await continuar(pg);
+  await tela(pg);
+  await pg.locator("form textarea").last().pressSequentially("Que eu explico bem e respondo.");
+  await continuar(pg);
+  await tela(pg);
+  await pg.goto(`${SITE}/forms/amostra/trabalhista/agencia`);
+  const sinal = (id) => pg.locator(`[data-resposta="${id}"]`).getAttribute("data-sinal");
+  check("colada fica marcada", (await sinal("quem_chega")) === "colada", await sinal("quem_chega"));
+  check("colada e reescrita não fica", (await sinal("quem_quer")) === "", await sinal("quem_quer"));
+  check("curta fica marcada", (await sinal("elogio")) === "curta", await sinal("elogio"));
+  if (FOTOS) await pg.screenshot({ path: `${FOTOS}/pc-agencia.png`, fullPage: true });
   await pg.context().close();
 }
 

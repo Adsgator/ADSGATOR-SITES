@@ -12,11 +12,12 @@ export default function InicioDaAmostra() {
       <BrandLogo />
       <h1 className="mt-8 font-heading text-3xl">Amostra do briefing</h1>
       <p className="mt-3 leading-7 text-muted-foreground">
-        Dois negócios inventados. As respostas ficam só neste navegador.
+        Negócios inventados. As respostas ficam só neste navegador.
       </p>
       <ul className="mt-8 space-y-4">
         {briefingsDaAmostra.map((b) => (
           <li key={b.slug} className="rounded-2xl border bg-card p-5">
+            <p className="text-sm text-muted-foreground">{b.tipo === "pagina" ? "Página" : "Google Ads"}</p>
             <h2 className="font-heading text-xl">{b.segmento}</h2>
             <div className="mt-4 flex flex-wrap gap-2 text-sm font-medium">
               <a href={`/forms/amostra/${b.slug}`} className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 text-brand-foreground">
@@ -27,6 +28,12 @@ export default function InicioDaAmostra() {
                 className="inline-flex min-h-11 items-center rounded-full border border-input px-5 hover:bg-muted"
               >
                 Como se fosse outro aparelho
+              </a>
+              <a
+                href={`/forms/amostra/${b.slug}/agencia`}
+                className="inline-flex min-h-11 items-center rounded-full border border-input px-5 hover:bg-muted"
+              >
+                Como você vai ver
               </a>
             </div>
           </li>

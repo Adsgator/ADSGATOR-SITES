@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, CloudCheckIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, CloudCheckIcon, XIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { BrandLogo } from "@/components/brand";
 import { CampoDaPergunta } from "@/components/briefing/campos";
-import { blocosDasRespostas, RascunhoDaPagina } from "@/components/briefing/rascunho-da-pagina";
+import { Desenho, desenhoDe, LegendaDoDesenho } from "@/components/briefing/desenho";
+import { Olho } from "@/components/briefing/olho";
 import { Abertura, Fim, OutroAparelho, Passo, Revisao, Volta } from "@/components/briefing/telas";
+import { Eyebrow } from "@/components/eyebrow";
+import { FundoVivo } from "@/components/fundo-vivo";
 import {
   problema,
   progresso,
@@ -17,6 +20,8 @@ import {
   type Resposta,
   type Respostas,
 } from "@/lib/briefing/regras";
+import { guardarAmostra, lerAmostra } from "@/lib/briefing/guardado-da-amostra";
+import { MINIMO_COLADO, type Colados } from "@/lib/briefing/sinais";
 import { cn } from "@/lib/utils";
 
 // O briefing: uma pergunta por tela, com o que vem depois dependendo da resposta
@@ -31,20 +36,6 @@ type Tela =
   | { tipo: "pergunta"; id: string; daRevisao?: boolean }
   | { tipo: "passo"; secao: number };
 
-type Guardado = { respostas: Respostas; enviado: boolean };
-
-const chaveDe = (slug: string) => `amostra-briefing:${slug}`;
-
-function lerGuardado(slug: string): Guardado {
-  try {
-    const texto = localStorage.getItem(chaveDe(slug));
-    if (texto) return JSON.parse(texto) as Guardado;
-  } catch {
-    // Navegador sem armazenamento: a amostra funciona, só não guarda.
-  }
-  return { respostas: {}, enviado: false };
-}
-
 const semAssinatura = () => () => {};
 
 /** Só depois de montar no navegador, porque o começo depende do que está guardado nele. */
@@ -54,10 +45,13 @@ export function BriefingDaAmostra(props: { briefing: Briefing; outroAparelho: bo
 }
 
 function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho: boolean }) {
-  const [guardado] = useState(() => lerGuardado(briefing.slug));
+  const [guardado] = useState(() => lerAmostra(briefing.slug));
   const [respostas, setRespostas] = useState(guardado.respostas);
   const [enviado, setEnviado] = useState(guardado.enviado);
+  const [colados, setColados] = useState<Colados>(guardado.colados);
   const [salvo, setSalvo] = useState(false);
+  const [vendo, setVendo] = useState(false);
+  const [jaViu, setJaViu] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [direcao, setDirecao] = useState(1);
   const [tela, setTela] = useState<Tela>(() => {
@@ -69,14 +63,17 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
   const lista = visiveis(briefing, respostas);
   const { feitas, total, porcento } = progresso(briefing, respostas);
 
-  function guardar(novas: Respostas, jaEnviado = enviado) {
+  function guardar(novas: Respostas, mais: { enviado?: boolean; colados?: Colados } = {}) {
     setRespostas(novas);
-    setSalvo(true);
-    try {
-      localStorage.setItem(chaveDe(briefing.slug), JSON.stringify({ respostas: novas, enviado: jaEnviado }));
-    } catch {
-      setSalvo(false);
-    }
+    setSalvo(guardarAmostra(briefing.slug, { respostas: novas, enviado, colados, ...mais }));
+  }
+
+  /** Um texto longo chegou de uma vez (sinais.ts). */
+  function chegouDeUmaVez(id: string, texto: string) {
+    if (texto.trim().length < MINIMO_COLADO || colados[id]?.includes(texto)) return;
+    const novos = { ...colados, [id]: [...(colados[id] ?? []), texto.slice(0, 5000)].slice(-5) };
+    setColados(novos);
+    guardarAmostra(briefing.slug, { respostas, enviado, colados: novos });
   }
 
   function ir(destino: Tela, sentido = 1) {
@@ -87,6 +84,13 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
     window.history.pushState({ briefing: destino }, "");
   }
 
+  // O desenho aberto pelo olho também entra no histórico: o Voltar do celular o fecha.
+  function verDesenho() {
+    setVendo(true);
+    setJaViu(true);
+    window.history.pushState({ briefing: tela }, "");
+  }
+
   // O Voltar do navegador (e o gesto do celular) anda dentro do briefing.
   useEffect(() => {
     window.history.replaceState({ ...window.history.state, briefing: tela }, "");
@@ -95,6 +99,7 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
       if (!destino) return;
       clearTimeout(espera.current);
       setErro(null);
+      setVendo(false);
       setDirecao(-1);
       setTela(destino);
     };
@@ -151,7 +156,7 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
   function escolheu(id: string, r: Resposta) {
     const novas = responder(id, r);
     clearTimeout(espera.current);
-    espera.current = setTimeout(() => seguinte(id, novas, daRevisao), 380);
+    espera.current = setTimeout(() => seguinte(id, novas, daRevisao), 560);
   }
 
   const emPergunta = tela.tipo === "pergunta" && pergunta;
@@ -163,20 +168,33 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       {tela.tipo !== "abertura" && tela.tipo !== "fim" && tela.tipo !== "aparelho" && (
-        <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur" data-cabecalho>
-          <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
-            <BrandLogo className="h-5 w-[108px]" />
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-live="polite">
-              {salvo && (
-                <>
-                  <CloudCheckIcon className="size-4" aria-hidden="true" />
-                  Salvo
-                </>
-              )}
-            </p>
+        <header
+          className={cn(
+            "sticky top-0 z-20 border-b bg-background/95 text-foreground backdrop-blur transition-colors duration-300",
+            tela.tipo === "passo" && "dark section-ink",
+          )}
+          data-cabecalho
+        >
+          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
+            <BrandLogo className="h-5 w-[108px] sm:h-6 sm:w-[130px]" />
+            <div className="flex items-center gap-3">
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-live="polite">
+                {salvo && (
+                  <>
+                    <CloudCheckIcon className="size-4" aria-hidden="true" />
+                    Salvo
+                  </>
+                )}
+              </p>
+              <Olho
+                feitas={feitas}
+                convidar={tela.tipo === "pergunta" && !jaViu && feitas >= 1 && feitas <= 3}
+                aoAbrir={verDesenho}
+              />
+            </div>
           </div>
           <div
-            className="h-1.5 bg-ring/15"
+            className="mx-auto flex max-w-6xl gap-1.5 px-4 pb-2.5"
             role="progressbar"
             aria-label="Quanto do briefing já foi respondido"
             aria-valuenow={porcento}
@@ -184,10 +202,18 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
             aria-valuemax={100}
             data-porcento={porcento}
           >
-            <div
-              className="h-full rounded-r-full bg-brand transition-[width] duration-700 ease-(--ease-out)"
-              style={{ width: `${Math.max(porcento, 2)}%` }}
-            />
+            {briefing.secoes.map((s, i) => {
+              const doPasso = lista.filter((p) => p.secao === i);
+              const prontas = doPasso.filter((p) => respondida(p, briefing, respostas)).length;
+              return (
+                <span key={s} className="h-1.5 flex-1 overflow-hidden rounded-full bg-ring/20">
+                  <span
+                    className="block h-full rounded-full bg-brand transition-[width] duration-700 ease-(--ease-out)"
+                    style={{ width: `${(prontas / doPasso.length) * 100}%` }}
+                  />
+                </span>
+              );
+            })}
           </div>
         </header>
       )}
@@ -221,7 +247,8 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
               aoContinuar={continuar}
               aoRever={() => ir({ tipo: "revisao" })}
               aoRecomecar={() => {
-                guardar({});
+                setColados({});
+                guardar({}, { colados: {} });
                 ir({ tipo: "abertura" });
               }}
             />
@@ -248,7 +275,7 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
               aoMudar={(id) => ir({ tipo: "pergunta", id, daRevisao: true })}
               aoEnviar={() => {
                 setEnviado(true);
-                guardar(respostas, true);
+                guardar(respostas, { enviado: true });
                 ir({ tipo: "fim" });
               }}
             />
@@ -256,97 +283,187 @@ function Player({ briefing, outroAparelho }: { briefing: Briefing; outroAparelho
           {tela.tipo === "fim" && <Fim briefing={briefing} respostas={respostas} />}
 
           {emPergunta && (
-            <form
-              noValidate
-              onSubmit={(e) => {
-                e.preventDefault();
-                confirmar();
-              }}
-              className="flex flex-1 flex-col"
-            >
-              <div className="mx-auto grid w-full max-w-6xl flex-1 gap-14 px-4 pt-7 pb-10 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_18rem]">
-                <div className="mx-auto w-full max-w-2xl lg:mx-0">
-                  <p className="text-sm text-muted-foreground" data-secao>
-                    <span className="font-medium text-foreground">{briefing.secoes[pergunta.secao]}</span>
-                    <span aria-hidden="true"> · </span>
-                    <span>
-                      passo {pergunta.secao + 1} de {briefing.secoes.length}
-                    </span>
-                  </p>
-                  <Titulo key={pergunta.id} digita={pergunta.tipo === "texto" || pergunta.tipo === "longo"}>
-                    {pergunta.titulo}
-                  </Titulo>
-                  {pergunta.ajuda && <p className="mt-3 text-base leading-7 text-pretty text-muted-foreground">{pergunta.ajuda}</p>}
-                  <div className="mt-6 sm:mt-8">
-                    <CampoDaPergunta
-                      p={pergunta}
-                      briefing={briefing}
-                      respostas={respostas}
-                      mudar={(r) => responder(pergunta.id, r)}
-                      escolheu={(r) => escolheu(pergunta.id, r)}
-                      comErro={Boolean(erro)}
+            <FundoVivo className="flex flex-1 flex-col [&>div:first-child]:opacity-40 sm:[&>div:first-child]:opacity-80" aria-label={pergunta.titulo}>
+              <form
+                noValidate
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  confirmar();
+                }}
+                onPaste={(e) => {
+                  if (e.target instanceof HTMLTextAreaElement) chegouDeUmaVez(pergunta.id, e.clipboardData.getData("text"));
+                }}
+                onInput={(e) => {
+                  // O teclado do celular às vezes cola sem avisar que colou.
+                  const { inputType, data } = e.nativeEvent as InputEvent;
+                  if (e.target instanceof HTMLTextAreaElement && inputType === "insertText" && data) chegouDeUmaVez(pergunta.id, data);
+                }}
+                className="bg-pattern-light flex flex-1 flex-col"
+              >
+                <div className="mx-auto grid w-full max-w-6xl flex-1 gap-14 px-4 pt-8 pb-10 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_18rem]">
+                  <div className="mx-auto w-full max-w-2xl lg:mx-0">
+                    <Eyebrow>
+                      <span data-secao>
+                        {briefing.secoes[pergunta.secao]} · {pergunta.secao + 1} de {briefing.secoes.length}
+                      </span>
+                    </Eyebrow>
+                    <Titulo
+                      key={pergunta.id}
+                      texto={pergunta.titulo}
+                      destaque={pergunta.destaque}
+                      digita={pergunta.tipo === "texto" || pergunta.tipo === "longo"}
                     />
-                    {pergunta.nada && (
-                      <button
-                        type="button"
-                        aria-pressed={respostas[pergunta.id]?.nada ?? false}
-                        onClick={() => escolheu(pergunta.id, { nada: true })}
-                        className={cn(
-                          "mt-3 inline-flex min-h-11 items-center gap-2 rounded-full border px-5 text-sm transition-colors",
-                          respostas[pergunta.id]?.nada
-                            ? "border-ink bg-brand/20 font-medium"
-                            : "border-dashed border-ring hover:border-solid hover:bg-card",
-                        )}
-                      >
-                        {respostas[pergunta.id]?.nada && <CheckIcon className="size-4" aria-hidden="true" />}
-                        {pergunta.nada}
-                      </button>
+                    {pergunta.ajuda && (
+                      <p className="mt-3 text-base leading-7 text-pretty text-muted-foreground">{pergunta.ajuda}</p>
                     )}
-                  </div>
-                  <p role="alert" className="mt-3 min-h-6 text-sm font-medium text-destructive" data-erro>
-                    {erro}
-                  </p>
-                </div>
-                <aside className="hidden lg:block" aria-hidden="true">
-                  <div className="sticky top-24">
-                    <RascunhoDaPagina blocos={blocosDasRespostas(briefing, respostas)} />
-                    <p className="mt-3 text-center text-xs text-balance text-muted-foreground">
-                      Só um desenho para acompanhar. O visual de verdade é com a gente.
+                    <motion.div
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.22, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                      className="mt-7 sm:mt-9"
+                    >
+                      <CampoDaPergunta
+                        p={pergunta}
+                        briefing={briefing}
+                        respostas={respostas}
+                        mudar={(r) => responder(pergunta.id, r)}
+                        escolheu={(r) => escolheu(pergunta.id, r)}
+                        comErro={Boolean(erro)}
+                      />
+                      {pergunta.nada && (
+                        <button
+                          type="button"
+                          aria-pressed={respostas[pergunta.id]?.nada ?? false}
+                          onClick={() => escolheu(pergunta.id, { nada: true })}
+                          className={cn(
+                            "mt-3 inline-flex min-h-11 items-center gap-2 rounded-full border px-5 text-sm transition-colors",
+                            respostas[pergunta.id]?.nada
+                              ? "border-ink bg-brand/20 font-medium"
+                              : "border-dashed border-ring bg-background/60 hover:border-solid hover:bg-card",
+                          )}
+                        >
+                          {respostas[pergunta.id]?.nada && <CheckIcon className="size-4" aria-hidden="true" />}
+                          {pergunta.nada}
+                        </button>
+                      )}
+                    </motion.div>
+                    <p role="alert" className="mt-3 min-h-6 text-sm font-medium text-destructive" data-erro>
+                      {erro}
                     </p>
                   </div>
-                </aside>
-              </div>
-              <div className="sticky bottom-0 z-10 border-t bg-background/95 backdrop-blur" data-rodape>
-                <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-                  <button
-                    type="button"
-                    onClick={() => anterior(pergunta.id, daRevisao)}
-                    className="inline-flex h-12 items-center gap-2 rounded-full border border-input px-4 text-sm font-medium hover:bg-muted sm:px-5"
-                  >
-                    <ArrowLeftIcon className="size-4" aria-hidden="true" />
-                    Voltar
-                  </button>
-                  <span className="flex-1 text-center text-xs text-muted-foreground" data-contagem>
-                    {feitas} de {total}
-                  </span>
-                  <button
-                    type="submit"
-                    className="inline-flex h-12 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground transition-transform hover:brightness-95 active:scale-[0.98] sm:px-8"
-                  >
-                    {daRevisao ? "Pronto" : "Continuar"}
-                    {daRevisao ? (
-                      <CheckIcon className="size-4" aria-hidden="true" />
-                    ) : (
-                      <ArrowRightIcon className="size-4" aria-hidden="true" />
-                    )}
-                  </button>
+                  <aside className="hidden lg:block" aria-hidden="true">
+                    <div className="sticky top-32">
+                      <Desenho desenho={desenhoDe(briefing, respostas)} />
+                      <LegendaDoDesenho tipo={briefing.tipo} />
+                    </div>
+                  </aside>
                 </div>
-              </div>
-            </form>
+                <div className="sticky bottom-0 z-10 border-t bg-background/95 backdrop-blur" data-rodape>
+                  <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => anterior(pergunta.id, daRevisao)}
+                      className="group inline-flex h-12 items-center gap-2 rounded-full border border-input px-4 text-sm font-medium hover:bg-muted sm:px-5"
+                    >
+                      <ArrowLeftIcon className="size-4 transition-transform group-hover:-translate-x-1" aria-hidden="true" />
+                      Voltar
+                    </button>
+                    <span className="flex-1 text-center font-mono text-xs text-muted-foreground" data-contagem>
+                      {feitas} de {total}
+                    </span>
+                    <button
+                      type="submit"
+                      className="group inline-flex h-12 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground transition-transform hover:brightness-95 active:scale-[0.98] sm:px-8"
+                    >
+                      {daRevisao ? "Pronto" : "Continuar"}
+                      {daRevisao ? (
+                        <CheckIcon className="size-4" aria-hidden="true" />
+                      ) : (
+                        <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </FundoVivo>
           )}
         </motion.div>
       </AnimatePresence>
+
+      <AnimatePresence>
+        {vendo && (
+          <VerDesenho aoFechar={() => window.history.back()}>
+            <Desenho desenho={desenhoDe(briefing, respostas)} />
+            <LegendaDoDesenho tipo={briefing.tipo} />
+          </VerDesenho>
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+/** O desenho aberto pelo olho, por cima de tudo. */
+function VerDesenho({ aoFechar, children }: { aoFechar: () => void; children: React.ReactNode }) {
+  const fechar = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const quemAbriu = document.activeElement;
+    fechar.current?.focus();
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.key === "Escape") window.history.back();
+      // Só há um botão para focar enquanto o desenho está aberto.
+      if (e.key === "Tab") e.preventDefault();
+    };
+    document.addEventListener("keydown", aoTeclar);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", aoTeclar);
+      document.body.style.overflow = "";
+      if (quemAbriu instanceof HTMLElement) quemAbriu.focus({ preventScroll: true });
+    };
+  }, []);
+  return (
+    <motion.div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Como está ficando"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      className="dark section-ink bg-pattern-dark fixed! inset-0 z-50 overflow-y-auto bg-background text-foreground"
+      data-ver-desenho
+    >
+      <div className="mx-auto flex min-h-full max-w-md flex-col px-5 py-4">
+        <div className="flex h-12 items-center justify-between">
+          <p className="font-heading text-2xl">Está ficando assim</p>
+          <button
+            ref={fechar}
+            type="button"
+            onClick={aoFechar}
+            aria-label="Fechar e voltar a responder"
+            className="flex size-11 items-center justify-center rounded-full border border-input hover:bg-muted"
+          >
+            <XIcon className="size-5" aria-hidden="true" />
+          </button>
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 40, scale: 0.94 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-6"
+        >
+          {children}
+        </motion.div>
+        <button
+          type="button"
+          onClick={aoFechar}
+          className="mb-3 min-h-12 rounded-full bg-brand text-sm font-semibold text-brand-foreground"
+          tabIndex={-1}
+        >
+          Voltar a responder
+        </button>
+      </div>
+    </motion.div>
   );
 }
 
@@ -355,26 +472,53 @@ function inicio(enviado: boolean, respostas: Respostas): Tela {
   return { tipo: Object.keys(respostas).length ? "volta" : "abertura" };
 }
 
-/** O título da pergunta recebe o foco quando ela aparece (leitor de tela); no
- * computador, o campo de escrever já vem pronto para digitar. No celular, não: o
- * teclado cobriria a pergunta. */
-function Titulo({ digita, children }: { digita: boolean; children: React.ReactNode }) {
+/** O título da pergunta entra palavra por palavra e o destaque ganha o marca-texto.
+ * Recebe o foco quando aparece (leitor de tela); no computador, o campo de escrever já
+ * vem pronto para digitar. No celular, não: o teclado cobriria a pergunta. */
+function Titulo({ texto, destaque, digita }: { texto: string; destaque?: string; digita: boolean }) {
   const ref = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     window.scrollTo(0, 0);
-    const campo = digita && window.matchMedia("(pointer: fine)").matches
-      ? ref.current?.closest("form")?.querySelector<HTMLElement>("input, textarea")
-      : null;
+    const campo =
+      digita && window.matchMedia("(pointer: fine)").matches
+        ? ref.current?.closest("form")?.querySelector<HTMLElement>("input, textarea")
+        : null;
     (campo ?? ref.current)?.focus({ preventScroll: true });
   }, [digita]);
+  const corte = destaque ? texto.indexOf(destaque) : -1;
+  const partes =
+    destaque && corte >= 0
+      ? [
+          { trecho: texto.slice(0, corte), marcado: false },
+          { trecho: destaque, marcado: true },
+          { trecho: texto.slice(corte + destaque.length), marcado: false },
+        ]
+      : [{ trecho: texto, marcado: false }];
+  const antes = partes.map((_, i) => partes.slice(0, i).reduce((n, p) => n + p.trecho.split(/\s+/).filter(Boolean).length, 0));
   return (
     <h1
       ref={ref}
       tabIndex={-1}
-      className="mt-3 font-heading text-[1.7rem] leading-[1.15] tracking-tight text-balance outline-none sm:text-4xl"
+      className="mt-4 font-heading text-[1.75rem] leading-[1.18] tracking-tight lining-nums text-balance outline-none sm:text-[2.6rem]"
       data-titulo
     >
-      {children}
+      {partes.map(({ trecho, marcado }, i) => (
+        <span key={i} className={marcado ? "highlight highlight-desenha" : undefined}>
+          {trecho.split(/(\s+)/).map((palavra, j) =>
+            palavra.trim() ? (
+              <span
+                key={j}
+                className="char-in"
+                style={{ "--char-delay": `${(antes[i] + Math.floor(j / 2)) * 45}ms` } as React.CSSProperties}
+              >
+                {palavra}
+              </span>
+            ) : (
+              palavra
+            ),
+          )}
+        </span>
+      ))}
     </h1>
   );
 }

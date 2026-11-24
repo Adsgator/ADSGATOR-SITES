@@ -444,3 +444,76 @@ details[open]::details-content {
 /* "Reduzir animações" do sistema não muda mais o movimento do site: decisão do
    Lucas (2026-11-20), "tem que funcionar independente disso". O que roda
    sozinho continua com o botão de pausar (MotionScope). */
+
+/* Briefing (components/briefing): o olho do topo e o marca-texto que se desenha no
+   título da pergunta. */
+@keyframes olho-pisca {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  45%,
+  60% {
+    transform: scaleY(0.06);
+  }
+}
+@keyframes olho-parado {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.06);
+  }
+}
+@keyframes marca-texto {
+  from {
+    background-size: 0 100%;
+  }
+  to {
+    background-size: 100% 100%;
+  }
+}
+@keyframes cursor-clica {
+  0% {
+    opacity: 0;
+    transform: translate(14px, 12px);
+  }
+  55% {
+    opacity: 1;
+    transform: none;
+  }
+  75% {
+    transform: scale(0.78);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@layer components {
+  .olho-pisca,
+  .olho-parado {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .olho-pisca {
+    animation:
+      olho-pisca 420ms ease-in-out,
+      olho-parado 5s ease-in-out 1s infinite;
+  }
+  .olho-parado {
+    animation: olho-parado 5s ease-in-out infinite;
+  }
+  .olho-pupila {
+    transition: transform 180ms var(--ease-out);
+  }
+  .highlight-desenha {
+    background-repeat: no-repeat;
+    animation: marca-texto 700ms var(--ease-out) 350ms both;
+  }
+  .cursor-clica {
+    animation: cursor-clica 420ms var(--ease-out) both;
+  }
+}

@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, DownloadIcon, FolderUpIcon, PencilIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, DownloadIcon, ExternalLinkIcon, FolderUpIcon, PencilIcon } from "lucide-react";
 import { AnimatePresence, motion, useInView } from "motion/react";
 
 import { BrandLogo } from "@/components/brand";
-import { blocosDasRespostas, RascunhoDaPagina, type Blocos } from "@/components/briefing/rascunho-da-pagina";
+import { Desenho, desenhoDe, LegendaDoDesenho, type BlocosDoDesenho } from "@/components/briefing/desenho";
+import { BumerangueFrame } from "@/components/bumerangue";
+import { Eyebrow } from "@/components/eyebrow";
 import { IconeWhatsApp } from "@/components/icone-whatsapp";
 import { linkWhatsApp, site } from "@/config/site";
-import { emTexto, progresso, respondida, visiveis, type Briefing, type Respostas } from "@/lib/briefing/regras";
+import { emTexto, progresso, respondida, visiveis, type Briefing, type Respostas, type TipoDeBriefing } from "@/lib/briefing/regras";
 import { cn } from "@/lib/utils";
 
 // As telas em volta das perguntas: a abertura, a volta de quem já começou, o fim
@@ -38,20 +40,75 @@ function TituloDaTela({ className, children }: { className?: string; children: R
   );
 }
 
-// Abertura ----------------------------------------------------------------------------------
+// Textos de cada briefing ---------------------------------------------------------------------
 
-const respostasDaCena: { texto: string; bloco: Blocos }[] = [
-  { texto: "O nome é esse mesmo", bloco: { nome: "Seu negócio" } },
-  { texto: "Pode ser neste WhatsApp", bloco: { whatsapp: true } },
-  { texto: "Faço quatro serviços", bloco: { servicos: ["O principal", "O mais pedido", "O novo", "O especial"] } },
-  { texto: "Atendo mais famílias daqui", bloco: { clientes: true } },
-  { texto: "Sempre me perguntam isto", bloco: { duvidas: 3 } },
-  { texto: "Comecei há dez anos", bloco: { historia: true, lugar: true, horarios: true } },
+const jeitoDeResponder = [
+  { titulo: "Conte do seu jeito.", texto: "Como você conta para um cliente. Escrever bonito é com a gente." },
+  { titulo: "Responda aos poucos.", texto: "Fica tudo salvo, é só voltar por este link." },
 ];
 
-/** As respostas virando a página, uma vez só (6 respostas, perto de 5 segundos), quando
+const textos = {
+  pagina: {
+    rotulo: "O briefing da sua página",
+    titulo: (nome: string) => `Que bom ter você aqui, ${nome}`,
+    texto:
+      "As suas respostas são o ponto de partida da sua página. Quanto mais a gente souber do seu negócio, mais ela vai ter a sua cara.",
+    combinados: [
+      ...jeitoDeResponder,
+      { titulo: "Quanto mais seu, melhor.", texto: "Um caso real ou uma frase sua valem mais que um texto pronto." },
+    ],
+    frases: ["Já dá para ver começando", "Está tomando forma", "Agora tem a voz dos seus clientes", "Só falta o jeito dela"],
+    depois: [
+      { titulo: "A gente lê tudo com calma", texto: "Se ficar alguma dúvida, chamamos você no WhatsApp." },
+      { titulo: "Monta o roteiro da página", texto: "As seções e a mensagem principal, para você aprovar." },
+      { titulo: "Cria a sua página", texto: "Com o seu jeito de falar e o visual pensado para você." },
+    ],
+    mensagem: "Oi, vi a sua página!",
+  },
+  google_ads: {
+    rotulo: "O briefing do seu Google Ads",
+    titulo: (nome: string) => `Vamos preparar os seus anúncios, ${nome}`,
+    texto:
+      "Com as suas respostas, a gente escolhe em quais buscas você vai aparecer e quem vai chamar no seu WhatsApp.",
+    combinados: [
+      ...jeitoDeResponder,
+      { titulo: "Os seus valores não são publicados.", texto: "Servem para a gente calcular o retorno dos anúncios." },
+    ],
+    frases: ["A gente já sabe quem procurar", "O anúncio está tomando forma"],
+    depois: [
+      { titulo: "A gente lê tudo com calma", texto: "Se ficar alguma dúvida, chamamos você no WhatsApp." },
+      { titulo: "Monta a campanha", texto: "As buscas, os anúncios e o que fica bloqueado." },
+      { titulo: "Coloca no ar e avisa você", texto: "Assim que a conta e os acessos estiverem prontos." },
+    ],
+    mensagem: "Oi, vi o anúncio no Google!",
+  },
+} satisfies Record<TipoDeBriefing, unknown>;
+
+// Abertura ----------------------------------------------------------------------------------
+
+const cenas: Record<TipoDeBriefing, { texto: string; bloco: object }[]> = {
+  pagina: [
+    { texto: "O nome é esse mesmo", bloco: { nome: "Seu negócio" } },
+    { texto: "Pode ser neste WhatsApp", bloco: { whatsapp: true } },
+    { texto: "Faço quatro serviços", bloco: { servicos: ["O principal", "O mais pedido", "O novo", "O especial"] } },
+    { texto: "Atendo mais famílias daqui", bloco: { clientes: true } },
+    { texto: "Sempre me perguntam isto", bloco: { duvidas: 3 } },
+    { texto: "Comecei há dez anos", bloco: { historia: true, lugar: true, horarios: true } },
+  ],
+  google_ads: [
+    { texto: "Procuram assim", bloco: { busca: "o seu serviço perto de mim" } },
+    { texto: "O principal é este", bloco: { servicos: ["O seu serviço"], site: "seunegocio.com.br" } },
+    { texto: "Atendo a cidade toda", bloco: { cidades: ["Sua cidade e região"] } },
+    { texto: "Faço outros dois também", bloco: { servicos: ["O seu serviço", "O mais pedido", "O novo"] } },
+    { texto: "Esses pedidos eu não quero", bloco: { bloqueadas: ["curso", "vaga de emprego", "de graça"] } },
+    { texto: "Respondo em horário comercial", bloco: { horarios: "Segunda a sexta" } },
+  ],
+};
+
+/** As respostas virando a página (ou o anúncio), uma vez só (6 respostas, perto de 5 segundos), quando
  * a cena está à vista: no celular, ela fica embaixo do texto. */
-function CenaDaAbertura() {
+function CenaDaAbertura({ tipo }: { tipo: TipoDeBriefing }) {
+  const respostasDaCena = cenas[tipo];
   const ref = useRef<HTMLDivElement>(null);
   const aVista = useInView(ref, { amount: 0.4 });
   // Passa uma da última resposta, para o balão sair no fim.
@@ -60,13 +117,15 @@ function CenaDaAbertura() {
     if (!aVista || n > respostasDaCena.length) return;
     const t = setTimeout(() => setN(n + 1), n === 0 ? 700 : 800);
     return () => clearTimeout(t);
-  }, [n, aVista]);
-  const blocos: Blocos = Object.assign({}, ...respostasDaCena.slice(0, n).map((r) => r.bloco));
+  }, [n, aVista, respostasDaCena.length]);
+  const desenho = { tipo, blocos: Object.assign({}, ...respostasDaCena.slice(0, n).map((r) => r.bloco)) } as BlocosDoDesenho;
   const atual = respostasDaCena[n - 1];
   return (
     <div ref={ref} className="relative mx-auto w-full max-w-[19rem]" aria-hidden="true" data-cena={n}>
       <div className="pointer-events-none absolute -inset-8 rounded-full bg-brand/20 blur-3xl" />
-      <RascunhoDaPagina blocos={blocos} className="relative" />
+      <BumerangueFrame>
+        <Desenho desenho={desenho} className="relative" />
+      </BumerangueFrame>
       <AnimatePresence>
         {atual && (
           <motion.p
@@ -85,12 +144,6 @@ function CenaDaAbertura() {
   );
 }
 
-const combinados = [
-  { titulo: "Conte do seu jeito.", texto: "Como você conta para um cliente. Escrever bonito é com a gente." },
-  { titulo: "Responda aos poucos.", texto: "Fica tudo salvo, é só voltar por este link." },
-  { titulo: "Quanto mais seu, melhor.", texto: "Um caso real ou uma frase sua valem mais que um texto pronto." },
-];
-
 export function Abertura({ briefing, aoComecar }: { briefing: Briefing; aoComecar: () => void }) {
   return (
     <main className="dark section-ink bg-pattern-dark flex flex-1 flex-col bg-background text-foreground">
@@ -99,14 +152,13 @@ export function Abertura({ briefing, aoComecar }: { briefing: Briefing; aoComeca
       </div>
       <div className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-12 px-4 py-10 lg:grid-cols-[1.1fr_1fr]">
         <div>
-          <p className="text-sm font-medium text-brand">O briefing da sua página</p>
-          <TituloDaTela className="mt-4">Que bom ter você aqui, {briefing.nome}</TituloDaTela>
+          <Eyebrow className="text-brand">{textos[briefing.tipo].rotulo}</Eyebrow>
+          <TituloDaTela className="mt-4">{textos[briefing.tipo].titulo(briefing.nome)}</TituloDaTela>
           <p className="mt-5 max-w-lg text-pretty text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-            As suas respostas são o ponto de partida da sua página. Quanto mais a gente souber do seu negócio, mais ela
-            vai ter a sua cara.
+            {textos[briefing.tipo].texto}
           </p>
           <ul className="mt-7 max-w-lg space-y-4">
-            {combinados.map((c) => (
+            {textos[briefing.tipo].combinados.map((c) => (
               <li key={c.titulo} className="flex gap-3 text-base leading-7">
                 <CheckIcon className="mt-1 size-5 shrink-0 text-brand" aria-hidden="true" />
                 <span className="text-pretty text-muted-foreground">
@@ -127,7 +179,7 @@ export function Abertura({ briefing, aoComecar }: { briefing: Briefing; aoComeca
             .
           </p>
         </div>
-        <CenaDaAbertura />
+        <CenaDaAbertura tipo={briefing.tipo} />
       </div>
     </main>
   );
@@ -224,14 +276,12 @@ export function Volta({
           )}
         </div>
       </div>
-      <RascunhoDaPagina blocos={blocosDasRespostas(briefing, respostas)} className="hidden self-start lg:block" />
+      <Desenho desenho={desenhoDe(briefing, respostas)} className="hidden self-start lg:block" />
     </main>
   );
 }
 
 // Fim de um passo ---------------------------------------------------------------------------
-
-const frases = ["Já dá para ver começando", "Está tomando forma", "Agora tem a voz dos seus clientes", "Só falta o jeito dela"];
 
 export function Passo({
   briefing,
@@ -262,11 +312,16 @@ export function Passo({
     <main className="dark section-ink bg-pattern-dark flex flex-1 flex-col bg-background text-foreground">
       <div className="mx-auto grid w-full max-w-5xl flex-1 items-center gap-8 px-4 py-8 lg:grid-cols-[1fr_18rem] lg:gap-16">
         <div className="text-center lg:text-left">
-          <p className="inline-flex items-center gap-2 text-sm font-medium text-brand">
+          <motion.p
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 380, damping: 18, delay: 0.15 }}
+            className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-1.5 text-sm font-semibold text-brand-foreground"
+          >
             <CheckIcon className="size-4" strokeWidth={3} aria-hidden="true" />
             Passo {secao + 1} de {briefing.secoes.length} pronto
-          </p>
-          <TituloDaTela className="mt-3 text-3xl sm:text-5xl">{frases[secao] ?? "Muito bom"}</TituloDaTela>
+          </motion.p>
+          <TituloDaTela className="mt-3 text-3xl sm:text-5xl">{textos[briefing.tipo].frases[secao] ?? "Está tomando forma"}</TituloDaTela>
           <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
             A seguir, <strong className="font-medium text-foreground">{briefing.secoes[secao + 1]?.toLowerCase()}</strong>.
           </p>
@@ -274,11 +329,11 @@ export function Passo({
             <BotoesDoPasso aoVoltar={aoVoltar} aoContinuar={aoContinuar} />
           </div>
         </div>
-        <div className="mx-auto w-full max-w-[17rem]">
-          <RascunhoDaPagina blocos={blocosDasRespostas(briefing, completo ? respostas : antes)} />
-          <p className="mt-3 text-center text-xs text-balance text-muted-foreground">
-            Só um desenho para acompanhar. O visual de verdade é com a gente.
-          </p>
+        <div className="mx-auto w-full max-w-[16rem] pt-2 sm:max-w-[17rem]">
+          <BumerangueFrame>
+            <Desenho desenho={desenhoDe(briefing, completo ? respostas : antes)} className="relative" />
+          </BumerangueFrame>
+          <LegendaDoDesenho tipo={briefing.tipo} />
         </div>
       </div>
       <div className="sticky bottom-0 flex gap-3 border-t bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
@@ -384,12 +439,6 @@ export function Revisao({
 
 // Fim ---------------------------------------------------------------------------------------
 
-const depois = [
-  { titulo: "A gente lê tudo com calma", texto: "Se ficar alguma dúvida, chamamos você no WhatsApp." },
-  { titulo: "Monta o roteiro da página", texto: "As seções e a mensagem principal, para você aprovar." },
-  { titulo: "Cria a sua página", texto: "Com o seu jeito de falar e o visual pensado para você." },
-];
-
 export function Fim({ briefing, respostas }: { briefing: Briefing; respostas: Respostas }) {
   const [aviso, setAviso] = useState(false);
   return (
@@ -399,15 +448,12 @@ export function Fim({ briefing, respostas }: { briefing: Briefing; respostas: Re
       </div>
       <div className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-12 px-4 py-10 lg:grid-cols-[1.2fr_1fr]">
         <div>
-          <p className="inline-flex items-center gap-2 text-sm font-medium text-brand">
-            <CheckIcon className="size-4" strokeWidth={3} aria-hidden="true" />
-            Respostas enviadas
-          </p>
+          <Eyebrow className="text-brand">Respostas enviadas</Eyebrow>
           <TituloDaTela className="mt-4">
             Recebemos tudo, {briefing.nome}. <span className="highlight">Obrigado!</span>
           </TituloDaTela>
           <ol className="mt-8 max-w-lg space-y-5">
-            {depois.map((d, i) => (
+            {textos[briefing.tipo].depois.map((d, i) => (
               <li key={d.titulo} className="flex gap-4">
                 <span
                   className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-semibold text-brand-foreground"
@@ -417,18 +463,26 @@ export function Fim({ briefing, respostas }: { briefing: Briefing; respostas: Re
                 </span>
                 <span className="leading-7">
                   <strong className="block font-medium">{d.titulo}</strong>
-                  <span className="text-muted-foreground">{d.texto}</span>
+                  <span className="block text-pretty text-muted-foreground">{d.texto}</span>
                 </span>
               </li>
             ))}
           </ol>
-          <p className="mt-8 flex max-w-lg gap-3 rounded-2xl border p-4 text-sm leading-6 text-pretty">
-            <FolderUpIcon className="mt-0.5 size-5 shrink-0 text-brand" aria-hidden="true" />
-            <span>
-              Já colocou o logo e as fotos na pasta do Drive? O link está na nossa conversa do WhatsApp, e o prazo começa
-              quando chegar tudo.
-            </span>
-          </p>
+          {briefing.pastaDoMaterial && (
+            <div className="mt-8 max-w-lg rounded-2xl border border-brand/50 bg-card p-5" data-material>
+              <p className="flex items-center gap-3 font-heading text-xl">
+                <FolderUpIcon className="size-6 shrink-0 text-brand" aria-hidden="true" />
+                Agora só falta o material
+              </p>
+              <p className="mt-2 text-sm leading-6 text-pretty text-muted-foreground">
+                Coloque na sua pasta o logo, as fotos e os depoimentos que você tiver. O prazo começa quando chegar tudo.
+              </p>
+              <a href={briefing.pastaDoMaterial} target="_blank" rel="noopener" className={cn(botaoAmarelo, "mt-4 min-h-12 w-full text-sm sm:w-auto")}>
+                Abrir a minha pasta
+                <ExternalLinkIcon className="size-4" aria-hidden="true" />
+              </a>
+            </div>
+          )}
           <div className="mt-7">
             <button type="button" onClick={() => setAviso(true)} className={cn(botaoContorno, "w-full sm:w-auto")}>
               <DownloadIcon className="size-5" aria-hidden="true" />
@@ -439,7 +493,22 @@ export function Fim({ briefing, respostas }: { briefing: Briefing; respostas: Re
             </p>
           </div>
         </div>
-        <RascunhoDaPagina blocos={blocosDasRespostas(briefing, respostas)} className="mx-auto w-full max-w-[19rem]" />
+        <div className="relative mx-auto w-full max-w-[19rem]">
+          <BumerangueFrame>
+            <Desenho desenho={desenhoDe(briefing, respostas)} className="relative" />
+          </BumerangueFrame>
+          {/* O que a página (ou o anúncio) vai trazer: alguém chamando no WhatsApp. */}
+          <motion.p
+            initial={{ opacity: 0, scale: 0.7, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20, delay: 1.1 }}
+            className="absolute -right-2 -bottom-9 flex items-center gap-2.5 rounded-2xl rounded-br-sm bg-white px-4 py-3 text-sm font-medium text-ink shadow-2xl sm:-right-10"
+            aria-hidden="true"
+          >
+            <IconeWhatsApp className="size-5 text-[#1fa855]" />
+            {textos[briefing.tipo].mensagem}
+          </motion.p>
+        </div>
       </div>
     </main>
   );

@@ -35,13 +35,19 @@ export type Papel =
   | "clientes"
   | "duvidas"
   | "historia"
-  | "estilo";
+  | "estilo"
+  | "site"
+  | "cidades"
+  | "procuram"
+  | "naoQuer";
 
 export type Pergunta = {
   id: string;
   secao: number;
   tipo: TipoDePergunta;
   titulo: string;
+  /** Pedaço do título que leva o marca-texto da marca. */
+  destaque?: string;
   ajuda?: string;
   /** Texto de exemplo dentro do campo. */
   exemplo?: string;
@@ -61,7 +67,13 @@ export type Pergunta = {
   papel?: Papel;
 };
 
-export type Horario = { dias: string; aberto: boolean; de: string; ate: string };
+/** Um período de atendimento, com o intervalo no meio quando tem. */
+export type Periodo = { de: string; ate: string; pausa?: { de: string; ate: string } };
+
+/** Um dia de segunda a sexta com horário próprio (ou sem atendimento). */
+export type DiaDiferente = Periodo & { dia: string; fechado?: boolean };
+
+export type Horario = Periodo & { dias: string; aberto: boolean; diferentes?: DiaDiferente[] };
 
 export type Resposta = {
   /** Marcou a resposta de quem não tem. */
@@ -74,20 +86,31 @@ export type Resposta = {
 
 export type Respostas = Record<string, Resposta>;
 
+export type TipoDeBriefing = "pagina" | "google_ads";
+
 export type Briefing = {
   slug: string;
+  tipo: TipoDeBriefing;
   /** O primeiro nome, para a saudação. */
   nome: string;
   segmento: string;
   secoes: string[];
   perguntas: Pergunta[];
+  /** A pasta do cliente no Drive, para o material (logo, fotos). */
+  pastaDoMaterial?: string;
+  /** O que já veio do briefing da página, para o desenho do anúncio. */
+  jaSabemos?: { nome: string; site: string; servicos: string[] };
 };
 
 /** Textos longos obrigatórios precisam dizer alguma coisa. */
 export const MINIMO_DO_LONGO = 20;
 
+export const DIAS_UTEIS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+export const SEMANA = [...DIAS_UTEIS, "Sábado", "Domingo"];
+export const DE_SEGUNDA_A_SEXTA = "Segunda a sexta";
+
 export const HORARIOS_INICIAIS: Horario[] = [
-  { dias: "Segunda a sexta", aberto: false, de: "08:00", ate: "18:00" },
+  { dias: DE_SEGUNDA_A_SEXTA, aberto: false, de: "08:00", ate: "18:00" },
   { dias: "Sábado", aberto: false, de: "08:00", ate: "12:00" },
   { dias: "Domingo", aberto: false, de: "08:00", ate: "12:00" },
 ];
@@ -95,6 +118,45 @@ export const HORARIOS_INICIAIS: Horario[] = [
 export const HORA_MARCADA = "Só com hora marcada";
 
 const cheio = (texto?: string) => Boolean(texto?.trim());
+
+/** O período de cada dia da semana (null quando não atende). */
+export function semanaDe(horarios: Horario[]): { dia: string; periodo: Periodo | null }[] {
+  return SEMANA.map((dia) => {
+    const linha = horarios.find((h) => h.dias === dia) ?? horarios.find((h) => h.dias === DE_SEGUNDA_A_SEXTA);
+    if (!linha?.aberto) return { dia, periodo: null };
+    const proprio = linha.diferentes?.find((d) => d.dia === dia);
+    return { dia, periodo: proprio ? (proprio.fechado ? null : proprio) : linha };
+  });
+}
+
+function problemaDoPeriodo(nome: string, p: Periodo): string | null {
+  if (p.ate <= p.de) return `${nome} termina antes de começar. Confira as horas.`;
+  if (p.pausa && (p.pausa.de <= p.de || p.pausa.ate >= p.ate || p.pausa.ate <= p.pausa.de))
+    return `${nome} tem um intervalo fora do horário. Confira as horas.`;
+  return null;
+}
+
+const textoDoPeriodo = (p: Periodo) =>
+  p.pausa ? `das ${p.de} às ${p.pausa.de} e das ${p.pausa.ate} às ${p.ate}` : `das ${p.de} às ${p.ate}`;
+
+/** Os horários em linhas, com os dias iguais juntos ("Segunda, quarta e sexta, das 08:00 às 18:00"). */
+function textoDosHorarios(horarios: Horario[]): string[] {
+  const grupos = new Map<string, string[]>();
+  for (const { dia, periodo } of semanaDe(horarios)) {
+    if (!periodo) continue;
+    const texto = textoDoPeriodo(periodo);
+    grupos.set(texto, [...(grupos.get(texto) ?? []), dia]);
+  }
+  return [...grupos].map(([texto, dias]) => {
+    const juntos =
+      dias.join() === DIAS_UTEIS.join()
+        ? DE_SEGUNDA_A_SEXTA
+        : dias.length === 1
+          ? dias[0]
+          : `${dias.slice(0, -1).join(", ")} e ${dias[dias.length - 1]}`;
+    return `${juntos[0]}${juntos.slice(1).toLowerCase()}, ${texto}`;
+  });
+}
 
 function condicaoVale(c: Condicao, respostas: Respostas) {
   const marcadas = respostas[c.pergunta]?.opcoes ?? [];
@@ -144,13 +206,18 @@ export function problema(p: Pergunta, briefing: Briefing, respostas: Respostas):
     case "confirmar":
       return r?.opcoes?.includes("sim") || cheio(r?.valor) ? null : "Confirme ou escreva o certo para continuar.";
     case "detalhes": {
-      const falta = opcoesDa(p, briefing, respostas).find((o) => !cheio(r?.itens?.[o]));
+      const opcoes = opcoesDa(p, briefing, respostas);
+      // Antes de a pessoa escolher os itens, ainda não há o que contar.
+      if (!opcoes.length) return "Escolha antes o que vai na página.";
+      const falta = opcoes.find((o) => !cheio(r?.itens?.[o]));
       return falta ? `Falta contar sobre ${falta}.` : null;
     }
-    case "horarios":
-      return r?.horarios?.some((h) => h.aberto) || r?.opcoes?.includes(HORA_MARCADA)
-        ? null
-        : "Marque pelo menos um dia.";
+    case "horarios": {
+      const semana = semanaDe(r?.horarios ?? []);
+      const ruim = semana.map((d) => d.periodo && problemaDoPeriodo(d.dia, d.periodo)).find(Boolean);
+      if (ruim) return ruim;
+      return semana.some((d) => d.periodo) || r?.opcoes?.includes(HORA_MARCADA) ? null : "Marque pelo menos um dia.";
+    }
     case "redes":
       return Object.values(r?.itens ?? {}).some(cheio) ? null : "Preencha pelo menos um.";
     case "duvidas":
@@ -184,10 +251,7 @@ export function emTexto(p: Pergunta, briefing: Briefing, respostas: Respostas): 
         .filter(([, v]) => cheio(v))
         .map(([k, v]) => `${k} · ${v.trim()}`);
     case "horarios":
-      return [
-        ...(r.horarios ?? []).filter((h) => h.aberto).map((h) => `${h.dias}, das ${h.de} às ${h.ate}`),
-        ...(r.opcoes ?? []),
-      ];
+      return [...textoDosHorarios(r.horarios ?? []), ...(r.opcoes ?? [])];
     case "multipla":
     case "escolha":
     case "etiquetas":
