@@ -382,12 +382,16 @@ function BotoesDoPasso({ aoVoltar, aoContinuar }: { aoVoltar: () => void; aoCont
 export function Revisao({
   briefing,
   respostas,
+  enviando,
+  erro,
   aoMudar,
   aoResponder,
   aoEnviar,
 }: {
   briefing: Briefing;
   respostas: Respostas;
+  enviando: boolean;
+  erro: string;
   aoMudar: (id: string) => void;
   /** Passa por tudo o que falta, uma a uma. */
   aoResponder: (id: string) => void;
@@ -445,13 +449,17 @@ export function Revisao({
         </div>
       </div>
       <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl px-4 py-3">
+        <div className="mx-auto flex max-w-3xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center">
+          <p role="alert" className="text-sm font-medium text-destructive empty:hidden sm:flex-1" data-erro-do-envio>
+            {erro}
+          </p>
           <button
             type="button"
+            disabled={enviando}
             onClick={() => (faltam.length ? aoResponder(faltam[0].id) : aoEnviar())}
-            className={cn(botaoAmarelo, "min-h-12 w-full text-sm sm:ml-auto sm:w-auto")}
+            className={cn(botaoAmarelo, "min-h-12 w-full text-sm disabled:opacity-60 sm:ml-auto sm:w-auto")}
           >
-            {faltam.length ? "Responder o que falta" : "Enviar as respostas"}
+            {faltam.length ? "Responder o que falta" : enviando ? "Enviando..." : "Enviar as respostas"}
             <ArrowRightIcon className="size-4" aria-hidden="true" />
           </button>
         </div>
@@ -468,11 +476,11 @@ export function Revisao({
  * segurar o envio.
  */
 export function Material({
-  briefing,
+  pasta,
   respostas,
   aoTerminar,
 }: {
-  briefing: Briefing;
+  pasta: string;
   respostas: Respostas;
   aoTerminar: (mandou: boolean) => void;
 }) {
@@ -519,7 +527,7 @@ export function Material({
             </ul>
           )}
           <a
-            href={briefing.pastaDoMaterial}
+            href={pasta}
             target="_blank"
             rel="noopener"
             onClick={() => setAbriu(true)}
@@ -569,13 +577,17 @@ export function Fim({
   respostas,
   faltaMaterial,
   aoMandar,
+  aoBaixar,
 }: {
   briefing: Briefing;
   respostas: Respostas;
   faltaMaterial: boolean;
   aoMandar: () => void;
+  /** Baixa as respostas; devolve o recado para a pessoa, se houver. */
+  aoBaixar: () => Promise<string>;
 }) {
-  const [aviso, setAviso] = useState(false);
+  const [aviso, setAviso] = useState("");
+  const [baixando, setBaixando] = useState(false);
   const desenho = desenhoDe(briefing, respostas);
   const passos = textos[briefing.tipo].depois;
   return (
@@ -635,12 +647,21 @@ export function Fim({
             ))}
           </ol>
           <div className="mt-8">
-            <button type="button" onClick={() => setAviso(true)} className={cn(botaoContorno, "w-full sm:w-auto")}>
+            <button
+              type="button"
+              disabled={baixando}
+              onClick={async () => {
+                setBaixando(true);
+                setAviso(await aoBaixar());
+                setBaixando(false);
+              }}
+              className={cn(botaoContorno, "w-full disabled:opacity-60 sm:w-auto")}
+            >
               <DownloadIcon className="size-5" aria-hidden="true" />
               Guardar as minhas respostas
             </button>
             <p className="mt-3 min-h-5 text-sm text-muted-foreground" aria-live="polite">
-              {aviso && "Nesta amostra o arquivo ainda não sai. Na versão final, baixa o PDF das respostas."}
+              {aviso}
             </p>
           </div>
         </div>
@@ -653,13 +674,35 @@ export function Fim({
 // Outro aparelho ----------------------------------------------------------------------------
 
 const TENTATIVAS = 5;
-/** Os 4 últimos números do WhatsApp inventado da amostra; na versão final, quem confere é o painel. */
-const FINAL_DA_AMOSTRA = "0000";
 
-export function OutroAparelho({ aoConfirmar }: { aoConfirmar: () => void }) {
+export function OutroAparelho({
+  jaTravado = false,
+  aoConferir,
+  aoConfirmar,
+}: {
+  jaTravado?: boolean;
+  aoConferir: (digitos: string) => Promise<{ ok: boolean; travado: boolean } | null>;
+  aoConfirmar: () => void;
+}) {
   const [digitos, setDigitos] = useState("");
   const [erros, setErros] = useState(0);
-  const travado = erros >= TENTATIVAS;
+  const [travadoNoPainel, setTravadoNoPainel] = useState(jaTravado);
+  const [semResposta, setSemResposta] = useState(false);
+  const [conferindo, setConferindo] = useState(false);
+  const travado = travadoNoPainel || erros >= TENTATIVAS;
+
+  async function conferir() {
+    setConferindo(true);
+    setSemResposta(false);
+    const r = await aoConferir(digitos);
+    setConferindo(false);
+    if (!r) return setSemResposta(true);
+    if (r.ok) return aoConfirmar();
+    setErros(erros + 1);
+    setDigitos("");
+    if (r.travado) setTravadoNoPainel(true);
+  }
+
   return (
     <main className="flex flex-1 flex-col">
       <div className="mx-auto w-full max-w-6xl px-4 pt-6">
@@ -685,9 +728,7 @@ export function OutroAparelho({ aoConfirmar }: { aoConfirmar: () => void }) {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (digitos === FINAL_DA_AMOSTRA) return aoConfirmar();
-              setErros(erros + 1);
-              setDigitos("");
+              void conferir();
             }}
           >
             <TituloDaTela className="text-3xl sm:text-4xl">Só para confirmar que é você</TituloDaTela>
@@ -705,11 +746,11 @@ export function OutroAparelho({ aoConfirmar }: { aoConfirmar: () => void }) {
               className="mt-7 h-16 w-full rounded-xl border border-input bg-card text-center font-mono text-3xl tracking-[0.5em] outline-none placeholder:text-muted-foreground/40 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
             />
             <p role="alert" className="mt-2 min-h-6 text-sm font-medium text-destructive">
-              {erros > 0 && "Não bateu. Confira os números e tente de novo."}
+              {semResposta ? "Não conseguimos conferir agora. Tente de novo em instantes." : erros > 0 && "Não bateu. Confira os números e tente de novo."}
             </p>
             <button
               type="submit"
-              disabled={digitos.length < 4}
+              disabled={digitos.length < 4 || conferindo}
               className={cn(botaoAmarelo, "mt-3 w-full disabled:opacity-50")}
             >
               Continuar

@@ -82,22 +82,11 @@ const enderecosAntigos: [origem: string, destino: string][] = [
   ["/sitemap_index.xml", "/sitemap.xml"],
 ];
 
-// Briefings em forms.adsgator.com.br (decisão 3 do plano): página simples com o
-// formulário do respondi incorporado, em public/forms/. Só essa página libera o
-// respondi na CSP; o resto do site continua fechado.
-const noForms = [{ type: "host" as const, value: "forms.adsgator.com.br" }];
-const cspBriefing = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://embed.respondi.app",
-  "style-src 'self' 'unsafe-inline' https://embed.respondi.app",
-  "frame-src https://form.respondi.app",
-  "img-src 'self' data:",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  ...(isDev ? [] : ["upgrade-insecure-requests"]),
-].join("; ");
+// Briefings em forms.adsgator.com.br (plano geral, Parte 5). Por dentro fica em /forms
+// (src/app/forms): o link do cliente, com o código, e os dois endereços sem código das mensagens.
+// Fora do Google e sem medição, com a mesma CSP da central. forms.localhost é o mesmo endereço no
+// `next dev` do Lucas.
+const noForms = [{ type: "host" as const, value: "forms\\..+" }];
 
 // Central de Ajuda em ajuda.adsgator.com.br (plano geral, Parte 3). Por dentro
 // fica em /ajuda (src/app/ajuda). No endereço ajuda.: "/" e "/<guia>" abrem a
@@ -139,30 +128,20 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
-      {
-        source: "/:path*",
-        has: noForms,
-        headers: [{ key: "X-Robots-Tag", value: "noindex" }],
-      },
-      {
-        source: "/briefing-google-ads",
-        has: noForms,
-        headers: [{ key: "Content-Security-Policy", value: cspBriefing }],
-      },
       // Depois da geral: a mesma chave, a última vale.
       {
         source: "/:path*",
         has: naAjuda,
         headers: [{ key: "Content-Security-Policy", value: cspAjuda }],
       },
-      {
+      ...[noCheckout, noForms].map((has) => ({
         source: "/:path*",
-        has: noCheckout,
+        has,
         headers: [
           { key: "Content-Security-Policy", value: cspAjuda },
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
         ],
-      },
+      })),
     ];
   },
   async redirects() {
@@ -202,6 +181,13 @@ const nextConfig: NextConfig = {
         destination,
         permanent: true,
       })),
+      // Os briefings da página que as mensagens antigas mandavam.
+      ...["briefing-estilo-e-sensacoes", "briefing-landing-page-pro"].map((antigo) => ({
+        source: `/${antigo}`,
+        has: noForms,
+        destination: "/briefing-pro",
+        permanent: true,
+      })),
       {
         source: "/",
         has: noForms,
@@ -224,13 +210,12 @@ const nextConfig: NextConfig = {
         { source: "/situacao/:cobranca", has: noCheckout, destination: "/checkout/situacao/:cobranca" },
         // O link gerado no painel: checkout.adsgator.com.br/K7Q2PX.
         { source: "/:codigo([A-Za-z0-9]{6})", has: noCheckout, destination: "/checkout/:codigo" },
-      ],
-      afterFiles: [
-        {
-          source: "/briefing-google-ads",
-          has: noForms,
-          destination: "/forms/briefing-google-ads.html",
-        },
+        // O link do briefing: forms.adsgator.com.br/K7Q2PXABCD.
+        { source: "/briefing-pro", has: noForms, destination: "/forms/comecar/pagina" },
+        { source: "/briefing-google-ads", has: noForms, destination: "/forms/comecar/google-ads" },
+        { source: "/:codigo([A-Za-z0-9]{10})", has: noForms, destination: "/forms/:codigo" },
+        // Os outros endereços de uma parte só: os briefings antigos, que não abrem mais.
+        { source: "/:resto([A-Za-z0-9-]+)", has: noForms, destination: "/forms/nao-existe" },
       ],
       // Endereço que não é de nada, no ajuda.: a 404 da central.
       fallback: [{ source: "/:resto", has: naAjuda, destination: "/ajuda/:resto" }],

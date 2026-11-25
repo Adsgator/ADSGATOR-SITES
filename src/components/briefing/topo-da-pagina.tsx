@@ -6,7 +6,8 @@ import { motion } from "motion/react";
 
 import { Retrato, TexturaDoFundo } from "@/components/briefing/arte";
 import { EfeitosDaSensacao } from "@/components/briefing/efeitos";
-import { iconeDaOpcao, iconesDoNegocio, type IconeDoNegocio } from "@/lib/briefing/icones";
+import { iconeDaOpcao, iconesDoNegocio } from "@/lib/briefing/icones";
+import type { IconeDoNegocio } from "@/lib/briefing/regras";
 import type { Familia, Tema } from "@/lib/briefing/temas";
 import { cn } from "@/lib/utils";
 

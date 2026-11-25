@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { BriefingDaAmostra } from "@/components/briefing/briefing";
+import { Amostra } from "@/components/briefing/amostra";
 import { briefingsDaAmostra } from "@/lib/briefing/amostra";
 import { exemplos } from "@/lib/briefing/amostra-preenchida";
 
@@ -12,8 +12,8 @@ export default async function PaginaDaAmostra({ params, searchParams }: PageProp
   const comeco = aparelho === "outro" ? "aparelho" : ir === "fim" || ir === "revisao" || ir === "material" ? ir : "normal";
   // O exemplo tem endereço próprio no navegador: não mexe no que a pessoa respondeu.
   return preenchido ? (
-    <BriefingDaAmostra briefing={{ ...briefing, slug: `${pessoa}-exemplo` }} comeco={comeco} exemplo={exemplos[pessoa]} />
+    <Amostra briefing={{ ...briefing, slug: `${pessoa}-exemplo` }} comeco={comeco} exemplo={exemplos[pessoa]} />
   ) : (
-    <BriefingDaAmostra briefing={briefing} comeco={comeco} />
+    <Amostra briefing={briefing} comeco={comeco} />
   );
 }

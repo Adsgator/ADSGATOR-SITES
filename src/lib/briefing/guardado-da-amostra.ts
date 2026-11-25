@@ -1,11 +1,8 @@
+import type { Guardado } from "@/components/briefing/briefing";
 import type { Exemplo } from "@/lib/briefing/amostra-preenchida";
-import type { Respostas } from "@/lib/briefing/regras";
-import type { Colados } from "@/lib/briefing/sinais";
 
 // Onde a amostra guarda as respostas (só neste navegador). Na versão final, ficam no
 // painel, e este arquivo sai.
-
-export type Guardado = { respostas: Respostas; enviado: boolean; colados: Colados; materialMandado?: boolean };
 
 // O número muda para todos recomeçarem do zero, em qualquer aparelho.
 const PREFIXO = "amostra-briefing-2:";

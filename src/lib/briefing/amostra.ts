@@ -27,7 +27,9 @@ import type { Briefing } from "@/lib/briefing/regras";
 // ver a mesma estrutura adaptada a cada um, e o padrão. Na versão final as perguntas chegam do
 // painel, e este arquivo sai.
 
-const trabalhista: Briefing = {
+export type BriefingDaAmostra = Briefing & { slug: string; pastaDoMaterial?: string };
+
+const trabalhista: BriefingDaAmostra = {
   slug: "trabalhista",
   cidade: { nome: "Campinas", uf: "SP" },
   tipo: "pagina",
@@ -236,7 +238,7 @@ const trabalhista: Briefing = {
   ],
 };
 
-const adestramento: Briefing = {
+const adestramento: BriefingDaAmostra = {
   slug: "adestramento",
   cidade: { nome: "Campinas", uf: "SP" },
   tipo: "pagina",
@@ -466,7 +468,7 @@ const adestramento: Briefing = {
 // Google Ads ----------------------------------------------------------------------------------
 
 /** Quem já respondeu o da página: só o que falta para os anúncios. */
-const trabalhistaAds: Briefing = {
+const trabalhistaAds: BriefingDaAmostra = {
   slug: "trabalhista-ads",
   cidade: { nome: "Campinas", uf: "SP" },
   tipo: "google_ads",
@@ -499,7 +501,7 @@ const trabalhistaAds: Briefing = {
 };
 
 /** Quem contratou só o Google Ads e tem o próprio site: os serviços e os destaques também. */
-const adestramentoAds: Briefing = {
+const adestramentoAds: BriefingDaAmostra = {
   slug: "adestramento-ads",
   cidade: { nome: "Campinas", uf: "SP" },
   tipo: "google_ads",
@@ -567,11 +569,13 @@ const adestramentoAds: Briefing = {
 
 const semAdaptacao = { nome: "Bia", negocio: "Bia Andrade", cidade: { nome: "Campinas", uf: "SP" } };
 
-const padroes: Briefing[] = [
-  padraoDaPagina({ ...semAdaptacao, pastaDoMaterial: "https://drive.google.com/", whatsapp: "(00) 90000-0000", slug: "padrao", segmento: "O padrão, sem adaptação" }),
-  padraoDoGoogleAds({ ...semAdaptacao, slug: "padrao-ads", segmento: "O padrão, só o Google Ads" }),
-  padraoDoGoogleAds(
-    { ...semAdaptacao, slug: "padrao-ads-pagina", segmento: "O padrão, já com o da página", site: "biaandrade.com.br" },
+const padroes: BriefingDaAmostra[] = [
+  { ...padraoDaPagina({ ...semAdaptacao, whatsapp: "(00) 90000-0000", segmento: "O padrão, sem adaptação" }), slug: "padrao", pastaDoMaterial: "https://drive.google.com/" },
+  { ...padraoDoGoogleAds({ ...semAdaptacao, segmento: "O padrão, só o Google Ads" }), slug: "padrao-ads" },
+  {
+    slug: "padrao-ads-pagina",
+    ...padraoDoGoogleAds(
+    { ...semAdaptacao, segmento: "O padrão, já com o da página", site: "biaandrade.com.br" },
     {
       servicos: ["O primeiro serviço", "O segundo serviço"],
       principal: "O primeiro serviço",
@@ -581,9 +585,10 @@ const padroes: Briefing[] = [
         { dias: "Sábado", aberto: false, de: "08:00", ate: "12:00" },
         { dias: "Domingo", aberto: false, de: "08:00", ate: "12:00" },
       ],
-      horariosEmTexto: "de segunda a sexta, das 8h às 18h",
+      horariosEmTexto: "segunda a sexta, das 08:00 às 18:00",
     },
-  ),
+    ),
+  },
 ];
 
-export const briefingsDaAmostra: Briefing[] = [trabalhista, adestramento, trabalhistaAds, adestramentoAds, ...padroes];
+export const briefingsDaAmostra: BriefingDaAmostra[] = [trabalhista, adestramento, trabalhistaAds, adestramentoAds, ...padroes];

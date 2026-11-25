@@ -3,7 +3,29 @@
 // o que conta como respondido, a porcentagem e a resposta em texto. Nada de
 // conteúdo de cliente: as perguntas chegam de fora.
 
-import type { IconeDoNegocio } from "@/lib/briefing/icones";
+/** O ícone do negócio, no desenho (icones.ts). */
+export type IconeDoNegocio =
+  | "balanca"
+  | "pata"
+  | "sol"
+  | "dente"
+  | "coracao"
+  | "estetoscopio"
+  | "casa"
+  | "predio"
+  | "ferramenta"
+  | "raio"
+  | "tesoura"
+  | "flor"
+  | "livro"
+  | "carro"
+  | "camera"
+  | "prato"
+  | "halter"
+  | "maleta"
+  | "bebe"
+  | "musica"
+  | "computador";
 
 export type TipoDePergunta =
   | "texto"
@@ -115,7 +137,6 @@ export type Respostas = Record<string, Resposta>;
 export type TipoDeBriefing = "pagina" | "google_ads";
 
 export type Briefing = {
-  slug: string;
   tipo: TipoDeBriefing;
   /** O primeiro nome, para a saudação. */
   nome: string;
@@ -126,8 +147,6 @@ export type Briefing = {
   cidade?: { nome: string; uf: string };
   /** O ícone do negócio, no desenho da página. */
   icone?: IconeDoNegocio;
-  /** A pasta do cliente no Drive, para o material (logo, fotos); só no da página. */
-  pastaDoMaterial?: string;
   /** O que já veio da página, da ficha ou do diagnóstico, para o desenho do anúncio. */
   jaSabemos?: { nome?: string; site?: string; buscas?: string[]; servicos?: string[]; principal?: string; horarios?: Horario[] };
 };

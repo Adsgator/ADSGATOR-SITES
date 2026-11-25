@@ -34,7 +34,19 @@ import {
   ReceiptIcon,
   CalendarClockIcon,
   MessageCircleIcon,
+  SmileIcon,
+  StethoscopeIcon,
+  WrenchIcon,
+  ScissorsIcon,
+  FlowerIcon,
+  UtensilsIcon,
+  DumbbellIcon,
+  BabyIcon,
+  MusicIcon,
+  MonitorIcon,
 } from "lucide-react";
+
+import type { IconeDoNegocio } from "@/lib/briefing/regras";
 
 // Ícones das opções, pelo texto da opção. Sem ícone aqui, a opção aparece sem.
 
@@ -88,5 +100,26 @@ const porOpcao: Record<string, LucideIcon> = {
 export const iconeDaOpcao = (opcao: string): LucideIcon | undefined => porOpcao[opcao];
 
 /** O ícone do negócio, no desenho da página. */
-export const iconesDoNegocio = { balanca: ScaleIcon, pata: PawPrintIcon, sol: SunIcon } satisfies Record<string, LucideIcon>;
-export type IconeDoNegocio = keyof typeof iconesDoNegocio;
+export const iconesDoNegocio: Record<IconeDoNegocio, LucideIcon> = {
+  balanca: ScaleIcon,
+  pata: PawPrintIcon,
+  sol: SunIcon,
+  dente: SmileIcon,
+  coracao: HeartIcon,
+  estetoscopio: StethoscopeIcon,
+  casa: HomeIcon,
+  predio: BuildingIcon,
+  ferramenta: WrenchIcon,
+  raio: ZapIcon,
+  tesoura: ScissorsIcon,
+  flor: FlowerIcon,
+  livro: BookOpenIcon,
+  carro: CarIcon,
+  camera: CameraIcon,
+  prato: UtensilsIcon,
+  halter: DumbbellIcon,
+  maleta: BriefcaseIcon,
+  bebe: BabyIcon,
+  musica: MusicIcon,
+  computador: MonitorIcon,
+};

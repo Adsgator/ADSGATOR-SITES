@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, CloudCheckIcon, XIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, CloudCheckIcon, CloudOffIcon, XIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { BrandLogo } from "@/components/brand";
@@ -23,8 +23,6 @@ import {
   type Resposta,
   type Respostas,
 } from "@/lib/briefing/regras";
-import type { Exemplo } from "@/lib/briefing/amostra-preenchida";
-import { guardarAmostra, lerAmostra, type Guardado } from "@/lib/briefing/guardado-da-amostra";
 import { encontroDosEstilos, fraseDoVisual, temaDe } from "@/lib/briefing/temas";
 import { MINIMO_COLADO, type Colados } from "@/lib/briefing/sinais";
 import { cn } from "@/lib/utils";
@@ -33,8 +31,17 @@ import { cn } from "@/lib/utils";
 // (src/lib/briefing/regras.ts). Cada resposta é guardada na hora; quem volta
 // continua de onde parou. O botão Voltar do celular leva à pergunta anterior, não
 // para fora do briefing.
-// Nesta amostra, as respostas ficam só neste navegador (localStorage); na versão
-// final, ficam no painel (plano geral, Parte 5, decisão 1 A).
+// Onde as respostas ficam é de quem usa: o painel (de-verdade.tsx) ou só o navegador
+// (amostra.tsx).
+
+export type Guardado = { respostas: Respostas; enviado: boolean; colados: Colados; materialMandado?: boolean };
+
+/** O que mudou agora, para guardar só isso. */
+export type Mudanca = { respostas?: Respostas; colados?: Colados; recomecar?: true; feitas: number; total: number };
+
+export type Salvo = "" | "salvo" | "sem_conexao";
+
+export type Comeco = "normal" | "aparelho" | "revisao" | "material" | "fim";
 
 type Tela =
   | { tipo: "aparelho" | "abertura" | "volta" | "revisao" | "material" | "fim" }
@@ -42,45 +49,54 @@ type Tela =
   | { tipo: "pergunta"; id: string; daRevisao?: string[] }
   | { tipo: "passo"; secao: number };
 
-const semAssinatura = () => () => {};
-
-/** Só depois de montar no navegador, porque o começo depende do que está guardado nele. */
-type Comeco = "normal" | "aparelho" | "revisao" | "material" | "fim";
-
-export function BriefingDaAmostra(props: { briefing: Briefing; comeco: Comeco; exemplo?: Exemplo }) {
-  const noNavegador = useSyncExternalStore(semAssinatura, () => true, () => false);
-  return noNavegador ? <Player {...props} /> : <div className="min-h-dvh" />;
-}
-
-function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Comeco; exemplo?: Exemplo }) {
-  // O exemplo preenchido recomeça inteiro a cada vez que abre.
-  const [guardado] = useState(() =>
-    exemplo ? { ...exemplo, enviado: false, materialMandado: false } : lerAmostra(briefing.slug),
-  );
-  useEffect(() => {
-    if (exemplo) guardarAmostra(briefing.slug, { ...exemplo, enviado: false });
-  }, [briefing.slug, exemplo]);
+export function PlayerDoBriefing({
+  briefing,
+  comeco = "normal",
+  inicial: guardado,
+  pasta,
+  salvo,
+  aoGuardar,
+  aoEnviar,
+  aoMaterial,
+  aoBaixar,
+}: {
+  briefing: Briefing;
+  comeco?: Comeco;
+  inicial: Guardado;
+  /** A pasta do cliente no Drive; sem ela, não há tela de material. */
+  pasta?: string;
+  salvo: Salvo;
+  aoGuardar: (dados: Guardado, mudanca: Mudanca) => void;
+  /** Devolve o que deu errado, para dizer à pessoa; vazio quando foi. */
+  aoEnviar: (dados: Guardado) => Promise<string>;
+  aoMaterial: (dados: Guardado, mandou: boolean) => void;
+  aoBaixar: () => Promise<string>;
+}) {
   const [respostas, setRespostas] = useState(guardado.respostas);
   const [enviado, setEnviado] = useState(guardado.enviado);
   const [materialMandado, setMaterialMandado] = useState(guardado.materialMandado ?? false);
   const [colados, setColados] = useState<Colados>(guardado.colados);
-  const [salvo, setSalvo] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [erroDoEnvio, setErroDoEnvio] = useState("");
   const [vendo, setVendo] = useState(false);
   const [jaViu, setJaViu] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [direcao, setDirecao] = useState(1);
   const [tela, setTela] = useState<Tela>(() => {
     if (comeco !== "normal") return { tipo: comeco };
-    return inicio(guardado, briefing);
+    return inicio(guardado, pasta);
   });
   const espera = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const lista = visiveis(briefing, respostas);
   const { feitas, total, porcento } = progresso(briefing, respostas);
 
-  function guardar(novas: Respostas, mais: { enviado?: boolean; colados?: Colados; materialMandado?: boolean } = {}) {
+  const dados = (): Guardado => ({ respostas, enviado, colados, materialMandado });
+
+  function guardar(novas: Respostas, mudanca: Omit<Mudanca, "feitas" | "total">, mais: Partial<Guardado> = {}) {
     setRespostas(novas);
-    setSalvo(guardarAmostra(briefing.slug, { respostas: novas, enviado, colados, materialMandado, ...mais }));
+    const { feitas, total } = progresso(briefing, novas);
+    aoGuardar({ ...dados(), respostas: novas, ...mais }, { ...mudanca, feitas, total });
   }
 
   /** Um texto longo chegou de uma vez (sinais.ts). */
@@ -88,7 +104,17 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
     if (texto.trim().length < MINIMO_COLADO || colados[id]?.includes(texto)) return;
     const novos = { ...colados, [id]: [...(colados[id] ?? []), texto.slice(0, 20000)].slice(-5) };
     setColados(novos);
-    guardarAmostra(briefing.slug, { respostas, enviado, colados: novos, materialMandado });
+    guardar(respostas, { colados: { [id]: novos[id] } }, { colados: novos });
+  }
+
+  async function enviar() {
+    setErroDoEnvio("");
+    setEnviando(true);
+    const erro = await aoEnviar({ ...dados(), enviado: true });
+    setEnviando(false);
+    if (erro) return setErroDoEnvio(erro);
+    setEnviado(true);
+    ir({ tipo: pasta ? "material" : "fim" });
   }
 
   function ir(destino: Tela, sentido = 1) {
@@ -162,7 +188,7 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
 
   function responder(id: string, r: Resposta) {
     const novas = { ...respostas, [id]: r };
-    guardar(novas);
+    guardar(novas, { respostas: { [id]: r } });
     setErro(null);
     return novas;
   }
@@ -171,7 +197,7 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
     if (!pergunta) return;
     const falta = problema(pergunta, briefing, naTela);
     if (falta) return setErro(falta);
-    if (naTela !== respostas) guardar(naTela);
+    if (naTela !== respostas) guardar(naTela, { respostas: { [pergunta.id]: naTela[pergunta.id] } });
     seguinte(pergunta.id, naTela, daRevisao);
   }
 
@@ -211,8 +237,8 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
                 ) : (
                   salvo && (
                     <>
-                      <CloudCheckIcon className="size-4" aria-hidden="true" />
-                      Salvo
+                      {salvo === "salvo" ? <CloudCheckIcon className="size-4" aria-hidden="true" /> : <CloudOffIcon className="size-4" aria-hidden="true" />}
+                      {salvo === "salvo" ? "Salvo" : "Sem internet, guardado aqui"}
                     </>
                   )
                 )}
@@ -262,7 +288,7 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
           data-tela={tela.tipo}
         >
           {tela.tipo === "aparelho" && (
-            <OutroAparelho aoConfirmar={() => ir(inicio({ enviado, respostas, materialMandado }, briefing))} />
+            <OutroAparelho aoConferir={async (d) => ({ ok: d === "0000", travado: false })} aoConfirmar={() => ir(inicio(dados(), pasta))} />
           )}
           {tela.tipo === "abertura" && (
             <Abertura briefing={briefing} aoComecar={() => (feitas ? continuar() : ir({ tipo: "pergunta", id: lista[0].id }))} />
@@ -275,7 +301,7 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
               aoRever={() => ir({ tipo: "revisao" })}
               aoRecomecar={() => {
                 setColados({});
-                guardar({}, { colados: {} });
+                guardar({}, { recomecar: true }, { colados: {} });
                 ir({ tipo: "abertura" });
               }}
             />
@@ -301,20 +327,18 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
               respostas={respostas}
               aoMudar={(id) => ir({ tipo: "pergunta", id, daRevisao: lista.filter((p) => !respondida(p, briefing, respostas)).map((p) => p.id) })}
               aoResponder={(id) => ir({ tipo: "pergunta", id, daRevisao: [] })}
-              aoEnviar={() => {
-                setEnviado(true);
-                guardar(respostas, { enviado: true });
-                ir({ tipo: briefing.pastaDoMaterial ? "material" : "fim" });
-              }}
+              enviando={enviando}
+              erro={erroDoEnvio}
+              aoEnviar={enviar}
             />
           )}
           {tela.tipo === "material" && (
             <Material
-              briefing={briefing}
+              pasta={pasta ?? ""}
               respostas={respostas}
               aoTerminar={(mandou) => {
                 setMaterialMandado(mandou);
-                guardar(respostas, { enviado: true, materialMandado: mandou });
+                aoMaterial({ ...dados(), enviado: true, materialMandado: mandou }, mandou);
                 ir({ tipo: "fim" });
               }}
             />
@@ -323,7 +347,8 @@ function Player({ briefing, comeco, exemplo }: { briefing: Briefing; comeco: Com
             <Fim
               briefing={briefing}
               respostas={respostas}
-              faltaMaterial={Boolean(briefing.pastaDoMaterial) && !materialMandado}
+              faltaMaterial={Boolean(pasta) && !materialMandado}
+              aoBaixar={aoBaixar}
               aoMandar={() => ir({ tipo: "material" }, -1)}
             />
           )}
@@ -546,8 +571,8 @@ function VerDesenho({ aoFechar, children }: { aoFechar: () => void; children: Re
 }
 
 /** Enviado sem o material, a pessoa volta direto para mandar. */
-function inicio({ enviado, respostas, materialMandado }: Pick<Guardado, "enviado" | "respostas" | "materialMandado">, briefing: Briefing): Tela {
-  if (enviado) return { tipo: briefing.pastaDoMaterial && !materialMandado ? "material" : "fim" };
+function inicio({ enviado, respostas, materialMandado }: Guardado, pasta?: string): Tela {
+  if (enviado) return { tipo: pasta && !materialMandado ? "material" : "fim" };
   return { tipo: Object.keys(respostas).length ? "volta" : "abertura" };
 }
 

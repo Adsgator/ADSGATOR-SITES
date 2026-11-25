@@ -20,13 +20,13 @@ import {
   secoesDoAdsComPagina,
   whatsapp,
 } from "@/lib/briefing/perguntas";
-import type { Briefing } from "@/lib/briefing/regras";
+import { emTexto, visiveis, type Briefing, type Horario, type Papel, type Respostas } from "@/lib/briefing/regras";
 
 // O briefing padrão, para quando não houver um adaptado ao cliente. Serve a qualquer
 // profissão: as opções não falam de preço, pagamento, desconto, gratuidade nem de resultado,
 // que os conselhos (OAB, saúde) limitam. Quem quiser, escreve.
 
-type Cliente = Pick<Briefing, "slug" | "nome" | "segmento" | "cidade"> & {
+type Cliente = Pick<Briefing, "nome" | "segmento" | "cidade"> & {
   /** O que o cadastro já sabe; o que faltar vira pergunta. */
   negocio?: string;
 };
@@ -41,7 +41,7 @@ const FACILIDADES = [
   "Acesso para cadeira de rodas",
 ];
 
-export const padraoDaPagina = ({ negocio, whatsapp: numero, ...cliente }: Cliente & { whatsapp?: string; pastaDoMaterial?: string }): Briefing => ({
+export const padraoDaPagina = ({ negocio, whatsapp: numero, ...cliente }: Cliente & { whatsapp?: string }): Briefing => ({
   ...cliente,
   tipo: "pagina",
   secoes: secoesDaPagina,
@@ -206,7 +206,22 @@ export const padraoDaPagina = ({ negocio, whatsapp: numero, ...cliente }: Client
 });
 
 /** O que o briefing da página já contou; com ele, o do Google Ads pergunta só o que falta. */
-type DaPagina = { servicos: string[]; principal?: string; cidades: string[]; horarios: NonNullable<Briefing["jaSabemos"]>["horarios"]; horariosEmTexto: string };
+export type DaPagina = { servicos: string[]; principal?: string; cidades?: string[]; horarios?: Horario[]; horariosEmTexto?: string };
+
+/** Tira do briefing da página, já respondido, o que serve para os anúncios. */
+export function daPagina(briefing: Briefing, respostas: Respostas): DaPagina {
+  const com = (papel: Papel) => visiveis(briefing, respostas).filter((p) => p.papel === papel && emTexto(p, briefing, respostas).length);
+  const horarios = com("horarios").find((p) => p.tipo === "horarios");
+  const cidades = com("lugar").flatMap((p) => (p.tipo === "etiquetas" ? (respostas[p.id].opcoes ?? []) : []));
+  const texto = horarios && emTexto(horarios, briefing, respostas).join(", e ");
+  return {
+    servicos: com("servicos").flatMap((p) => respostas[p.id].opcoes ?? []),
+    principal: com("principal").flatMap((p) => respostas[p.id].opcoes ?? [])[0],
+    cidades: cidades.length ? cidades : undefined,
+    horarios: horarios && respostas[horarios.id].horarios,
+    horariosEmTexto: texto && `${texto[0].toLowerCase()}${texto.slice(1)}`,
+  };
+}
 
 export const padraoDoGoogleAds = ({ negocio, site, ...cliente }: Cliente & { site?: string }, pagina?: DaPagina): Briefing => {
   const valor = { titulo: "Em média, quanto um cliente novo representa para você?", destaque: "um cliente novo", exemplo: "Perto de R$..." };
@@ -220,7 +235,7 @@ export const padraoDoGoogleAds = ({ negocio, site, ...cliente }: Cliente & { sit
       perguntas: [
         cidadesDosAnuncios(pagina.cidades),
         naoQuer(),
-        ...oSeuAtendimento(1, valor, vagas, respondeNosMesmos(pagina.horariosEmTexto)),
+        ...oSeuAtendimento(1, valor, vagas, pagina.horariosEmTexto ? respondeNosMesmos(pagina.horariosEmTexto) : [respondeOWhatsapp]),
       ],
     };
   return {

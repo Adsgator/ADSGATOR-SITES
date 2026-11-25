@@ -6,7 +6,8 @@ import { animate, AnimatePresence, motion } from "motion/react";
 
 import { Traco, TopoDaPagina } from "@/components/briefing/topo-da-pagina";
 import { numeroEmPartes } from "@/lib/briefing/fatos";
-import { iconesDoNegocio, type IconeDoNegocio } from "@/lib/briefing/icones";
+import { iconesDoNegocio } from "@/lib/briefing/icones";
+import type { IconeDoNegocio } from "@/lib/briefing/regras";
 import { emTexto, visiveis, type Briefing, type Papel, type Respostas } from "@/lib/briefing/regras";
 import { temaDe, type Tema } from "@/lib/briefing/temas";
 import { cn } from "@/lib/utils";

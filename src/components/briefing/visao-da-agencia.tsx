@@ -5,9 +5,10 @@ import { CameraOffIcon, ClipboardPasteIcon, MessageCircleQuestionIcon } from "lu
 
 import { BolinhasDeCor } from "@/components/briefing/cores";
 import { Desenho, desenhoDe } from "@/components/briefing/desenho";
+import type { BriefingDaAmostra } from "@/lib/briefing/amostra";
 import type { Exemplo } from "@/lib/briefing/amostra-preenchida";
 import { lerAmostra } from "@/lib/briefing/guardado-da-amostra";
-import { emTexto, progresso, visiveis, type Briefing } from "@/lib/briefing/regras";
+import { emTexto, progresso, visiveis } from "@/lib/briefing/regras";
 import { semFotos, sinalDa, type Sinal } from "@/lib/briefing/sinais";
 import { fraseDoVisual } from "@/lib/briefing/temas";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,7 @@ const sinais: Record<Sinal, { rotulo: string; texto: string; icone: typeof Clipb
 
 const semAssinatura = () => () => {};
 
-export function VisaoDaAgencia({ briefing, exemplo }: { briefing: Briefing; exemplo?: Exemplo }) {
+export function VisaoDaAgencia({ briefing, exemplo }: { briefing: BriefingDaAmostra; exemplo?: Exemplo }) {
   const noNavegador = useSyncExternalStore(semAssinatura, () => true, () => false);
   if (!noNavegador) return null;
   const { respostas, colados, enviado } = lerAmostra(briefing.slug, exemplo);
