@@ -60,6 +60,14 @@ try {
   check("a raiz de forms. leva ao site", Boolean(raiz) && !new URL(finalRaiz).hostname.startsWith("forms."), finalRaiz);
 
   // O resto do site continua com a CSP fechada e pode aparecer no Google.
+  // A prévia do link do cliente no WhatsApp: o título e uma imagem que abre.
+  for (const caminho of ["/ABCDEFGH23", "/briefing-pro"]) {
+    const html = await (await fetch(`${FORMS}${caminho}`)).text();
+    const imagem = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
+    const resposta = imagem && (await fetch(imagem));
+    check(`${caminho}: a prévia do link tem título e imagem`, /og:title" content="[^"]*riefing · Adsgator"/.test(html) && /^image\//.test(resposta?.headers?.get("content-type") ?? ""), imagem);
+  }
+
   const site = await pagina.goto(WWW, { waitUntil: "domcontentloaded" });
   const cabecalhosSite = site.headers();
   check("o site não libera o respondi", !/respondi/.test(cabecalhosSite["content-security-policy"] ?? ""));

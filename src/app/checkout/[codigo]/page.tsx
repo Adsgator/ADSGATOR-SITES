@@ -42,7 +42,8 @@ export async function generateMetadata({ params }: PageProps<"/checkout/[codigo]
     link.tipo === "mensalidade"
       ? "Confira a mensalidade e a data da renovação e pague no Pix ou no cartão."
       : "Confira o que foi combinado e contrate com Pix ou cartão, em ambiente seguro.";
-  return { title: titulo, description: descricao, openGraph: { title: `${titulo} · Adsgator`, description: descricao } };
+  // Sem openGraph próprio: ele apagaria a imagem do layout; o título e o texto da prévia vêm daqui.
+  return { title: titulo, description: descricao };
 }
 
 const cabecalhosDaMensalidade: Record<string, { titulo: React.ReactNode; texto: string }> = {
