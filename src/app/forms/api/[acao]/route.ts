@@ -13,12 +13,16 @@ import {
   guardarBriefing,
   lerBriefing,
   marcarMaterial,
+  pdfDoBriefing,
 } from "@/lib/briefing/painel";
 import { respondida, visiveis, type Briefing } from "@/lib/briefing/regras";
 
 // O que a página do briefing pede (plano geral, Parte 5). Quem responde é o painel: aqui só se
 // confere o que veio, com o código do link e o token do aparelho, que fica num cookie que a
 // página não lê.
+
+// O PDF leva alguns segundos para sair do painel.
+export const maxDuration = 45;
 
 const COOKIE = "briefing";
 const LIMITE = 420_000;
@@ -95,6 +99,10 @@ export async function POST(request: Request, ctx: RouteContext<"/forms/api/[acao
       case "material": {
         const ok = await marcarMaterial(quem, corpo.mandou === true);
         return ok ? Response.json({ ok: true }) : recusar("Não foi possível", 409);
+      }
+      case "pdf": {
+        const pdf = await pdfDoBriefing(quem);
+        return pdf ? new Response(pdf, { headers: { "content-type": "application/pdf", "cache-control": "no-store" } }) : recusar("Não encontrado", 404);
       }
       default:
         return recusar("Não encontrado", 404);

@@ -1,14 +1,12 @@
 // Testes de forms.adsgator.com.br, com cliques reais no Chrome instalado.
 // Local (npm run dev ou npm start): node tests/forms.mjs
 // Em produção: FORMS=https://forms.adsgator.com.br WWW=https://www.adsgator.com.br node tests/forms.mjs
-// O teste abre o formulário e avança até a primeira pergunta; não responde nem
-// envia nada, para não criar resposta no respondi.
+// Não começa nenhum briefing: o ponta a ponta, com o painel, é o tests/briefing-site.mts de lá.
 import { chromium } from "playwright-core";
 
 const PORTA_LOCAL = process.env.PORTA ?? "3000";
-const FORMS = process.env.FORMS ?? `http://forms.adsgator.com.br:${PORTA_LOCAL}`;
+const FORMS = process.env.FORMS ?? `http://forms.localhost:${PORTA_LOCAL}`;
 const WWW = process.env.WWW ?? `http://localhost:${PORTA_LOCAL}`;
-const local = !process.env.FORMS;
 
 const resultados = [];
 const check = (nome, ok, extra = "") =>
@@ -16,8 +14,6 @@ const check = (nome, ok, extra = "") =>
 
 const browser = await chromium.launch({
   channel: "chrome",
-  // Local: o Chrome manda o endereço de forms. para o servidor deste computador.
-  args: local ? ["--host-resolver-rules=MAP forms.adsgator.com.br 127.0.0.1"] : [],
 });
 
 try {
@@ -34,29 +30,24 @@ try {
       }
     });
 
-    // O endereço com a barra no fim é o que já foi enviado a clientes.
-    const resposta = await pagina.goto(`${FORMS}/briefing-google-ads/`, { waitUntil: "networkidle" });
-    const cabecalhos = resposta.headers();
-    check(`${nome}: o endereço enviado abre`, resposta.status() === 200, String(resposta.status()));
-    check(`${nome}: fora do Google`, /noindex/.test(cabecalhos["x-robots-tag"] ?? ""));
-    check(`${nome}: CSP libera só o respondi`, /frame-src https:\/\/form\.respondi\.app/.test(cabecalhos["content-security-policy"] ?? ""));
-
-    const quadro = await pagina.waitForSelector("iframe.respondi-iframe", { timeout: 15000 }).catch(() => null);
-    check(`${nome}: formulário incorporado aparece`, Boolean(quadro));
-    if (quadro) {
-      const caixa = await quadro.boundingBox();
-      check(
-        `${nome}: formulário ocupa a tela toda, sem rolagem`,
-        caixa?.width === viewport.width && caixa?.height === viewport.height &&
-          (await pagina.evaluate(() => document.documentElement.scrollHeight <= innerHeight)),
-        JSON.stringify(caixa),
-      );
-      const conteudo = await quadro.contentFrame();
-      await conteudo.getByText("Como usamos estas informações").first().waitFor({ timeout: 15000 });
-      await conteudo.getByText("Continuar").first().click();
-      await conteudo.getByText("Qual é, em média, o preço dos seus serviços?").first().waitFor({ timeout: 10000 });
-      check(`${nome}: clique em Continuar leva à primeira pergunta`, true);
+    // Os endereços com a barra no fim são os que já foram enviados a clientes.
+    for (const caminho of ["/briefing-google-ads/", "/briefing-pro/"]) {
+      const resposta = await pagina.goto(`${FORMS}${caminho}`, { waitUntil: "networkidle" });
+      const cabecalhos = resposta.headers();
+      check(`${nome}: ${caminho} abre`, resposta.status() === 200, String(resposta.status()));
+      check(`${nome}: ${caminho} fora do Google`, /noindex/.test(cabecalhos["x-robots-tag"] ?? ""));
+      check(`${nome}: ${caminho} com a CSP fechada`, !/respondi|google/.test(cabecalhos["content-security-policy"] ?? "google"));
+      await pagina.getByRole("button", { name: "Continuar" }).click();
+      check(`${nome}: ${caminho} pede o nome e o WhatsApp`, await pagina.getByText("Escreva o seu nome.").isVisible());
+      check(`${nome}: ${caminho} sem medição`, await pagina.evaluate(() => !window.dataLayer));
     }
+    for (const antigo of ["/briefing-estilo-e-sensacoes/", "/briefing-landing-page-pro/"]) {
+      await pagina.goto(`${FORMS}${antigo}`);
+      check(`${nome}: ${antigo} leva ao da página`, /\/briefing-pro$/.test(pagina.url()), pagina.url());
+    }
+    await pagina.goto(`${FORMS}/um-briefing-antigo/`);
+    check(`${nome}: endereço que não existe mais, um recado com o WhatsApp`, await pagina.getByText("Este endereço mudou").isVisible() && await pagina.getByRole("link", { name: "Chamar no WhatsApp" }).isVisible());
+    check(`${nome}: sem rolagem lateral`, await pagina.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     check(`${nome}: nada bloqueado pela CSP`, bloqueios.length === 0, bloqueios.join(" ; "));
     await contexto.close();
   }
@@ -66,7 +57,7 @@ try {
 
   const raiz = await pagina.goto(`${FORMS}/`, { waitUntil: "domcontentloaded" }).catch(() => null);
   const finalRaiz = pagina.url();
-  check("a raiz de forms. leva ao site", Boolean(raiz) && !finalRaiz.includes("forms.adsgator"), finalRaiz);
+  check("a raiz de forms. leva ao site", Boolean(raiz) && !new URL(finalRaiz).hostname.startsWith("forms."), finalRaiz);
 
   // O resto do site continua com a CSP fechada e pode aparecer no Google.
   const site = await pagina.goto(WWW, { waitUntil: "domcontentloaded" });
